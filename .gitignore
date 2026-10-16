@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Variáveis de ambiente (nunca versionar segredos)
+.env
+.env.local
+.env.*.local
+
+# Notas pessoais
+NOTES.local.md
+
+# Vercel
+.vercel/
+
+# Playwright (baselines em e2e/**/__screenshots__ são versionadas)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Lighthouse (relatórios finais versionados em lighthouse/reports/)
+.lighthouseci/
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.log
+*.tsbuildinfo
