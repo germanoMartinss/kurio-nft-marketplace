@@ -1,0 +1,4 @@
+# O postinstall do msw copia o mockServiceWorker.js para public/ (ver "msw.workerDirectory"
+# no package.json), mantendo o worker sincronizado com a versão instalada da biblioteca.
+allowBuilds:
+  msw: true

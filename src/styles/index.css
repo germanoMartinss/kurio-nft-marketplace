@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+/* Tokens mínimos para a Fase 1; o design system completo entra na Fase 2. */
+@theme {
+  --color-background: #140d0a;
+  --color-surface: #241612;
+  --color-border: #3f2319;
+  --color-foreground: #f5f1eb;
+  --color-primary: #d28a4c;
+  --color-accent: #e89b55;
+  --color-muted-foreground: #cfb28c;
+  --color-coral: #f0805f;
+  --font-mono: 'Roboto Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-dvh bg-background font-mono text-foreground antialiased;
+  }
+}

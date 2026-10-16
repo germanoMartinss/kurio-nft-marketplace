@@ -34,6 +34,7 @@ long-polling não é suportado no mock — documentar como limitação).
 
 **Telas** (desktop 9 frames + mobile 6 frames; perfil, carteiras e confirmação também em mobile sem frame;
 validar em 390, 768 e 1440 px):
+
 - Início: destaques, catálogo, busca, filtros combináveis, ordenação, paginação — tudo na URL,
   sobrevive a refresh/histórico; mudança de filtro reinicia a página; vazio, erro e respostas fora de ordem.
 - Detalhe do NFT: galeria, info, edição, quantidade (limite), favoritos (persistem p/ autenticado), compra;
@@ -84,20 +85,20 @@ Os nomes das variáveis no Figma estão inconsistentes (ex.: `color/background` 
 de texto; `color/text-primary` = #241612, que é a superfície dos cards). No código usamos nomes
 semânticos e registramos o mapeamento em ARCHITECTURE.md.
 
-| Token | Hex | Uso |
-|---|---|---|
-| `background` | #140D0A | fundo da página; texto sobre botão primário |
-| `surface` | #241612 | cards, painel de filtros, modais, footer |
-| `surface-raised` | #2F1D15 | superfícies elevadas |
-| `surface-dark` | #38220F | faixa da marca no footer, chips de carteiras |
-| `border` | #3F2319 | bordas de inputs, divisores |
-| `border-soft` | #55321F | bordas suaves |
-| `foreground` | #F5F1EB | texto principal |
-| `primary` | #D28A4C | botões, sublinhado ativo, badges, bordas de destaque |
-| `accent` | #E89B55 | preços, links, nav ativa |
-| `muted-foreground` | #CFB28C | texto secundário |
-| `secondary` | #B39463 | ícones e textos de menu, placeholders |
-| `coral` | #F0805F | asterisco de obrigatório; erros (com ícone + texto) |
+| Token              | Hex     | Uso                                                  |
+| ------------------ | ------- | ---------------------------------------------------- |
+| `background`       | #140D0A | fundo da página; texto sobre botão primário          |
+| `surface`          | #241612 | cards, painel de filtros, modais, footer             |
+| `surface-raised`   | #2F1D15 | superfícies elevadas                                 |
+| `surface-dark`     | #38220F | faixa da marca no footer, chips de carteiras         |
+| `border`           | #3F2319 | bordas de inputs, divisores                          |
+| `border-soft`      | #55321F | bordas suaves                                        |
+| `foreground`       | #F5F1EB | texto principal                                      |
+| `primary`          | #D28A4C | botões, sublinhado ativo, badges, bordas de destaque |
+| `accent`           | #E89B55 | preços, links, nav ativa                             |
+| `muted-foreground` | #CFB28C | texto secundário                                     |
+| `secondary`        | #B39463 | ícones e textos de menu, placeholders                |
+| `coral`            | #F0805F | asterisco de obrigatório; erros (com ícone + texto)  |
 
 - Fonte única: **Roboto Mono** (400/500/700), self-hosted. Escala: 43/70 (display), 28/37, 24/32,
   22/29, 18, 17, 16, 15, 14, 13, 12, 10, 9. `letter-spacing: 0.1em` no wordmark e labels em caixa alta.
@@ -137,6 +138,13 @@ lighthouse/     configuração e relatórios versionados
 - Pedido: `Idempotency-Key` gerada por tentativa (quoteId + hash do corpo), persistida até estado terminal.
 - Eventos: envelope `{ eventId, type, resource: { type, id }, version, occurredAt, userId?, payload }`.
 
-## Comandos (a serem criados na Fase 1)
+## Comandos
 
-`dev` (com mocks) · `build` · `preview` · `typecheck` · `lint` · `test:e2e` · `test:e2e:update` · `lighthouse`
+Gerenciador: **pnpm** (Node ≥ 22.12). Disponíveis: `pnpm dev` (com mocks) · `pnpm build` ·
+`pnpm preview` · `pnpm typecheck` · `pnpm lint` · `pnpm format` / `pnpm format:check`.
+Previstos: `test:e2e`, `test:e2e:update` (Fase 9) e `lighthouse` (Fase 10).
+
+Antes de cada commit: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build`.
+
+- Socket.IO usa `path: '/realtime/'` (não `/socket.io/`): o MSW 2.x reescreve esse prefixo. Ver ARCHITECTURE.md.
+- `/mocks` é o painel de diagnóstico da camada de mocks.
