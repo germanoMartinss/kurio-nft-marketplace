@@ -71,8 +71,11 @@ como página cheia. Retorno ao fluxo via `?redirect=` (apenas caminhos internos)
 
 ## Build e deploy (Vercel)
 
-- `vercel.json`: rewrite de todas as rotas para `index.html`. A Vercel serve arquivos existentes
-  antes de aplicar rewrites, então `mockServiceWorker.js` e os assets não são afetados.
+- `vercel.json`: rewrite das rotas da aplicação para `index.html`. A Vercel serve arquivos existentes
+  antes de aplicar rewrites, então `mockServiceWorker.js` e os assets não são afetados. `/static/` e
+  `/assets/` ficam **fora** do rewrite: um arquivo inexistente ali responde 404, e não o
+  `index.html`. Sem essa exclusão, um chunk antigo pedido após um novo deploy receberia HTML com o
+  cache imutável de `/static/`, quebrando aquele navegador por um ano.
 - `mockServiceWorker.js` com `Cache-Control: no-cache`, para o navegador nunca usar um worker de
   versão diferente da biblioteca.
 - Bundles com hash em `/static/` (cache de 1 ano, `immutable`). `/assets/` fica reservado às imagens
