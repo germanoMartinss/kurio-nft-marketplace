@@ -98,24 +98,20 @@ claro no header; o logout é escuro dentro do botão laranja). IDs internos de m
 recebem um sufixo de `useId()`, para não duplicar IDs quando o ícone se repete na página. Inline em
 vez de `<img>`: herda cor, não gera requisições e não pisca no carregamento.
 
-Toda a interface importa ícones de `src/components/icons.tsx`, que expõe nomes por uso. Ícones
-usados no Figma que **não vieram na exportação** usam o equivalente do Phosphor até serem exportados:
+Toda a interface importa ícones de `src/components/icons.tsx`, que expõe nomes por uso. Os ícones
+próprios do mobile ficam em `public/assets/icons/icons-mobile/` e geram componentes com prefixo
+`Mobile`. Ícones multicoloridos ou de marca (Google e Facebook do login) mantêm as cores
+originais. Nomes de arquivo normalizados para kebab-case sem acentos; os ícones de compartilhar
+têm o sufixo `-compartilhar`, porque `Linkedin.svg` (compartilhar) e `linkedin.svg` (rede social)
+colidiriam em sistemas de arquivos que não diferenciam maiúsculas.
 
-| Uso                                                 | Onde aparece no Figma                                                              | Substituto (Phosphor)                                        |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Casa, coração, carrinho e usuário **preenchidos**   | barra de abas mobile; botão de carrinho do detalhe mobile                          | `House`, `Heart`, `ShoppingCartSimple`, `User` (peso `fill`) |
-| Botão central da barra de abas (moldura de leitura) | barra de abas mobile                                                               | `Scan`                                                       |
-| Filtros                                             | botão ao lado da busca mobile                                                      | `SlidersHorizontal`                                          |
-| Menos / mais                                        | steppers de quantidade (desktop e mobile)                                          | `Minus`, `Plus`                                              |
-| Menu "⋮" e carteira                                 | cards de carteira do pagamento mobile                                              | `DotsThreeVertical`, `Wallet`                                |
-| Fechar                                              | diálogos (login, cadastro, confirmação)                                            | `X`                                                          |
-| Seta para baixo                                     | selects (rede, tipo de carteira, `.eth`)                                           | `CaretDown`                                                  |
-| Olho aberto                                         | alternância de senha (só o "olho fechado" foi exportado)                           | `Eye`                                                        |
-| Compartilhar e redes sociais                        | detalhe (LinkedIn, e-mail, X) e footer (Facebook, Instagram, X, LinkedIn, YouTube) | logos do Phosphor                                            |
-| Logos Google e Facebook                             | login e cadastro                                                                   | pendente (ações de login social estão fora do escopo)        |
-| Ilustração "Thank you"                              | confirmação de pedido                                                              | pendente                                                     |
+Ícones usados no Figma que **não vieram na exportação** usam o equivalente do Phosphor:
 
-O "voltar" usa o chevron exportado (`arrow-right-2`) espelhado, como no Figma.
+| Uso             | Onde aparece no Figma                                                 | Substituto (Phosphor) |
+| --------------- | --------------------------------------------------------------------- | --------------------- |
+| Mais            | steppers de quantidade (desktop e mobile); só o "menos" foi exportado | `Plus`                |
+| Olho aberto     | alternância de senha; só o "olho fechado" foi exportado               | `Eye`                 |
+| Seta para baixo | selects (rede, tipo de carteira, `.eth`)                              | `CaretDown`           |
 
 **Imagens dos NFTs.** O Figma usa quatro ilustrações (`ape-oculos`, `gorila-chapeu`,
 `ape-gola-alta`, `macaco-fone`), exportadas em PNG de 500×500 (~430 KB cada). `pnpm images:optimize`

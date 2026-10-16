@@ -2,7 +2,13 @@ import { Link } from '@tanstack/react-router'
 import type { ComponentType, ReactNode } from 'react'
 
 import { UnavailableAction } from '@/components/common/unavailable-action'
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from '@/components/icons'
+import {
+  SocialFacebook,
+  SocialInstagram,
+  SocialLinkedin,
+  SocialTwitter,
+  SocialYoutube,
+} from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 import { NewsletterForm } from './newsletter-form'
@@ -27,11 +33,11 @@ const FEATURES = [
 
 const SOCIAL_LINKS: { label: string; href: string; Icon: ComponentType<{ className?: string }> }[] =
   [
-    { label: 'Facebook', href: 'https://www.facebook.com', Icon: Facebook },
-    { label: 'Instagram', href: 'https://www.instagram.com', Icon: Instagram },
-    { label: 'X (Twitter)', href: 'https://x.com', Icon: Twitter },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com', Icon: Linkedin },
-    { label: 'YouTube', href: 'https://www.youtube.com', Icon: Youtube },
+    { label: 'Facebook', href: 'https://www.facebook.com', Icon: SocialFacebook },
+    { label: 'Instagram', href: 'https://www.instagram.com', Icon: SocialInstagram },
+    { label: 'X (Twitter)', href: 'https://x.com', Icon: SocialTwitter },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com', Icon: SocialLinkedin },
+    { label: 'YouTube', href: 'https://www.youtube.com', Icon: SocialYoutube },
   ]
 
 const linkClass = 'text-14 leading-[22px] text-foreground transition-colors hover:text-accent-text'
@@ -125,9 +131,9 @@ export function SiteFooter() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${label} (abre em nova aba)`}
-                      className="flex size-[30px] items-center justify-center rounded-sm border border-primary text-primary transition-colors hover:bg-primary/10"
+                      className="block rounded-sm text-primary transition-opacity hover:opacity-80"
                     >
-                      <Icon className="size-4" />
+                      <Icon className="size-[30px]" />
                     </a>
                   </li>
                 ))}

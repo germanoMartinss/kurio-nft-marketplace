@@ -1,36 +1,12 @@
 /**
  * Ponto único de ícones da interface.
  *
- * Fonte principal: SVGs exportados do Figma (public/assets/icons/), convertidos em componentes
- * com `currentColor` por scripts/generate-icons.mjs. Onde o Figma usa um ícone que não foi
- * exportado, usamos o equivalente do Phosphor; a lista está em ARCHITECTURE.md e cada caso está
- * marcado abaixo. Os nomes exportados descrevem o uso, não o desenho.
+ * Fonte: SVGs exportados do Figma (public/assets/icons/ e icons-mobile/), convertidos em
+ * componentes com `currentColor` por scripts/generate-icons.mjs. Os nomes exportados descrevem
+ * o uso, não o desenho. Phosphor só onde o Figma não exportou o ícone (marcado abaixo e
+ * registrado em ARCHITECTURE.md).
  */
-import {
-  CaretDownIcon,
-  DotsThreeVerticalIcon,
-  EnvelopeSimpleIcon,
-  EyeIcon,
-  FacebookLogoIcon,
-  HeartIcon as PhosphorHeartIcon,
-  HouseIcon,
-  InfoIcon,
-  InstagramLogoIcon,
-  LinkedinLogoIcon,
-  MinusIcon,
-  PlusIcon,
-  ScanIcon,
-  ShoppingCartSimpleIcon,
-  SlidersHorizontalIcon,
-  TwitterLogoIcon,
-  UserIcon as PhosphorUserIcon,
-  WalletIcon,
-  XIcon,
-  YoutubeLogoIcon,
-} from '@phosphor-icons/react'
-import type { SVGProps } from 'react'
-
-import { cn } from '@/lib/utils'
+import { CaretDownIcon, EyeIcon, PlusIcon } from '@phosphor-icons/react'
 
 import {
   ActivityIcon,
@@ -40,24 +16,45 @@ import {
   DangerTriangleIcon,
   DeleteIcon,
   DownloadIcon,
+  EmailCompartilharIcon,
+  FacebookIcon,
+  FecharIcon,
   Heart1Icon,
   HideIcon,
   Image2Icon,
+  InstagramIcon,
+  LinkedinCompartilharIcon,
+  LinkedinIcon,
   LocationIcon,
   LogoutIcon,
+  MobileArrowLeft2Icon,
+  MobileBotaoCentralIcon,
+  MobileCoracaoPreenchidoIcon,
+  MobileFacebookIcon,
+  MobileFilterIcon,
+  MobileGoogleIcon,
+  MobileHomeIcon,
+  MobileMenosIcon,
+  MobileShopIcon,
+  MobileUserIcon,
+  MobileVerticalDotsIcon,
+  MobileWalletIcon,
   SearchIcon,
   Shopping1Icon,
   StarIcon,
+  ThankyouIcon,
+  TwitterCompartilharIcon,
+  TwitterIcon,
   UserIcon,
+  YoutubeIcon,
 } from './figma-icons.generated'
 
-type IconProps = SVGProps<SVGSVGElement>
-
-// --- Figma -------------------------------------------------------------------------------------
+// --- Figma (desktop) ---------------------------------------------------------------------------
 export {
   ArrowRightIcon as ArrowRight,
   ArrowRight2Icon as ChevronRight,
   CartIcon as Cart,
+  FecharIcon as Close,
   DangerTriangleIcon as Support,
   DeleteIcon as Trash,
   DownloadIcon as Download,
@@ -73,43 +70,34 @@ export {
   ActivityIcon as Offers,
   StarIcon as Star,
   UserIcon as User,
+  ThankyouIcon as ThankYou,
+  // Compartilhar (detalhe do NFT)
+  LinkedinCompartilharIcon as ShareLinkedin,
+  EmailCompartilharIcon as ShareEmail,
+  TwitterCompartilharIcon as ShareTwitter,
+  // Redes sociais do footer: o quadrado com borda faz parte do ícone (32px)
+  FacebookIcon as SocialFacebook,
+  InstagramIcon as SocialInstagram,
+  TwitterIcon as SocialTwitter,
+  LinkedinIcon as SocialLinkedin,
+  YoutubeIcon as SocialYoutube,
 }
 
-/** O Figma usa o mesmo chevron espelhado para "voltar". */
-export function ChevronLeft({ className, ...props }: IconProps) {
-  return <ArrowRight2Icon className={cn('-scale-x-100', className)} {...props} />
-}
-
-// --- Phosphor: ícones usados no Figma que não foram exportados ---------------------------------
+// --- Figma (mobile) ----------------------------------------------------------------------------
 export {
-  CaretDownIcon as ChevronDown,
-  XIcon as Close,
-  EyeIcon as Eye,
-  InfoIcon as Info,
-  MinusIcon as Minus,
-  PlusIcon as Plus,
-  SlidersHorizontalIcon as Filters,
-  ScanIcon as Scan,
-  DotsThreeVerticalIcon as MoreVertical,
-  WalletIcon as WalletApp,
-  EnvelopeSimpleIcon as Mail,
-  FacebookLogoIcon as Facebook,
-  InstagramLogoIcon as Instagram,
-  LinkedinLogoIcon as Linkedin,
-  TwitterLogoIcon as Twitter,
-  YoutubeLogoIcon as Youtube,
+  MobileArrowLeft2Icon as ChevronLeft,
+  MobileHomeIcon as HomeFilled,
+  MobileCoracaoPreenchidoIcon as HeartFilled,
+  MobileShopIcon as CartFilled,
+  MobileUserIcon as UserFilled,
+  MobileBotaoCentralIcon as Scan,
+  MobileFilterIcon as Filters,
+  MobileMenosIcon as Minus,
+  MobileVerticalDotsIcon as MoreVertical,
+  MobileWalletIcon as WalletApp,
+  MobileGoogleIcon as GoogleLogo,
+  MobileFacebookIcon as FacebookLogo,
 }
 
-/** Versões preenchidas usadas na barra de abas mobile. */
-export function HomeFilled(props: IconProps) {
-  return <HouseIcon weight="fill" {...props} />
-}
-export function HeartFilled(props: IconProps) {
-  return <PhosphorHeartIcon weight="fill" {...props} />
-}
-export function CartFilled(props: IconProps) {
-  return <ShoppingCartSimpleIcon weight="fill" {...props} />
-}
-export function UserFilled(props: IconProps) {
-  return <PhosphorUserIcon weight="fill" {...props} />
-}
+// --- Phosphor: ícones que o Figma não exportou -------------------------------------------------
+export { CaretDownIcon as ChevronDown, EyeIcon as Eye, PlusIcon as Plus }
