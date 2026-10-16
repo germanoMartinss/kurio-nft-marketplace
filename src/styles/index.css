@@ -1,24 +1,194 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/roboto-mono';
 
-/* Tokens mínimos para a Fase 1; o design system completo entra na Fase 2. */
+/* O Kurio só tem tema escuro: o variant `dark:` dos componentes shadcn vale sempre, sem depender
+   do prefers-color-scheme do sistema. */
+@custom-variant dark (&:is(html *));
+
+/*
+ * Design tokens do Kurio (design/tokens.md).
+ *
+ * Os nomes das variáveis no Figma estão inconsistentes (ex.: `color/background` guarda a cor do
+ * texto). Aqui os tokens têm nomes semânticos e seguem a convenção do shadcn/ui, para que os
+ * componentes gerados herdem a identidade visual sem ajustes um a um. Mapeamento completo em
+ * ARCHITECTURE.md. O Kurio tem apenas tema escuro.
+ */
+:root {
+  /* Superfícies */
+  --background: #140d0a; /* color/ink */
+  --card: #241612; /* color/text-primary → "Surface Card" */
+  --popover: #241612;
+  --surface-raised: #2f1d15; /* color/text-secondary → "Surface Raised" */
+  --surface-dark: #38220f; /* color/surface-dark */
+
+  /* Texto */
+  --foreground: #f5f1eb; /* color/background → "Foreground" */
+  --card-foreground: #f5f1eb;
+  --popover-foreground: #f5f1eb;
+  --muted-foreground: #cfb28c; /* text/secondary */
+  --subtle: #b39463; /* color/secondary: ícones, menus, placeholders */
+  --accent-text: #e89b55; /* text/accent: preços, links, item ativo */
+  --coral: #f0805f; /* text/coral: asterisco de obrigatório e erros */
+
+  /* Ação */
+  --primary: #d28a4c; /* color/primary */
+  --primary-foreground: #140d0a;
+  --secondary: #2f1d15;
+  --secondary-foreground: #f5f1eb;
+  --muted: #2f1d15;
+  /* No shadcn, "accent" é o fundo de hover/foco de itens de menu. */
+  --accent: #2f1d15;
+  --accent-foreground: #e89b55;
+  --destructive: #f0805f;
+
+  /* Linhas e foco */
+  --border: #3f2319; /* color/border */
+  --border-soft: #55321f; /* color/border-soft */
+  --input: #3f2319;
+  --ring: #e89b55;
+
+  --radius: 6px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-surface: var(--card);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-dark: var(--surface-dark);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-text: var(--accent-text);
+  --color-subtle: var(--subtle);
+  --color-coral: var(--coral);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
 @theme {
-  --color-background: #140d0a;
-  --color-surface: #241612;
-  --color-border: #3f2319;
-  --color-foreground: #f5f1eb;
-  --color-primary: #d28a4c;
-  --color-accent: #e89b55;
-  --color-muted-foreground: #cfb28c;
-  --color-coral: #f0805f;
-  --font-mono: 'Roboto Mono', ui-monospace, monospace;
+  --font-sans: 'Roboto Mono Variable', ui-monospace, monospace;
+  --font-mono: 'Roboto Mono Variable', ui-monospace, monospace;
+  --font-heading: var(--font-mono);
+
+  /* Escala tipográfica do Figma (tamanho em px → altura de linha mais usada). */
+  --text-9: 9px;
+  --text-9--line-height: 12px;
+  --text-10: 10px;
+  --text-10--line-height: 13px;
+  --text-12: 12px;
+  --text-12--line-height: 16px;
+  --text-13: 13px;
+  --text-13--line-height: 22px;
+  --text-14: 14px;
+  --text-14--line-height: 20px;
+  --text-15: 15px;
+  --text-15--line-height: 20px;
+  --text-16: 16px;
+  --text-16--line-height: 21px;
+  --text-17: 17px;
+  --text-17--line-height: 22px;
+  --text-18: 18px;
+  --text-18--line-height: 24px;
+  --text-20: 20px;
+  --text-20--line-height: 26px;
+  --text-22: 22px;
+  --text-22--line-height: 29px;
+  --text-24: 24px;
+  --text-24--line-height: 32px;
+  --text-28: 28px;
+  --text-28--line-height: 37px;
+  --text-43: 43px;
+  --text-43--line-height: 70px;
+
+  --tracking-brand: 0.1em;
+
+  /* Raios: inputs 3px, chips 4px, botões 6px, cards 8px, cards mobile 16–20px, hero 24px. */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+
+  --shadow-card: 0 4px 12px -2px rgb(20 13 10 / 0.15);
+  --shadow-modal: 0 0 20px rgb(10 6 4 / 0.45);
+
+  --container-page: 1200px;
+
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 150% 0;
+    }
+    to {
+      background-position: -50% 0;
+    }
+  }
+}
+
+/* Largura útil das páginas: 1200px no desktop (frame de 1440 com 120px de margem). */
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: calc(var(--container-page) + 2rem);
+  padding-inline: 1rem;
+
+  @variant md {
+    max-width: calc(var(--container-page) + 3rem);
+    padding-inline: 1.5rem;
+  }
 }
 
 @layer base {
   html {
     color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply min-h-dvh bg-background font-mono text-foreground antialiased;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* Foco sempre visível para quem navega por teclado. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

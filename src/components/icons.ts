@@ -1,0 +1,40 @@
+/**
+ * Ponto único de ícones da interface. O Figma usa a família Iconly; enquanto os SVGs exportados não
+ * estão em public/assets/, usamos equivalentes do Phosphor (já dependência dos componentes shadcn).
+ * Trocar a família afeta só este arquivo.
+ */
+export {
+  ArrowRightIcon as ArrowRight,
+  CaretDownIcon as ChevronDown,
+  CaretLeftIcon as ChevronLeft,
+  ChartLineUpIcon as Activity,
+  DownloadSimpleIcon as Download,
+  EnvelopeSimpleIcon as Mail,
+  EyeIcon as Eye,
+  EyeSlashIcon as EyeOff,
+  FacebookLogoIcon as Facebook,
+  HeartIcon as Heart,
+  HouseIcon as Home,
+  ImageSquareIcon as ImagePlaceholder,
+  InfoIcon as Info,
+  InstagramLogoIcon as Instagram,
+  LinkedinLogoIcon as Linkedin,
+  MagnifyingGlassIcon as Search,
+  MagnifyingGlassPlusIcon as ZoomIn,
+  MapPinIcon as Wallet,
+  MinusIcon as Minus,
+  PlusIcon as Plus,
+  ScanIcon as Scan,
+  ShoppingCartSimpleIcon as Cart,
+  SignInIcon as SignIn,
+  SignOutIcon as SignOut,
+  SlidersHorizontalIcon as Filters,
+  StarIcon as Star,
+  TagIcon as Offer,
+  TrashIcon as Trash,
+  TwitterLogoIcon as Twitter,
+  UserIcon as User,
+  WarningIcon as Support,
+  XIcon as Close,
+  YoutubeLogoIcon as Youtube,
+} from '@phosphor-icons/react'

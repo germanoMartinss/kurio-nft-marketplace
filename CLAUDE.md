@@ -95,9 +95,9 @@ semânticos e registramos o mapeamento em ARCHITECTURE.md.
 | `border-soft`      | #55321F | bordas suaves                                        |
 | `foreground`       | #F5F1EB | texto principal                                      |
 | `primary`          | #D28A4C | botões, sublinhado ativo, badges, bordas de destaque |
-| `accent`           | #E89B55 | preços, links, nav ativa                             |
+| `accent-text`      | #E89B55 | preços, links, nav ativa                             |
 | `muted-foreground` | #CFB28C | texto secundário                                     |
-| `secondary`        | #B39463 | ícones e textos de menu, placeholders                |
+| `subtle`           | #B39463 | ícones e textos de menu, placeholders                |
 | `coral`            | #F0805F | asterisco de obrigatório; erros (com ícone + texto)  |
 
 - Fonte única: **Roboto Mono** (400/500/700), self-hosted. Escala: 43/70 (display), 28/37, 24/32,
@@ -107,6 +107,14 @@ semânticos e registramos o mapeamento em ARCHITECTURE.md.
 - Espaçamentos recorrentes: 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 40. Container desktop 1200px (gutter 120 em 1440).
 - Sombras: `0 4px 12px -2px rgb(20 13 10 / .15)`; modal `0 0 20px rgb(10 6 4 / .45)`.
 - `design/tokens.md` só cobre desktop; tokens mobile foram derivados das PNGs.
+- Tokens em `src/styles/index.css` com os nomes de variável do shadcn (`--primary`, `--card`...).
+  Atenção: no shadcn, `accent`/`secondary`/`muted` são **fundos** de hover e de botões
+  secundários; por isso a cor de texto de destaque do Figma é `accent-text` e o tom areia é
+  `subtle`. Tipografia em classes `text-9` … `text-43` (o `cn` em `src/lib/utils.ts` conhece
+  essa escala). Raios: `rounded-xs` 3 · `sm` 4 · `md` 6 · `lg` 8 · `xl` 16 · `2xl` 20 · `3xl` 24.
+- Layout: abaixo de `lg` (1024px) vale o padrão mobile (barra de abas inferior); a partir de `lg`,
+  header e footer de desktop. Largura útil com a utility `container-page`.
+- Ícones só via `src/components/icons.ts`. Ações fora do escopo usam `UnavailableAction`.
 
 ## Arquitetura (resumo — detalhes em ARCHITECTURE.md quando existir)
 
