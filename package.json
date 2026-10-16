@@ -17,7 +17,8 @@
     "format:check": "prettier --check .",
     "icons:generate": "node scripts/generate-icons.mjs",
     "images:optimize": "node scripts/optimize-images.mjs",
-    "screens": "node scripts/capture-screens.mjs"
+    "screens": "node scripts/capture-screens.mjs",
+    "requirements": "node scripts/requirements-summary.mjs && prettier --write docs/REQUIREMENTS.md"
   },
   "msw": {
     "workerDirectory": [

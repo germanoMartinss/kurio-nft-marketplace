@@ -119,6 +119,7 @@ semânticos e registramos o mapeamento em ARCHITECTURE.md.
   `public/assets/nfts/optimized/` (`pnpm images:optimize`). Ações fora do escopo usam `UnavailableAction`.
 - Mobile **não** é o desktop redimensionado: topo por tela (`MobileTopBar`), sem footer, barra de abas.
 - Toda tela é conferida com `pnpm screens` (390, 768 e 1440 contra os PNGs desktop e mobile) antes do commit.
+- `docs/REQUIREMENTS.md` é atualizado ao fim de cada fase (`pnpm requirements` recalcula o resumo).
 
 ## Arquitetura (resumo — detalhes em ARCHITECTURE.md quando existir)
 
@@ -154,7 +155,7 @@ lighthouse/     configuração e relatórios versionados
 
 Gerenciador: **pnpm** (Node ≥ 22.12). Disponíveis: `pnpm dev` (com mocks) · `pnpm build` ·
 `pnpm preview` · `pnpm typecheck` · `pnpm lint` · `pnpm format` / `pnpm format:check` ·
-`pnpm screens` · `pnpm icons:generate` · `pnpm images:optimize`.
+`pnpm screens` · `pnpm requirements` · `pnpm icons:generate` · `pnpm images:optimize`.
 Previstos: `test:e2e`, `test:e2e:update` (Fase 9) e `lighthouse` (Fase 10).
 
 Antes de cada commit: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build`.
