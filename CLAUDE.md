@@ -24,7 +24,7 @@ Enunciado completo: [CHALLENGE.md](CHALLENGE.md). Deploy na Vercel.
 
 React + TypeScript · TanStack Router · TanStack Query · Axios · REST · Socket.IO (socket.io-client)
 · Tailwind CSS · shadcn/ui · MSW · Playwright (E2E + regressão visual) · Lighthouse.
-Escolhas complementares: Vite, Zod (contratos), big.js (decimais), React Hook Form, sonner (toasts).
+Escolhas complementares: Vite, Zod via `zod/mini` (contratos), big.js (decimais), React Hook Form, sonner (toasts).
 
 **Restrição de versão**: `@mswjs/socket.io-binding@0.2.0` exige `msw ^2.10.2` → `msw` fixado em
 `2.15.0` (versão exata, sem `^`; não usar msw 3). Socket.IO client com `transports: ['websocket']` (o binding só intercepta WebSocket;
@@ -150,6 +150,9 @@ lighthouse/     configuração e relatórios versionados
 - Logout/troca de usuário: desconectar socket da sessão, `removeQueries(['user', prevId])`, limpar rascunhos.
 - Pedido: `Idempotency-Key` gerada por tentativa (quoteId + hash do corpo), persistida até estado terminal.
 - Eventos: envelope `{ eventId, type, resource: { type, id }, version, occurredAt, userId?, payload }`.
+- Contratos e cenários documentados em `docs/API.md`. Backend simulado: `src/mocks/` (db, domain,
+  handlers, scenarios, socket). Controle para testes: `window.__kurioMock` (age só no backend simulado).
+- Todo HTTP passa por `src/api/` (valida respostas com os contratos); erros chegam como `ApiRequestError`.
 
 ## Comandos
 

@@ -1,11 +1,10 @@
 import { QueryClient } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
 
-/** Falhas que podem se resolver numa nova tentativa: rede, timeout, 408, 429 e 5xx. */
+import { ApiRequestError } from '@/api/errors'
+
+/** Falhas que podem se resolver numa nova tentativa: rede, timeout e 5xx. */
 export function isTransientError(error: unknown) {
-  if (!isAxiosError(error) || error.code === 'ERR_CANCELED') return false
-  const status = error.response?.status
-  return status === undefined || status === 408 || status === 429 || status >= 500
+  return error instanceof ApiRequestError && error.isTransient
 }
 
 export function createQueryClient() {

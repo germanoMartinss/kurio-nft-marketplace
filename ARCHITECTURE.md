@@ -12,7 +12,7 @@ Documento vivo: cada fase acrescenta as decisões que tomou. Contexto e requisit
 | Rotas            | TanStack Router (file-based)                                         | Parâmetros e search params tipados; árvore gerada em `src/routeTree.gen.ts` (versionada, para que o typecheck funcione num checkout limpo). |
 | Estado remoto    | TanStack Query 5                                                     |                                                                                                                                             |
 | HTTP             | Axios                                                                | Instância única em `src/api/http.ts`.                                                                                                       |
-| Contratos        | Zod 4                                                                | Schemas em `src/contracts/`, usados pelo cliente **e** pelos mocks.                                                                         |
+| Contratos        | Zod 4 (`zod/mini`)                                                   | Schemas em `src/contracts/`, usados pelo cliente **e** pelos mocks. Ver "Contratos" abaixo.                                                 |
 | Tempo real       | socket.io-client 4.8                                                 |                                                                                                                                             |
 | Mocks            | MSW **2.15.0** (versão exata) + `@mswjs/socket.io-binding` **0.2.0** | Ver abaixo.                                                                                                                                 |
 | Estilo           | Tailwind CSS 4 + shadcn/ui                                           |                                                                                                                                             |
@@ -149,6 +149,58 @@ Regra adotada:
 `pnpm screens` (`scripts/capture-screens.mjs`) captura cada tela em 390, 768 e 1440px, aponta
 overflow horizontal e erros de console, e gera imagens lado a lado "implementação | Figma" em
 `screenshots/` (não versionado). Toda tela é conferida assim antes do commit da fase.
+
+## Contratos
+
+Os schemas em `src/contracts/` são a fonte única dos formatos de REST e de eventos. O cliente
+(`src/api/`) valida **toda resposta** antes de entregá-la ao estado, e a API simulada valida
+**todo corpo** recebido com os mesmos schemas: um desvio entre os dois lados quebra o typecheck ou
+falha na fronteira, em vez de aparecer como `undefined` na tela. As regras de formulário (formato
+de e-mail, senha, endereço `0x`, cupom) também moram nos contratos, então formulário e API validam
+igual. Documentação dos endpoints, erros e eventos em [docs/API.md](docs/API.md).
+
+**`zod/mini` em vez do Zod clássico.** Medido com os mesmos schemas: 8,0 KB gzip contra 26,6 KB.
+A API funcional (`z.optional(x)`, `.check(z.minLength(1))`) é mais verbosa, mas cobre tudo o que
+os contratos usam (objetos, enums, regex, inteiros, datas ISO, `z.infer`). As mensagens padrão do
+mini são genéricas, o que não importa aqui: toda mensagem exibida é própria, em português.
+
+**Dinheiro.** ETH trafega como string decimal e é calculado com big.js (`src/lib/money.ts`),
+tanto na API simulada (totais, desconto, taxa) quanto na exibição. `number` nunca representa
+dinheiro. O cliente não recalcula totais: exibe o que a API devolve.
+
+## Backend simulado
+
+```
+src/mocks/
+  db/          estado único (types), seed determinístico, store com persistência e reset
+  fixtures/    36 NFTs, 2 usuários (senhas só em hash), carteiras, favoritos, cupons
+  domain/      regras: catálogo e facetas, carrinho, cotação, pedidos e pagamento, sessão, eventos
+  handlers/    tradução HTTP → domínio; route() aplica antes as condições de rede do cenário
+  scenarios/   presets do §6 e cenário ativo (contadores e PRNG com semente)
+  socket/      servidor Socket.IO simulado (ver "Limitações do transporte")
+```
+
+- **Estado consistente**: catálogo, favoritos, carrinhos, perfil, carteiras, cotações e pedidos
+  vivem num único estado. Toda alteração passa por `mutate()`, que persiste no `localStorage`
+  (`kurio:mock:db`). Alterações que afetam recursos observados publicam o evento correspondente
+  (`domain/events.ts`), então REST e Socket.IO nunca divergem.
+- **Reset**: `?reset=1` ou o painel restauram o seed integralmente e limpam o estado do cliente
+  (`kurio:app:*`), voltando a um cenário conhecido e deslogado.
+- **Determinismo**: ids sequenciais (`ord_0001`), fixtures sem aleatoriedade, latência variável
+  com PRNG de semente fixa e hash de transação derivado do id do pedido. Só tokens de sessão e
+  sais de senha novos são aleatórios, por segurança.
+- **Senhas**: PBKDF2-SHA256 com 100 mil iterações (WebCrypto). Os hashes das contas de demonstração
+  foram calculados fora da aplicação; nem o código nem o storage contêm a senha em claro.
+- **Carrinho de visitante na API**: identificado por `X-Guest-Id`, para que também o carrinho sem
+  login siga as regras de disponibilidade da API, em vez de uma cópia local com regras paralelas.
+  Ao autenticar, `POST /cart/merge` soma as quantidades respeitando a disponibilidade.
+- **Cotação e pedido**: a cotação congela preços, cupom e taxa; o pedido só nasce de uma cotação
+  ainda válida (`409 QUOTE_STALE` caso contrário). O pagamento simulado tem o horário de término
+  persistido, então um pedido pendente continua e termina mesmo após refresh.
+- **Idempotência**: a chave fica associada ao hash canônico do corpo (chaves ordenadas em todos os
+  níveis). Mesma chave e mesmo corpo devolvem o pedido existente; corpo diferente é conflito.
+- **Isolamento**: pedidos de outro usuário respondem 404. `order.updated` só é enviado às conexões
+  cujo token pertence ao dono, resolvido no momento do envio (sessão expirada deixa de receber).
 
 ## Mocks e tempo real
 

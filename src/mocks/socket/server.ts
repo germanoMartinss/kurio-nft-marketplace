@@ -10,6 +10,9 @@ import {
 } from '@/contracts/realtime'
 import { env } from '@/env'
 
+import { resolveToken } from '../domain/auth'
+import { getScenario } from '../scenarios/active'
+
 /**
  * Servidor Socket.IO simulado sobre a interceptação de WebSocket do MSW.
  *
@@ -36,6 +39,12 @@ export interface RealtimeConnection {
   auth: HandshakeAuth | null
 }
 
+/** Usuário da conexão, resolvido no momento do envio: sessão expirada ou encerrada = anônimo. */
+export function connectionUserId(connection: RealtimeConnection) {
+  const session = resolveToken(connection.auth?.token)
+  return session.kind === 'ok' ? session.user.id : null
+}
+
 interface ConnectionEntry extends RealtimeConnection {
   emit: ReturnType<typeof toSocketIo>['client']['emit']
   close: () => void
@@ -53,6 +62,11 @@ function toWebSocketUrl(origin: string) {
 const realtimeLink = ws.link(`${toWebSocketUrl(env.socketOrigin)}*`)
 
 export const realtimeHandler = realtimeLink.addEventListener('connection', (connection) => {
+  // Cenário "sem conexão": o servidor recusa o socket, e o cliente segue tentando reconectar.
+  if (getScenario().offline) {
+    connection.client.close(1011, 'offline')
+    return
+  }
   const io = toSocketIo(connection)
   const entry: ConnectionEntry = {
     id: `conn-${nextConnectionId++}`,

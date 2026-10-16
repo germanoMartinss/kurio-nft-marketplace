@@ -5,12 +5,13 @@ import { getHealth } from '@/api/system'
 import { env } from '@/env'
 import { createRealtimeSocket, type RealtimeSocket } from '@/realtime/socket'
 
+import { mockControl } from '../browser'
 import { realtimeServer, type RealtimeConnection } from '../socket/server'
 
 /**
  * Painel de diagnóstico da camada de mocks (rota /mocks). Faz parte da infraestrutura de mocks,
  * não do produto: verifica o service worker, uma ida e volta REST (Axios → MSW) e uma ida e volta
- * pelo socket.io-client (WebSocket interceptado). Seleção e reset de cenários entram na Fase 3.
+ * pelo socket.io-client (WebSocket interceptado), além de selecionar o cenário e restaurar os dados.
  */
 export function MockPanel() {
   if (!env.enableMocks) {
@@ -22,6 +23,7 @@ export function MockPanel() {
   }
   return (
     <PanelLayout>
+      <ScenarioControls />
       <ServiceWorkerStatus />
       <RestStatus />
       <SocketStatus />
@@ -65,6 +67,60 @@ function Field({ label, value, testId }: { label: string; value: ReactNode; test
 
 const buttonClass =
   'bg-primary text-background w-fit rounded-md px-4 py-2 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground'
+
+function ScenarioControls() {
+  const scenarios = mockControl.scenarios.list()
+  const [selected, setSelected] = useState(mockControl.scenarios.active())
+  const description = scenarios.find((scenario) => scenario.id === selected)?.description
+
+  return (
+    <Section title="Cenário">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="mock-scenario" className="text-14 text-muted-foreground">
+          Cenário ativo (também por <code>?cenario=&lt;id&gt;</code> na URL)
+        </label>
+        <select
+          id="mock-scenario"
+          value={selected}
+          onChange={(event) => setSelected(event.target.value)}
+          aria-describedby="mock-scenario-description"
+          className="h-10 rounded-xs border border-input bg-background px-3 text-15"
+        >
+          {scenarios.map((scenario) => (
+            <option key={scenario.id} value={scenario.id}>
+              {scenario.label} ({scenario.id})
+            </option>
+          ))}
+        </select>
+        <p id="mock-scenario-description" className="text-14 text-subtle">
+          {description}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          className={buttonClass}
+          onClick={() => {
+            mockControl.scenarios.set(selected)
+            window.location.reload()
+          }}
+        >
+          Aplicar e recarregar
+        </button>
+        <button
+          type="button"
+          className={buttonClass}
+          onClick={() => {
+            mockControl.reset()
+            window.location.reload()
+          }}
+        >
+          Restaurar dados iniciais
+        </button>
+      </div>
+    </Section>
+  )
+}
 
 function ServiceWorkerStatus() {
   const controller = typeof navigator !== 'undefined' ? navigator.serviceWorker?.controller : null

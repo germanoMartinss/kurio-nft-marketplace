@@ -29,7 +29,10 @@ export default defineConfig([
       // Componentes shadcn exportam as variantes junto com o componente (ex.: buttonVariants).
       'react-refresh/only-export-components': ['error', { allowExportNames: ['buttonVariants'] }],
       '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
     },
   },
   {
