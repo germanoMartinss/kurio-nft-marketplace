@@ -114,7 +114,11 @@ semânticos e registramos o mapeamento em ARCHITECTURE.md.
   essa escala). Raios: `rounded-xs` 3 · `sm` 4 · `md` 6 · `lg` 8 · `xl` 16 · `2xl` 20 · `3xl` 24.
 - Layout: abaixo de `lg` (1024px) vale o padrão mobile (barra de abas inferior); a partir de `lg`,
   header e footer de desktop. Largura útil com a utility `container-page`.
-- Ícones só via `src/components/icons.ts`. Ações fora do escopo usam `UnavailableAction`.
+- Ícones só via `src/components/icons.tsx` (SVGs do Figma gerados por `pnpm icons:generate`;
+  Phosphor só onde o Figma não exportou). Imagens dos NFTs: variantes AVIF/WebP em
+  `public/assets/nfts/optimized/` (`pnpm images:optimize`). Ações fora do escopo usam `UnavailableAction`.
+- Mobile **não** é o desktop redimensionado: topo por tela (`MobileTopBar`), sem footer, barra de abas.
+- Toda tela é conferida com `pnpm screens` (390, 768 e 1440 contra os PNGs desktop e mobile) antes do commit.
 
 ## Arquitetura (resumo — detalhes em ARCHITECTURE.md quando existir)
 
@@ -149,7 +153,8 @@ lighthouse/     configuração e relatórios versionados
 ## Comandos
 
 Gerenciador: **pnpm** (Node ≥ 22.12). Disponíveis: `pnpm dev` (com mocks) · `pnpm build` ·
-`pnpm preview` · `pnpm typecheck` · `pnpm lint` · `pnpm format` / `pnpm format:check`.
+`pnpm preview` · `pnpm typecheck` · `pnpm lint` · `pnpm format` / `pnpm format:check` ·
+`pnpm screens` · `pnpm icons:generate` · `pnpm images:optimize`.
 Previstos: `test:e2e`, `test:e2e:update` (Fase 9) e `lighthouse` (Fase 10).
 
 Antes de cada commit: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build`.

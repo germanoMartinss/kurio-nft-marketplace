@@ -26,6 +26,9 @@ playwright-report/
 blob-report/
 playwright/.cache/
 
+# Capturas de verificação visual (pnpm screens)
+/screenshots/
+
 # Lighthouse (relatórios finais versionados em lighthouse/reports/)
 .lighthouseci/
 

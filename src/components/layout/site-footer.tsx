@@ -37,8 +37,9 @@ const SOCIAL_LINKS: { label: string; href: string; Icon: ComponentType<{ classNa
 const linkClass = 'text-14 leading-[22px] text-foreground transition-colors hover:text-accent-text'
 
 export function SiteFooter() {
+  // As telas mobile do Figma não têm footer; abaixo de 1024px a navegação fica na barra de abas.
   return (
-    <footer className="container-page mt-20 pb-6">
+    <footer className="container-page mt-20 hidden pb-6 lg:block">
       <div className="bg-card">
         <section
           aria-label="Destaques da Kurio"

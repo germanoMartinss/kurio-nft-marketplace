@@ -73,17 +73,56 @@ sempre, em vez de depender do `prefers-color-scheme` do sistema.
   (quem anuncia o carregamento é o contêiner, com `aria-busy`).
 - Dependências do preset descartadas: a fonte JetBrains Mono, o `next-themes` (não há troca de
   tema) e o pacote `cn` (publicado poucos dias antes; preferimos clsx + tailwind-merge).
-- Ícones: o Figma usa Iconly. Até os SVGs exportados chegarem, `src/components/icons.ts`
-  reexporta equivalentes do Phosphor; a troca afeta só esse arquivo.
+- Ícones: ver "Assets" abaixo.
 
 ### Layout e navegação
 
-- A partir de `lg` (1024px): header e footer de desktop do Figma. Abaixo disso: o padrão das telas
-  mobile, com barra de abas inferior fixa; o tablet (768px) segue o padrão mobile com grades mais
-  largas, porque a navegação de desktop não cabe nessa largura sem perder itens.
+- A partir de `lg` (1024px): header e footer de desktop do Figma. Abaixo disso, o padrão das telas
+  mobile, que **não é o desktop redimensionado**: não há header global (cada tela tem o próprio topo,
+  `MobileTopBar`, com voltar circular, título e ação), não há footer (nenhum frame mobile tem) e a
+  navegação fica na barra de abas inferior, com recorte côncavo em volta do botão central e ícones
+  preenchidos. O recorte é um path SVG de largura fixa entre duas partes flexíveis, para a curva não
+  deformar entre 390 e 1023px. O tablet (768px) segue o padrão mobile, porque a navegação de desktop
+  não cabe nessa largura.
 - Header: "Início" ativo nas telas de início, conta e autenticação; "Mercado" nas telas do fluxo
   de compra, que também não têm a divisória sob o header (conforme a descrição do componente no Figma).
 - Link "Pular para o conteúdo" como primeiro elemento focável; `<main id="conteudo">`.
+
+### Assets
+
+**Ícones.** Os SVGs exportados do Figma ficam em `public/assets/icons/` (nomes em kebab-case) e são
+convertidos em componentes React por `pnpm icons:generate` (`scripts/generate-icons.mjs` →
+`src/components/figma-icons.generated.tsx`). A conversão troca a cor fixa de cada SVG por
+`currentColor`: no Figma o mesmo ícone aparece em cores diferentes conforme o contexto (o carrinho é
+claro no header; o logout é escuro dentro do botão laranja). IDs internos de máscaras e clip-paths
+recebem um sufixo de `useId()`, para não duplicar IDs quando o ícone se repete na página. Inline em
+vez de `<img>`: herda cor, não gera requisições e não pisca no carregamento.
+
+Toda a interface importa ícones de `src/components/icons.tsx`, que expõe nomes por uso. Ícones
+usados no Figma que **não vieram na exportação** usam o equivalente do Phosphor até serem exportados:
+
+| Uso                                                 | Onde aparece no Figma                                                              | Substituto (Phosphor)                                        |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Casa, coração, carrinho e usuário **preenchidos**   | barra de abas mobile; botão de carrinho do detalhe mobile                          | `House`, `Heart`, `ShoppingCartSimple`, `User` (peso `fill`) |
+| Botão central da barra de abas (moldura de leitura) | barra de abas mobile                                                               | `Scan`                                                       |
+| Filtros                                             | botão ao lado da busca mobile                                                      | `SlidersHorizontal`                                          |
+| Menos / mais                                        | steppers de quantidade (desktop e mobile)                                          | `Minus`, `Plus`                                              |
+| Menu "⋮" e carteira                                 | cards de carteira do pagamento mobile                                              | `DotsThreeVertical`, `Wallet`                                |
+| Fechar                                              | diálogos (login, cadastro, confirmação)                                            | `X`                                                          |
+| Seta para baixo                                     | selects (rede, tipo de carteira, `.eth`)                                           | `CaretDown`                                                  |
+| Olho aberto                                         | alternância de senha (só o "olho fechado" foi exportado)                           | `Eye`                                                        |
+| Compartilhar e redes sociais                        | detalhe (LinkedIn, e-mail, X) e footer (Facebook, Instagram, X, LinkedIn, YouTube) | logos do Phosphor                                            |
+| Logos Google e Facebook                             | login e cadastro                                                                   | pendente (ações de login social estão fora do escopo)        |
+| Ilustração "Thank you"                              | confirmação de pedido                                                              | pendente                                                     |
+
+O "voltar" usa o chevron exportado (`arrow-right-2`) espelhado, como no Figma.
+
+**Imagens dos NFTs.** O Figma usa quatro ilustrações (`ape-oculos`, `gorila-chapeu`,
+`ape-gola-alta`, `macaco-fone`), exportadas em PNG de 500×500 (~430 KB cada). `pnpm images:optimize`
+(`scripts/optimize-images.mjs`, com `sharp`) gera AVIF e WebP em 160, 240, 320 e 500px em
+`public/assets/nfts/optimized/` (de ~3 KB a ~26 KB). A maior variante é 500px porque essa é a
+resolução do original; ampliar só aumentaria o peso. As saídas são versionadas, para o build não
+depender de processamento de imagem. Os PNGs originais ficam como fonte e não são servidos às páginas.
 
 ### Ações fora do escopo
 
@@ -96,6 +135,20 @@ Regra adotada:
 | Contato (e-mail, telefone)                                                 | `mailto:` e `tel:`.                                                                                                                                                                     |
 | Redes sociais                                                              | Link externo em nova aba, com aviso no nome acessível.                                                                                                                                  |
 | Seção fora da entrega (Criadores, Aprenda, Central de ajuda, Atividade...) | `UnavailableAction`: botão com `aria-disabled` e "(indisponível nesta demonstração)" no nome acessível; ao ser acionado, explica o motivo num toast. Não navega e não simula resultado. |
+
+### Desvios do Figma
+
+| Tela                       | No Figma                                                                                                                                                | Na implementação                              | Motivo                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
+| Carrinho (mobile)          | Ícone de lixeira sobreposto ao botão "+" do terceiro item                                                                                               | Lixeira em posição própria                    | Defeito do layout: a sobreposição impede o clique no "+". |
+| Login e cadastro (desktop) | Rótulo "2.29 ETH" duplicado sobre um card e selo RARO de canto reto saindo do card (defeitos registrados na descrição do componente "Marketplace Page") | Sem duplicação; selo acompanha o raio do card | Defeitos conhecidos do próprio arquivo.                   |
+| Footer (mobile e tablet)   | Não existe nos frames mobile                                                                                                                            | Oculto abaixo de 1024px                       | Fidelidade aos frames mobile.                             |
+
+## Verificação visual
+
+`pnpm screens` (`scripts/capture-screens.mjs`) captura cada tela em 390, 768 e 1440px, aponta
+overflow horizontal e erros de console, e gera imagens lado a lado "implementação | Figma" em
+`screenshots/` (não versionado). Toda tela é conferida assim antes do commit da fase.
 
 ## Mocks e tempo real
 
