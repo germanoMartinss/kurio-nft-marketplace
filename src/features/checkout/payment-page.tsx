@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Breadcrumb } from '@/components/common/breadcrumb'
+import { errorMessage } from '@/components/common/error-message'
 import { EmptyState, ErrorState } from '@/components/common/query-states'
 import { MobileTopBar } from '@/components/layout/mobile-top-bar'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -118,7 +119,7 @@ function PaymentScreen({
       <div className="container-page py-16">
         <ErrorState
           title="Não foi possível carregar o pagamento"
-          message="Verifique sua conexão e tente novamente."
+          message={errorMessage(wallets.error ?? cartQuery.error)}
           onRetry={() => {
             void wallets.refetch()
             void cartQuery.refetch()

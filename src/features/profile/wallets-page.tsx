@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { errorMessage } from '@/components/common/error-message'
 import { ErrorState } from '@/components/common/query-states'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -28,7 +29,7 @@ export function WalletsPage() {
       ) : query.isError ? (
         <ErrorState
           title="Não foi possível carregar as carteiras"
-          message="Verifique sua conexão e tente novamente."
+          message={errorMessage(query.error)}
           onRetry={() => void query.refetch()}
           retrying={query.isFetching}
         />

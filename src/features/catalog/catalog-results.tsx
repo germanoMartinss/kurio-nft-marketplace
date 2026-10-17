@@ -1,5 +1,6 @@
 import type { UseQueryResult } from '@tanstack/react-query'
 
+import { errorMessage } from '@/components/common/error-message'
 import { EmptyState, ErrorState } from '@/components/common/query-states'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -47,7 +48,7 @@ export function CatalogResults({
     return (
       <ErrorState
         title="Não foi possível carregar o catálogo"
-        message={`${error.message} Verifique sua conexão e tente novamente.`}
+        message={errorMessage(error)}
         onRetry={() => void refetch()}
         retrying={isFetching}
       />

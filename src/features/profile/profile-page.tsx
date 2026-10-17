@@ -6,6 +6,7 @@ import * as z from 'zod/mini'
 
 import { ApiRequestError } from '@/api/errors'
 import { EnsInput, PasswordInput, TextInput } from '@/components/common/form-fields'
+import { errorMessage } from '@/components/common/error-message'
 import { ErrorState } from '@/components/common/query-states'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,7 +47,7 @@ export function ProfilePage() {
       ) : query.isError ? (
         <ErrorState
           title="Não foi possível carregar o perfil"
-          message="Verifique sua conexão e tente novamente."
+          message={errorMessage(query.error)}
           onRetry={() => void query.refetch()}
           retrying={query.isFetching}
         />

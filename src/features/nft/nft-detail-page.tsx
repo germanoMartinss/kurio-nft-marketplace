@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 
 import { ApiRequestError } from '@/api/errors'
 import { Breadcrumb } from '@/components/common/breadcrumb'
+import { errorMessage } from '@/components/common/error-message'
 import { ErrorState } from '@/components/common/query-states'
 import { CartFilled } from '@/components/icons'
 import { MobileTopBar } from '@/components/layout/mobile-top-bar'
@@ -34,7 +35,7 @@ export function NftDetailPage({ nftId }: { nftId: string }) {
       <div className="container-page py-16">
         <ErrorState
           title="Não foi possível carregar o NFT"
-          message={`${query.error.message} Verifique sua conexão e tente novamente.`}
+          message={errorMessage(query.error)}
           onRetry={() => void query.refetch()}
           retrying={query.isFetching}
         />

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
 import { Breadcrumb } from '@/components/common/breadcrumb'
+import { errorMessage } from '@/components/common/error-message'
 import { EmptyState, ErrorState } from '@/components/common/query-states'
 import { MobileTopBar } from '@/components/layout/mobile-top-bar'
 import { buttonVariants } from '@/components/ui/button'
@@ -41,7 +42,7 @@ export function CartPage() {
         {query.isError && !cart ? (
           <ErrorState
             title="Não foi possível carregar o carrinho"
-            message={`${query.error.message} Verifique sua conexão e tente novamente.`}
+            message={errorMessage(query.error)}
             onRetry={() => void query.refetch()}
             retrying={query.isFetching}
           />
