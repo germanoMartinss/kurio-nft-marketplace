@@ -30,7 +30,7 @@ export function EditionPicker({
             <label
               key={edition.id}
               className={cn(
-                'flex h-7 cursor-pointer items-center rounded-full border border-border-soft px-2 text-14 leading-4 text-muted-foreground transition-colors hover:border-primary has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring',
+                'flex h-7 cursor-pointer items-center rounded-full border border-border-soft px-2 text-15 leading-4 text-muted-foreground transition-colors hover:border-primary has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring lg:text-14',
                 selected && 'border-[1.5px] border-primary font-medium text-accent-text',
                 soldOut && 'cursor-not-allowed opacity-50 hover:border-border-soft',
               )}

@@ -22,7 +22,8 @@ export function SocialButtons({ variant }: { variant: AuthVariant }) {
         />
         <span
           className={cn(
-            'relative px-3 text-12 text-foreground',
+            'relative px-3 text-foreground',
+            variant === 'dialog' ? 'text-12' : 'text-13',
             variant === 'dialog' ? 'bg-card' : 'bg-background',
           )}
         >

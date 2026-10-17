@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 export type AuthVariant = 'dialog' | 'page'
 
 const fieldClass = (variant: AuthVariant) =>
-  variant === 'page' ? 'h-[50px] rounded-[12px] border-border px-4 text-16' : ''
+  variant === 'page' ? 'h-[50px] rounded-[12px] border-border px-4 text-14' : ''
 
 /** Mensagem de erro de campo: ícone + texto (não depende só de cor), ligada ao campo por id. */
 export function FieldError({ id, children }: { id: string; children?: ReactNode }) {

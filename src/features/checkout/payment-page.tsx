@@ -169,7 +169,7 @@ function PaymentScreen({
       variant={mobile ? 'pill' : 'primary'}
       disabled={!canConfirm}
       aria-busy={checkout.quotePending}
-      className={cn('w-full', mobile ? 'h-[60px] rounded-full text-18' : 'h-[45px] text-15')}
+      className={cn('w-full', mobile ? 'h-[60px] rounded-full text-15' : 'h-[45px] text-15')}
     >
       {checkout.quotePending ? 'Cotando…' : 'Confirmar compra'}
     </Button>
@@ -369,10 +369,10 @@ function PaymentScreen({
                   <div className="hidden lg:block">
                     <Totals {...cart.summary} testId="checkout-total" />
                   </div>
-                  <p className="flex items-baseline justify-between gap-4 lg:hidden">
+                  <p className="flex items-baseline justify-end gap-7 lg:hidden">
                     <span className="text-16 font-bold">Total:</span>
                     <span
-                      className="text-20 font-bold text-accent-text"
+                      className="text-18 font-bold text-accent-text"
                       data-testid="checkout-total"
                     >
                       {formatEth(cart.summary.total)}

@@ -45,7 +45,7 @@ export function CatalogTabs({
             aria-pressed={active}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'shrink-0 border-b-2 border-transparent pb-1 text-15 leading-4 whitespace-nowrap transition-colors hover:text-accent-text',
+              'shrink-0 border-b-2 border-transparent pb-1 text-14 leading-4 whitespace-nowrap transition-colors hover:text-accent-text lg:text-15',
               active && 'border-primary font-bold text-accent-text',
             )}
           >

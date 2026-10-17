@@ -190,7 +190,7 @@ function MobilePurchaseBar({ nft, purchase }: { nft: NftDetail; purchase: Purcha
             size="sm"
           />
         </div>
-        <p className="text-22 font-bold text-accent-text">
+        <p className="text-20 font-bold text-accent-text">
           <span className="sr-only">Preço unitário: </span>
           {formatEth(nft.price)}
         </p>
@@ -198,7 +198,7 @@ function MobilePurchaseBar({ nft, purchase }: { nft: NftDetail; purchase: Purcha
       <div className="flex gap-3">
         <Button
           variant="pill"
-          className="h-[60px] flex-1 rounded-[30px] text-17"
+          className="h-[60px] max-w-[196px] min-w-0 flex-1 rounded-[30px] text-16"
           disabled={purchase.max === 0 || purchase.pending}
           onClick={() => purchase.add('carrinho')}
         >

@@ -30,7 +30,7 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
         ) : null}
       </div>
 
-      <h3 className="text-16 leading-4">
+      <h3 className="text-14 leading-4 lg:text-16">
         <Link
           to="/nft/$nftId"
           params={{ nftId: nft.id }}
@@ -39,7 +39,11 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
           {nft.name}
         </Link>
       </h3>
-      <Price value={nft.price} previous={nft.previousPrice} className="-mt-1.5" />
+      <Price
+        value={nft.price}
+        previous={nft.previousPrice}
+        className="-mt-1.5 text-16 leading-4 lg:text-18"
+      />
 
       {/* Ações: sempre visíveis no mobile (favorito), reveladas no hover/foco no desktop. */}
       <div className="absolute top-4 right-4 z-10 lg:top-auto lg:right-auto lg:bottom-[68px] lg:left-1/2 lg:flex lg:-translate-x-1/2 lg:gap-2 lg:opacity-0 lg:transition-opacity lg:group-focus-within:opacity-100 lg:group-hover:opacity-100">
@@ -68,7 +72,7 @@ export function NftCardSkeleton() {
     <div className="flex flex-col gap-3" aria-hidden="true">
       <Skeleton className="aspect-square w-full rounded-2xl lg:aspect-auto lg:h-[300px] lg:rounded-none" />
       <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-4 w-1/3" />
+      <Skeleton className="h-4 w-1/3 max-lg:-mt-1.5" />
     </div>
   )
 }

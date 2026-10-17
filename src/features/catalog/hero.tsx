@@ -62,7 +62,7 @@ export function Hero() {
         <div className="flex gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <p className="text-12 leading-4 font-bold">Bem-vindo à Kurio</p>
-            <h1 className="text-17 leading-6 font-bold">
+            <h1 className="text-18 leading-6 font-bold">
               SEJA DONO DA
               <br />
               CULTURA DIGITAL

@@ -36,7 +36,7 @@ export const MobileSearchBar = forwardRef<
           onChange={(event) => onChange(event.target.value)}
           placeholder="Explorar coleções"
           autoComplete="off"
-          className="h-full min-w-0 flex-1 bg-transparent text-15 font-bold outline-none placeholder:text-subtle"
+          className="h-full min-w-0 flex-1 bg-transparent text-14 font-bold outline-none placeholder:text-subtle"
         />
       </form>
       <button

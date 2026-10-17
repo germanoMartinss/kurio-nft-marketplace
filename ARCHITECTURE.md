@@ -217,6 +217,13 @@ fixos como a barra de abas e a barra de compra aparecem no meio da imagem) e olh
 As 11 telas em 390, 768 e 1440 passam no `pnpm screens` com `overflow-x = 0` e zero erros de console;
 zoom de 200% e 400% sem rolagem horizontal é coberto por `e2e/keyboard.spec.ts`.
 
+### Tipografia mobile
+
+Os frames mobile do Figma têm 414×896 px. Os tamanhos de fonte foram medidos nos PNGs em escala
+nativa (a Roboto Mono é monoespaçada: a largura de uma string conhecida dá o tamanho) e aplicados
+abaixo de `lg`; o desktop segue o `design/tokens.md`. Em 390 px as abas do catálogo cabem inteiras;
+em 320 px (zoom de 400%) a faixa de abas rola na horizontal, sem rolar a página.
+
 ## Verificação visual
 
 `pnpm screens` (`scripts/capture-screens.mjs`) captura cada tela em 390, 768 e 1440px, aponta

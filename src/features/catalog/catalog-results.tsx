@@ -38,8 +38,9 @@ export function CatalogResults({
             <NftCardSkeleton key={index} />
           ))}
         </div>
-        {/* Reserva o espaço da paginação, para o que vem abaixo não se deslocar. */}
-        <Skeleton className="h-[53px] lg:h-[17px]" />
+        {/* Reserva o espaço da paginação (35px no mobile) mais a linha extra do preço anterior, que
+            quebra num card da página típica: o que vem abaixo não se desloca. */}
+        <Skeleton className="h-[51px] lg:h-[17px]" />
       </div>
     )
   }

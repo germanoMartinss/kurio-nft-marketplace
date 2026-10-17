@@ -131,7 +131,7 @@ export function RegisterForm({
       <SocialButtons variant={variant} />
 
       {page ? (
-        <p className="mt-10 text-center text-14 text-muted-foreground">
+        <p className="mt-10 text-center text-16 text-muted-foreground">
           Já tem uma conta?{' '}
           <Link
             to="/entrar"

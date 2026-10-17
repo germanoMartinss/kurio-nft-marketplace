@@ -136,10 +136,10 @@ function SummaryRows({ cart }: { cart: Cart }) {
   const { summary } = cart
   const row = 'flex items-baseline justify-between gap-4'
   return (
-    <dl className="flex flex-col gap-2.5 text-16 lg:gap-3">
+    <dl className="flex flex-col gap-2.5 text-15 lg:gap-3 lg:text-16">
       <div className={row}>
         <dt>Subtotal</dt>
-        <dd className="text-18">{formatEth(summary.subtotal)}</dd>
+        <dd className="text-16 lg:text-18">{formatEth(summary.subtotal)}</dd>
       </div>
       <div className={row}>
         <dt>Desconto do lançamento</dt>
@@ -147,7 +147,7 @@ function SummaryRows({ cart }: { cart: Cart }) {
       </div>
       <div className={row}>
         <dt>Taxa de rede</dt>
-        <dd className="text-18">
+        <dd className="text-16 lg:text-18">
           {formatEth(summary.networkFee)}
           <span className="block text-right text-12 text-accent-text">Taxa estimada</span>
         </dd>
@@ -207,7 +207,7 @@ export function CartSummary({
         <Button
           variant={mobile ? 'pill' : 'primary'}
           size={mobile ? 'xl' : 'lg'}
-          className={cn('w-full', mobile ? 'h-[60px] rounded-full text-18' : 'text-15')}
+          className={cn('w-full', mobile ? 'h-[60px] rounded-full text-16' : 'text-15')}
           disabled={!canCheckout}
           onClick={onCheckout}
         >
@@ -247,7 +247,7 @@ export function CartSummarySkeleton({ variant }: { variant: Variant }) {
     >
       {mobile ? null : <Skeleton className="h-[29px] w-full" />}
       <Skeleton className={mobile ? 'h-[50px] rounded-full' : 'h-[68px]'} />
-      <div className={cn('flex flex-col justify-between', mobile ? 'h-[148px]' : 'h-[154px]')}>
+      <div className={cn('flex flex-col justify-between', mobile ? 'h-[141px]' : 'h-[154px]')}>
         <Skeleton className="h-6" />
         <Skeleton className="h-6" />
         <Skeleton className="h-9" />

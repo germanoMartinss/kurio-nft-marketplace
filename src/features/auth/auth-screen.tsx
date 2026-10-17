@@ -62,7 +62,7 @@ export function AuthScreen({ mode, redirect }: { mode: Mode; redirect?: string }
 
   if (!isDesktop) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col px-6 pt-[77px] pb-12">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col px-6 pt-[130px] pb-12">
         <Link
           to="/"
           aria-label="Kurio, página inicial"
@@ -70,7 +70,14 @@ export function AuthScreen({ mode, redirect }: { mode: Mode; redirect?: string }
         >
           KURIO
         </Link>
-        <h1 className="mt-[118px] mb-8 text-center text-22 font-bold">{COPY[mode].mobileTitle}</h1>
+        <h1
+          className={cn(
+            'mt-[88px] mb-8 text-center font-bold',
+            mode === 'cadastro' ? 'text-18' : 'text-20',
+          )}
+        >
+          {COPY[mode].mobileTitle}
+        </h1>
         {form}
       </div>
     )
