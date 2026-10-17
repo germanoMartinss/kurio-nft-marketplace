@@ -4,7 +4,6 @@ import type { RouterContext } from '@/app/router'
 import { NotFound } from '@/components/common/not-found'
 import { AppShell } from '@/components/layout/app-shell'
 import { Toaster } from '@/components/ui/sonner'
-import { TooltipProvider } from '@/components/ui/tooltip'
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
@@ -13,11 +12,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   return (
-    <TooltipProvider>
+    <>
       <AppShell>
         <Outlet />
       </AppShell>
       <Toaster position="top-right" />
-    </TooltipProvider>
+    </>
   )
 }

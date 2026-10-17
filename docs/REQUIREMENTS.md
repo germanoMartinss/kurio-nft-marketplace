@@ -81,16 +81,16 @@ os testes E2E não existem.
 
 ### Carrinho
 
-| ID    | Requisito                                                                                    | Status | Onde                                                                                      | Teste                  |
-| ----- | -------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- | ---------------------- |
-| R3.42 | Adicionar, alterar e remover itens respeitando a disponibilidade por NFT e edição            | feito  | API valida por NFT e edição; tela respeita `maxQuantity` e mostra conflitos               | `e2e/cart.spec.ts`     |
-| R3.43 | Carrinho mantido após refresh                                                                | feito  | carrinho na API por usuário/visitante; recarrega após refresh                             | `e2e/cart.spec.ts`     |
-| R3.44 | Itens do visitante preservados ao autenticar                                                 | feito  | `useLogin`/`useRegister` chamam `POST /cart/merge`; itens do visitante aparecem na conta  | `e2e/cart.spec.ts`     |
-| R3.45 | Aplicar e remover cupom; tratar código inválido ou expirado                                  | feito  | `PUT/DELETE /api/cart/coupon`; persiste após refresh                                      | `e2e/cart.spec.ts`     |
-| R3.46 | Subtotal, desconto, taxa de rede e total coerentes com a resposta da API                     | feito  | resumo exibido exatamente como calculado pela API                                         | `e2e/cart.spec.ts`     |
-| R3.47 | Alterações de preço e disponibilidade refletidas com o carrinho aberto                       | feito  | `nft.updated` → carrinho rebuscado; avisos em região `aria-live`; skeleton                | `e2e/cart.spec.ts`     |
-| R3.48 | ETH como strings decimais, com precisão nos cálculos e na apresentação; quantidades inteiras | feito  | strings decimais no transporte; `formatEth` sem arredondar; quantidades inteiras          | `e2e/cart.spec.ts`     |
-| R3.49 | A cotação da API é a referência para finalizar o pedido                                      | feito  | `useCreateQuote` + `quoteDivergences`; envio bloqueado com cotação expirada ou divergente | `e2e/checkout.spec.ts` |
+| ID    | Requisito                                                                                    | Status | Onde                                                                                                                                              | Teste                  |
+| ----- | -------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| R3.42 | Adicionar, alterar e remover itens respeitando a disponibilidade por NFT e edição            | feito  | API valida por NFT e edição; tela respeita `maxQuantity` e mostra conflitos                                                                       | `e2e/cart.spec.ts`     |
+| R3.43 | Carrinho mantido após refresh                                                                | feito  | carrinho na API por usuário/visitante; recarrega após refresh                                                                                     | `e2e/cart.spec.ts`     |
+| R3.44 | Itens do visitante preservados ao autenticar                                                 | feito  | `useLogin`/`useRegister` chamam `POST /cart/merge`; itens do visitante aparecem na conta                                                          | `e2e/cart.spec.ts`     |
+| R3.45 | Aplicar e remover cupom; tratar código inválido ou expirado                                  | feito  | `PUT/DELETE /api/cart/coupon`; persiste após refresh                                                                                              | `e2e/cart.spec.ts`     |
+| R3.46 | Subtotal, desconto, taxa de rede e total coerentes com a resposta da API                     | feito  | resumo exibido exatamente como calculado pela API                                                                                                 | `e2e/cart.spec.ts`     |
+| R3.47 | Alterações de preço e disponibilidade refletidas com o carrinho aberto                       | feito  | `nft.updated` → carrinho rebuscado; avisos em região `aria-live`; skeleton                                                                        | `e2e/cart.spec.ts`     |
+| R3.48 | ETH como strings decimais, com precisão nos cálculos e na apresentação; quantidades inteiras | feito  | strings decimais no transporte; `formatEth` sem arredondar; quantidades inteiras                                                                  | `e2e/cart.spec.ts`     |
+| R3.49 | A cotação da API é a referência para finalizar o pedido                                      | feito  | `useCheckout` cota pela API (`POST /quotes`) e `quoteDivergences` compara com o carrinho vivo; envio bloqueado com cotação expirada ou divergente | `e2e/checkout.spec.ts` |
 
 ### Pagamento e confirmação
 

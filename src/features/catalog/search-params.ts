@@ -92,13 +92,3 @@ export function toggleInList(list: string | undefined, value: string) {
     values.includes(value) ? values.filter((item) => item !== value) : [...values, value],
   )
 }
-
-export const hasActiveFilters = (search: CatalogSearch) =>
-  Boolean(
-    search.busca ||
-    search.colecoes ||
-    search.redes ||
-    search.precoMin ||
-    search.precoMax ||
-    search.aba,
-  )

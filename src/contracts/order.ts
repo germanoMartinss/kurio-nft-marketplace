@@ -20,7 +20,6 @@ export const quoteLineSchema = z.object({
   /** Versão do NFT no momento da cotação; o pedido é recusado se o catálogo mudou desde então. */
   nftVersion: z.int(),
 })
-export type QuoteLine = z.infer<typeof quoteLineSchema>
 
 /** POST /api/quotes — congela preços, disponibilidade, cupom e taxa do carrinho atual. */
 export const quoteRequestSchema = z.object({ network: networkSchema })
@@ -75,7 +74,6 @@ export type OrderCreate = z.infer<typeof orderCreateSchema>
 
 export const orderStatusSchema = z.enum(['pendente', 'confirmado', 'recusado'])
 export type OrderStatus = z.infer<typeof orderStatusSchema>
-export const TERMINAL_ORDER_STATUSES: OrderStatus[] = ['confirmado', 'recusado']
 
 /** Pedido com o snapshot da cotação: alterações posteriores no catálogo não mudam o recibo. */
 export const orderSchema = z.object({

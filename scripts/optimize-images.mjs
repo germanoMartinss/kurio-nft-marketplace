@@ -1,6 +1,7 @@
 /**
  * Gera versões otimizadas (AVIF e WebP, em várias larguras) das imagens dos NFTs exportadas do
- * Figma (public/assets/nfts/*.png) em public/assets/nfts/optimized/.
+ * Figma (assets-src/nfts/*.png) em public/assets/nfts/optimized/. As originais ficam fora de
+ * public/ para não serem publicadas: a aplicação só serve as variantes otimizadas.
  *
  * As originais têm 500×500, então a maior variante é 500px: ampliar não traria nitidez, só peso.
  * As saídas são versionadas para que o build não dependa de processamento de imagem.
@@ -16,8 +17,8 @@ import sharp from 'sharp'
 export const IMAGE_WIDTHS = [160, 240, 320, 500]
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const sourceDir = join(root, 'public/assets/nfts')
-const outputDir = join(sourceDir, 'optimized')
+const sourceDir = join(root, 'assets-src/nfts')
+const outputDir = join(root, 'public/assets/nfts/optimized')
 
 await mkdir(outputDir, { recursive: true })
 const files = (await readdir(sourceDir)).filter((file) => file.endsWith('.png')).sort()

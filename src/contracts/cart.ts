@@ -62,7 +62,6 @@ export type CartItemAdd = z.infer<typeof cartItemAddSchema>
 
 /** PATCH /api/cart/items/:itemId */
 export const cartItemUpdateSchema = z.object({ quantity: z.int().check(z.positive()) })
-export type CartItemUpdate = z.infer<typeof cartItemUpdateSchema>
 
 /** PUT /api/cart/coupon */
 export const couponApplySchema = z.object({

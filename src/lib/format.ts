@@ -4,8 +4,6 @@ import { NETWORK_LABELS, type Network } from '@/contracts/common'
 export const shortAddress = (value: string) =>
   value.length > 12 ? `${value.slice(0, 6)}…${value.slice(-4)}` : value
 
-export const shortHash = shortAddress
-
 const dateFormat = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
   month: 'short',

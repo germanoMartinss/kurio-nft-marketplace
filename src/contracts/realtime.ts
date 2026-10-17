@@ -43,8 +43,6 @@ export const orderUpdatedEventSchema = z.object({
 })
 export type OrderUpdatedEvent = z.infer<typeof orderUpdatedEventSchema>
 
-export type DomainEvent = NftUpdatedEvent | OrderUpdatedEvent
-
 /** Diagnóstico de ida e volta pelo canal (painel de mocks). */
 export const diagnosticsPingSchema = z.object({ sentAt: z.number() })
 export type DiagnosticsPing = z.infer<typeof diagnosticsPingSchema>

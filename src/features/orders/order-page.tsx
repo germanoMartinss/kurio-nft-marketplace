@@ -12,7 +12,7 @@ import type { Order } from '@/contracts/order'
 import { WALLET_PROVIDER_LABELS } from '@/contracts/wallet'
 import { useSessionUser } from '@/features/auth/session-store'
 import { clearAttempt } from '@/features/checkout/draft'
-import { formatDate, shortHash } from '@/lib/format'
+import { formatDate, shortAddress } from '@/lib/format'
 import { formatEth } from '@/lib/money'
 import { cn } from '@/lib/utils'
 
@@ -184,7 +184,7 @@ function Receipt({ order }: { order: Order }) {
 
       <dl className="grid grid-cols-2 gap-y-3 border-y border-primary/70 px-6 py-3 text-13 sm:grid-cols-4 sm:gap-y-0 sm:px-0 sm:[&>div]:px-3">
         <Info label="ID da transação" bold>
-          <span title={transaction.hash}>{shortHash(transaction.hash)}</span>
+          <span title={transaction.hash}>{shortAddress(transaction.hash)}</span>
         </Info>
         <Info label="Data">{formatDate(transaction.confirmedAt)}</Info>
         <Info label="Total">{formatEth(order.total)}</Info>

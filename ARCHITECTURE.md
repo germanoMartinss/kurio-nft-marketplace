@@ -119,7 +119,8 @@ O "+" do stepper no desktop é `plus.svg` (exportado depois). No mobile o Figma 
 (`scripts/optimize-images.mjs`, com `sharp`) gera AVIF e WebP em 160, 240, 320 e 500px em
 `public/assets/nfts/optimized/` (de ~3 KB a ~26 KB). A maior variante é 500px porque essa é a
 resolução do original; ampliar só aumentaria o peso. As saídas são versionadas, para o build não
-depender de processamento de imagem. Os PNGs originais ficam como fonte e não são servidos às páginas.
+depender de processamento de imagem. Os PNGs originais ficam em `assets-src/nfts/`, fora de `public/`: são a fonte do script e não
+entram no build publicado.
 
 ### Ações fora do escopo
 
@@ -412,8 +413,8 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - **Reconexão.** Ao reconectar (segundo `connect` do mesmo socket), todas as consultas ativas são
   invalidadas e rebuscadas: eventos perdidos durante a queda são reconciliados pelo REST, a fonte
   da verdade. Testado derrubando a conexão e alterando o preço no mesmo instante.
-- **Cotação pronta para o checkout.** `useCreateQuote` (mutation) e `quoteDivergences(quote, cart)`
-  comparam a cotação com o carrinho vivo (que reflete `nft.updated`); o checkout usa isso para exigir
+- **Cotação e carrinho vivo.** `quoteDivergences(quote, cart)` (`features/cart/quote.ts`) compara a
+  cotação em mãos com o carrinho vivo (que reflete `nft.updated`); o checkout usa isso para exigir
   nova confirmação.
 - **Layout.** Desktop: tabela semântica (`<table>` com cabeçalhos) em linhas-cartão e coluna de
   resumo. Mobile/tablet: cartões e painel de resumo `sticky` na base (`mt-auto`: encosta na base
@@ -428,7 +429,10 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   que mostra pendente, recusado ou o recibo conforme o estado do pedido. A tela de confirmação só
   renderiza o recibo para `status === 'confirmado'` **com** transação vinda da API; a UI nunca
   decide a confirmação.
-- **Cotação.** `useCreateQuote` + `quoteDivergences`/`describeChange`. O envio é bloqueado quando a
+- **Cotação.** `useCheckout` (`features/checkout/use-checkout.ts`) pede a cotação com uma mutation
+  própria (`POST /quotes`): `requestQuote` ao confirmar o formulário e `requote` ao atualizar uma
+  cotação vencida ou divergente; cada cotação nova gera outra tentativa e outra `Idempotency-Key`.
+  `quoteDivergences`/`describeChange` descrevem o que mudou. O envio é bloqueado quando a
   cotação expira (contagem regressiva) ou diverge do carrinho vivo (preço, disponibilidade, total),
   inclusive por `nft.updated` com o diálogo aberto; a diferença é listada numa região `role="alert"`
   e só resta "Atualizar cotação", que gera outra cotação e exige novo "Enviar pedido". A API

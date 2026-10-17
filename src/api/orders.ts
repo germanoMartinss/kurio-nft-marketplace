@@ -1,11 +1,4 @@
-import {
-  orderListSchema,
-  orderSchema,
-  quoteSchema,
-  type OrderCreate,
-  type OrderStatus,
-  type QuoteRequest,
-} from '@/contracts/order'
+import { orderSchema, quoteSchema, type OrderCreate, type QuoteRequest } from '@/contracts/order'
 
 import { http } from './http'
 import { parseResponse } from './parse'
@@ -26,9 +19,4 @@ export async function createOrder(body: OrderCreate, idempotencyKey: string) {
 export async function getOrder(id: string, signal?: AbortSignal) {
   const { data } = await http.get<unknown>(`/orders/${encodeURIComponent(id)}`, { signal })
   return parseResponse(orderSchema, data)
-}
-
-export async function listOrders(status?: OrderStatus, signal?: AbortSignal) {
-  const { data } = await http.get<unknown>('/orders', { params: status ? { status } : {}, signal })
-  return parseResponse(orderListSchema, data)
 }

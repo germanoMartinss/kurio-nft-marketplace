@@ -1,19 +1,6 @@
-import { useMutation } from '@tanstack/react-query'
-
-import { createQuote } from '@/api/orders'
-import type { Network } from '@/contracts/common'
 import type { Cart } from '@/contracts/cart'
 import type { Quote } from '@/contracts/order'
 import { compareEth, formatEth } from '@/lib/money'
-
-/**
- * Cotação (pronta para o checkout, Fase 7): congela preços, cupom e taxa. É uma operação, não um
- * dado em cache: cada chamada gera uma cotação nova, por isso é uma mutation. A cotação da API é a
- * referência para finalizar o pedido.
- */
-export function useCreateQuote() {
-  return useMutation({ mutationFn: (network: Network) => createQuote({ network }) })
-}
 
 export interface QuoteDivergence {
   nftId: string
