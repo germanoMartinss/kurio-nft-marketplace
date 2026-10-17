@@ -20,7 +20,9 @@ import { sessionSocket } from '@/realtime/session-socket'
 export function bindSessionLifecycle(queryClient: QueryClient, router: AnyRouter) {
   let previousUserId = sessionStore.get()?.user.id ?? null
   let previousToken = sessionStore.get()?.token ?? null
-  void sessionSocket.attach(previousToken)
+  // A conexão do socket não é necessária para o primeiro render: sai do caminho crítico de carga
+  // (o `socket.io-client` seria baixado junto com o código da tela). Usa a sessão do momento.
+  runWhenIdle(() => void sessionSocket.attach(sessionStore.get()?.token ?? null))
 
   sessionStore.subscribe(() => {
     const session = sessionStore.get()
@@ -65,4 +67,10 @@ export function bindSessionLifecycle(queryClient: QueryClient, router: AnyRouter
       .then((current) => sessionStore.setUser(current.user))
       .catch(() => undefined)
   }
+}
+
+/** Executa quando o navegador está ocioso (no máximo 1,5 s depois), sem competir com a carga inicial. */
+function runWhenIdle(task: () => void) {
+  if ('requestIdleCallback' in window) window.requestIdleCallback(task, { timeout: 1500 })
+  else setTimeout(task, 500)
 }

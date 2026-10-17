@@ -17,7 +17,18 @@ async function enableMocking() {
   await startMockWorker()
 }
 
+/**
+ * Baixa em paralelo com o início dos mocks o código da tela de entrada, que só seria pedido depois
+ * que o MSW estivesse pronto (uma ida e volta de rede a menos no caminho crítico). Não executa nada.
+ */
+function preloadEntryScreen() {
+  const path = window.location.pathname
+  if (path === '/') void import('./features/catalog/home-page')
+  else if (path.startsWith('/nft/')) void import('./features/nft/nft-detail-page')
+}
+
 async function startApp() {
+  preloadEntryScreen()
   // Os mocks precisam estar ativos antes da primeira requisição e da primeira conexão do socket.
   await enableMocking()
 

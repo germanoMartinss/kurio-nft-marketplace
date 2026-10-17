@@ -10,9 +10,32 @@
     />
     <meta name="theme-color" content="#140D0A" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      /* Casca de carregamento: cor de fundo e marca aparecem antes do JavaScript (o React a substitui). */
+      html {
+        background: #140d0a;
+        color: #f5f1eb;
+      }
+      .boot {
+        position: fixed;
+        top: 20px;
+        left: 16px;
+        font:
+          700 14px/1 'Roboto Mono',
+          ui-monospace,
+          monospace;
+        letter-spacing: 0.1em;
+      }
+      @media (min-width: 1024px) {
+        .boot {
+          top: 36px;
+          left: max(16px, calc((100vw - 1200px) / 2));
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="boot" aria-hidden="true">KURIO</div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

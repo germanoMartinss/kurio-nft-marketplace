@@ -22,7 +22,8 @@
     "verify:mocks": "node scripts/verify-mocks.mjs",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "lighthouse": "node lighthouse/run.mjs"
   },
   "msw": {
     "workerDirectory": [
@@ -64,6 +65,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "chrome-launcher": "^1.2.2",
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
