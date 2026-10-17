@@ -9,16 +9,30 @@ import type { NftDetail, NftSummary } from '@/contracts/nft'
 import { catalogQueryOptions } from '@/features/catalog/queries'
 import { cn } from '@/lib/utils'
 
+/** Três grupos de cinco cards, como o carrossel do Figma (cinco cards e três indicadores). */
+const RELATED_LIMIT = 15
+
 /**
- * "Mais desta coleção": NFTs da mesma categoria (nas fixtures cada coleção repete uma única arte),
- * em lista com rolagem horizontal (snap) e indicadores de página.
+ * "Mais desta coleção": primeiro os NFTs da mesma categoria (nas fixtures cada coleção repete uma
+ * única arte e cada categoria tem poucos itens), completados com os mais recentes do catálogo até
+ * três grupos de cinco, em lista com rolagem horizontal (snap) e indicadores de página.
  */
 export function RelatedNfts({ nft }: { nft: NftDetail }) {
-  const { data, isPending } = useQuery(
+  const sameCategory = useQuery(
     catalogQueryOptions({ categories: [nft.category], pageSize: 12, sort: 'recentes' }),
   )
-  const items = (data?.items ?? []).filter((item) => item.id !== nft.id)
-  return <NftCarousel title="Mais desta coleção" items={items} isPending={isPending} />
+  const recent = useQuery(catalogQueryOptions({ pageSize: 24, sort: 'recentes' }))
+  const seen = new Set([nft.id])
+  const items = [...(sameCategory.data?.items ?? []), ...(recent.data?.items ?? [])]
+    .filter((item) => !seen.has(item.id) && Boolean(seen.add(item.id)))
+    .slice(0, RELATED_LIMIT)
+  return (
+    <NftCarousel
+      title="Mais desta coleção"
+      items={items}
+      isPending={sameCategory.isPending || recent.isPending}
+    />
+  )
 }
 
 /** Lista horizontal de NFTs com snap e indicadores de página (detalhe e carrinho). */
@@ -87,7 +101,10 @@ export function NftCarousel({
               </li>
             ))}
       </ul>
-      {pages > 1 ? (
+      {isPending ? (
+        // Reserva a linha dos indicadores enquanto carrega: o conteúdo abaixo não se desloca.
+        <div aria-hidden="true" className="h-6" />
+      ) : pages > 1 ? (
         <div className="flex justify-center gap-1">
           {Array.from({ length: pages }, (_, index) => (
             <button

@@ -282,7 +282,8 @@ function NftDetailSkeleton() {
         <Skeleton className="h-[670px] w-full lg:h-[360px]" />
       </div>
       <div className="container-page">
-        <Skeleton className="h-[311px] w-full lg:h-[380px]" />
+        {/* "Mais desta coleção": cards e a linha dos indicadores do carrossel. */}
+        <Skeleton className="h-[383px] w-full lg:h-[436px]" />
       </div>
     </div>
   )

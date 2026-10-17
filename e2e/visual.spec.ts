@@ -13,11 +13,14 @@ const FIXED_TIME = '2026-07-29T12:00:00.000Z'
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready)
   await page.waitForFunction(() =>
-    [...document.images].every(
-      (image) =>
-        // Imagens de layouts ocultos (display: none) nunca carregam: só as visíveis contam.
-        image.getClientRects().length === 0 || (image.complete && image.naturalWidth > 0),
-    ),
+    [...document.images].every((image) => {
+      // Só contam as imagens que aparecem na captura: as de layouts ocultos (display: none) e as
+      // que ficam fora da largura da janela num carrossel horizontal (lazy) nunca carregam.
+      const rect = image.getBoundingClientRect()
+      const offscreen =
+        image.getClientRects().length === 0 || rect.right <= 0 || rect.left >= innerWidth
+      return offscreen || (image.complete && image.naturalWidth > 0)
+    }),
   )
   // Rola até o fim e volta: dispara imagens preguiçosas antes da captura de página inteira.
   await page.evaluate(async () => {
@@ -26,11 +29,14 @@ async function settle(page: Page) {
     window.scrollTo(0, 0)
   })
   await page.waitForFunction(() =>
-    [...document.images].every(
-      (image) =>
-        // Imagens de layouts ocultos (display: none) nunca carregam: só as visíveis contam.
-        image.getClientRects().length === 0 || (image.complete && image.naturalWidth > 0),
-    ),
+    [...document.images].every((image) => {
+      // Só contam as imagens que aparecem na captura: as de layouts ocultos (display: none) e as
+      // que ficam fora da largura da janela num carrossel horizontal (lazy) nunca carregam.
+      const rect = image.getBoundingClientRect()
+      const offscreen =
+        image.getClientRects().length === 0 || rect.right <= 0 || rect.left >= innerWidth
+      return offscreen || (image.complete && image.naturalWidth > 0)
+    }),
   )
 }
 
