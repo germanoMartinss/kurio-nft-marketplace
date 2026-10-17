@@ -75,21 +75,21 @@ com seus efeitos em [docs/API.md](docs/API.md#cenários-da-api-simulada).
 
 ## Comandos
 
-| Comando                           | O que faz                                                                                       |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `pnpm dev`                        | Desenvolvimento com os mocks ativos                                                             |
-| `pnpm build`                      | Verificação de tipos + build de produção (`dist/`, mocks incluídos)                             |
-| `pnpm preview`                    | Serve o build em `http://localhost:4173`                                                        |
-| `pnpm typecheck`                  | `tsc -b`                                                                                        |
-| `pnpm lint` · `pnpm format:check` | ESLint (inclui a regra que isola os mocks) · Prettier                                           |
-| `pnpm test:e2e`                   | Playwright (Chromium, desktop 1440 e mobile 390), contra o build com mocks                      |
-| `pnpm test:e2e:update`            | Regenera as baselines da **regressão visual** (`e2e/visual.spec.ts-snapshots/`)                 |
-| `pnpm test:e2e:report`            | Abre o relatório HTML (traces das falhas em `test-results/`)                                    |
-| `pnpm verify:mocks`               | Verifica a camada de mocks (REST e Socket.IO) fora do navegador de testes                       |
-| `pnpm lighthouse`                 | Lighthouse: início e detalhe, mobile e desktop, 3 execuções e mediana (precisa de `pnpm build`) |
-| `pnpm lighthouse:vercel [url]`    | O mesmo contra a URL pública (referência de produção)                                           |
-| `pnpm screens`                    | Captura as telas em 390/768/1440 e compara com os PNGs do Figma (precisa de `pnpm preview`)     |
-| `pnpm requirements`               | Recalcula o resumo de [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)                              |
+| Comando                           | O que faz                                                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                        | Desenvolvimento com os mocks ativos                                                                                      |
+| `pnpm build`                      | Verificação de tipos + build de produção (`dist/`, mocks incluídos)                                                      |
+| `pnpm preview`                    | Serve o build em `http://localhost:4173`                                                                                 |
+| `pnpm typecheck`                  | `tsc -b`                                                                                                                 |
+| `pnpm lint` · `pnpm format:check` | ESLint (inclui a regra que isola os mocks) · Prettier                                                                    |
+| `pnpm test:e2e`                   | Playwright (Chromium, desktop 1440 e mobile 390), contra o build com mocks                                               |
+| `pnpm test:e2e:update`            | Regenera as baselines da **regressão visual** (`e2e/visual.spec.ts-snapshots/`)                                          |
+| `pnpm test:e2e:report`            | Abre o relatório HTML (traces das falhas em `test-results/`)                                                             |
+| `pnpm verify:mocks`               | Verifica a camada de mocks (REST e Socket.IO). **Exige o build servido:** `pnpm build && pnpm preview` em outro terminal |
+| `pnpm lighthouse`                 | Lighthouse: início e detalhe, mobile e desktop, 3 execuções e mediana (precisa de `pnpm build`)                          |
+| `pnpm lighthouse:vercel [url]`    | O mesmo contra a URL pública (referência de produção)                                                                    |
+| `pnpm screens`                    | Captura as telas em 390/768/1440 e compara com os PNGs do Figma (precisa de `pnpm preview`)                              |
+| `pnpm requirements`               | Recalcula o resumo de [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)                                                       |
 
 `pnpm test:e2e` constrói e serve a aplicação sozinho. Antes de commitar:
 `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm test:e2e`.

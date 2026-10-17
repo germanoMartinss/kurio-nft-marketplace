@@ -11,7 +11,13 @@ const envSchema = z.object({
   VITE_SOCKET_URL: z.pipe(z.transform(emptyToUndefined), z.optional(z.url())),
 })
 
-const parsed = envSchema.parse(import.meta.env)
+// Só as chaves usadas, lidas uma a uma: `parse(import.meta.env)` faria o Vite embutir no bundle o
+// objeto inteiro, inclusive as variáveis de sistema da hospedagem (commit, autor, ids do projeto).
+const parsed = envSchema.parse({
+  VITE_ENABLE_MOCKS: import.meta.env.VITE_ENABLE_MOCKS,
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  VITE_SOCKET_URL: import.meta.env.VITE_SOCKET_URL,
+})
 
 /** Configuração da aplicação, validada na inicialização. Ver `.env.example`. */
 export const env = {
