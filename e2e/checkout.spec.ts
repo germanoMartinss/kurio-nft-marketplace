@@ -11,6 +11,7 @@ import {
   startCheckout,
   submitLogin,
   USERS,
+  waitForSocket,
 } from './support'
 
 test.describe('Compra completa', () => {
@@ -426,6 +427,7 @@ test.describe('Estados do pedido', () => {
     await expect(page).toHaveURL(new RegExp(`/pedido/${order!.id}$`))
     expect(await apiOrders(page)).toHaveLength(1)
 
+    await waitForSocket(page)
     await page.evaluate((id) => window.__kurioMock!.orders.settleNow(id), order!.id)
     await expect(receipt(page)).toBeVisible()
   })

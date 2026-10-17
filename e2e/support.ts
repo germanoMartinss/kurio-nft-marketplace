@@ -158,15 +158,27 @@ export const emptyCart = (page: Page) =>
 
 /** Altera um NFT no backend simulado; o evento chega à página pelo Socket.IO. */
 export async function updateNft(page: Page, id: string, change: Record<string, unknown>) {
-  // O socket conecta quando o navegador fica ocioso (fora do caminho crítico de carga): um evento
-  // publicado antes disso não teria destinatário.
-  await expect
-    .poll(() => page.evaluate(() => window.__kurioMock!.realtime.connections().length))
-    .toBeGreaterThan(0)
+  await waitForSocket(page)
   await page.evaluate(
     ([nftId, patch]) => window.__kurioMock!.nft.update(nftId as string, patch as never),
     [id, change] as const,
   )
+}
+
+/**
+ * Espera o socket da página estar pronto. Ele conecta quando o navegador fica ocioso (fora do
+ * caminho crítico de carga); pronto = o cliente já enviou o CONNECT do Socket.IO (o servidor
+ * registra o WebSocket antes disso, no início do handshake).
+ */
+export async function waitForSocket(page: Page) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.__kurioMock!.realtime.connections().filter((connection) => connection.auth).length,
+      ),
+    )
+    .toBeGreaterThan(0)
 }
 
 /** Sai da conta pela interface: menu do usuário (desktop) ou tela de perfil (mobile). */
