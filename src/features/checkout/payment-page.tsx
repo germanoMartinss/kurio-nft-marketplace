@@ -14,17 +14,19 @@ import { WALLET_PROVIDER_LABELS, type Wallet, type WalletProvider } from '@/cont
 import { useCheckoutCart } from '@/features/cart/queries'
 import { useSessionUser } from '@/features/auth/session-store'
 import { useWallets } from '@/features/wallets/queries'
-import { NETWORK_LABELS } from '@/contracts/common'
+import { NETWORK_LABELS, type Network } from '@/contracts/common'
 import { formatEth } from '@/lib/money'
 import { cn } from '@/lib/utils'
 
-import { Field, NoteField, TextInput } from '@/components/common/form-fields'
+import { Field, NativeSelect, NoteField, TextInput } from '@/components/common/form-fields'
 import { OrderLines } from './order-lines'
 import { ProviderPicker } from './provider-picker'
 import { ReviewDialog } from './review-dialog'
 import { Totals } from './totals'
 import { useCheckout } from './use-checkout'
 import { WalletPicker } from './wallet-picker'
+
+const NETWORK_OPTIONS = Object.keys(NETWORK_LABELS) as Network[]
 
 const EMPTY_BUYER: Buyer = {
   displayName: '',
@@ -75,7 +77,15 @@ function PaymentScreen({
   )
   const wallet = list.find((item) => item.id === draft.walletId) ?? list[0]
   const provider: WalletProvider | null = draft.provider ?? wallet?.provider ?? null
-  const network = wallet?.network ?? 'ethereum'
+  // A rede do pedido é escolhida no formulário; por padrão, a da carteira selecionada.
+  const network: Network = draft.network ?? wallet?.network ?? 'ethereum'
+  const networkMismatch = wallet && wallet.network !== network ? wallet : null
+  const networkError = networkMismatch
+    ? {
+        type: 'validate',
+        message: `A carteira ${networkMismatch.nickname} é da rede ${NETWORK_LABELS[networkMismatch.network]}. Escolha uma carteira da rede ${NETWORK_LABELS[network]} ou cadastre uma em Perfil › Carteiras.`,
+      }
+    : undefined
   const cartQuery = useCheckoutCart(network)
   const cart = cartQuery.data
 
@@ -110,9 +120,23 @@ function PaymentScreen({
   const unavailable = cart?.items.some((item) => item.notices.includes('indisponivel')) ?? false
 
   const onSubmit = handleSubmit((buyer) => {
-    if (!wallet || !provider) return
-    checkout.requestQuote({ buyer, wallet, provider })
+    if (!wallet || !provider || networkMismatch) return
+    checkout.requestQuote({ buyer, wallet, network, provider })
   })
+
+  /** Trocar a rede seleciona a primeira carteira cadastrada nela, se houver. */
+  const changeNetwork = (next: Network) =>
+    setDraft((previous) => {
+      const current = list.find((item) => item.id === previous.walletId) ?? list[0]
+      const compatible =
+        current?.network === next ? current : list.find((item) => item.network === next)
+      return {
+        ...previous,
+        network: next,
+        walletId: compatible?.id ?? previous.walletId,
+        provider: compatible ? compatible.provider : previous.provider,
+      }
+    })
 
   if (wallets.isError || (cartQuery.isError && !cart)) {
     return (
@@ -160,7 +184,7 @@ function PaymentScreen({
   }
 
   const loading = !cart || !wallet
-  const canConfirm = !loading && !unavailable && !checkout.quotePending
+  const canConfirm = !loading && !unavailable && !networkMismatch && !checkout.quotePending
 
   const confirmButton = (mobile: boolean) => (
     <Button
@@ -201,13 +225,15 @@ function PaymentScreen({
                 value={wallet.id}
                 connectedIds={draft.connectedWalletIds}
                 busy={checkout.toggleConnection.isPending}
-                onChange={(walletId) =>
+                onChange={(walletId) => {
+                  const chosen = list.find((item) => item.id === walletId)
                   setDraft((previous) => ({
                     ...previous,
                     walletId,
-                    provider: list.find((item) => item.id === walletId)?.provider ?? null,
+                    network: chosen?.network ?? previous.network,
+                    provider: chosen?.provider ?? null,
                   }))
-                }
+                }}
                 onToggleConnection={(walletId, connect) =>
                   checkout.toggleConnection.mutate({ walletId, connect })
                 }
@@ -248,15 +274,19 @@ function PaymentScreen({
                   error={errors.username}
                   registration={register('username')}
                 />
-                <Field label="Rede" required>
+                <Field label="Rede" required error={networkError}>
                   {(aria) => (
-                    <input
+                    <NativeSelect
                       {...aria}
-                      readOnly
-                      value={wallet ? NETWORK_LABELS[wallet.network] : ''}
-                      placeholder="Selecione uma rede"
-                      className="h-10 rounded-xs border border-input bg-transparent px-3 text-15 text-muted-foreground"
-                    />
+                      value={network}
+                      onChange={(event) => changeNetwork(event.target.value as Network)}
+                    >
+                      {NETWORK_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {NETWORK_LABELS[option]}
+                        </option>
+                      ))}
+                    </NativeSelect>
                   )}
                 </Field>
                 <TextInput

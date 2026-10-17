@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '@/api/errors'
 import { connectWallet, disconnectWallet } from '@/api/wallets'
 import { createOrder, createQuote } from '@/api/orders'
+import type { Network } from '@/contracts/common'
 import type { Buyer, OrderCreate, Quote, QuoteChange } from '@/contracts/order'
 import type { Wallet, WalletProvider } from '@/contracts/wallet'
 import { orderKeys } from '@/features/orders/queries'
@@ -108,10 +109,15 @@ export function useCheckout(userId: string) {
   }
 
   /** Cotação nova para o pedido descrito: gera outra tentativa (outra chave de idempotência). */
-  const requestQuote = (input: { buyer: Buyer; wallet: Wallet; provider: WalletProvider }) => {
+  const requestQuote = (input: {
+    buyer: Buyer
+    wallet: Wallet
+    network: Network
+    provider: WalletProvider
+  }) => {
     pending.current = { buyer: input.buyer, walletId: input.wallet.id, provider: input.provider }
     setProblem(null)
-    quote.mutate({ network: input.wallet.network })
+    quote.mutate({ network: input.network })
   }
 
   /** Recota o mesmo pedido (cotação expirada ou divergente), mantendo os dados já confirmados. */

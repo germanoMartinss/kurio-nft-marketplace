@@ -161,6 +161,14 @@ export function createOrder(
       message: 'Selecione uma carteira cadastrada.',
     }
   }
+  if (wallet.network !== quote.network) {
+    return {
+      ok: false,
+      status: 409,
+      code: 'NETWORK_MISMATCH',
+      message: `A carteira ${wallet.nickname} não é da rede do pedido. Escolha uma carteira compatível.`,
+    }
+  }
 
   const scenario = getScenario()
   const now = new Date().toISOString()

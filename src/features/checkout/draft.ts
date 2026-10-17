@@ -1,3 +1,4 @@
+import type { Network } from '@/contracts/common'
 import type { Buyer, OrderCreate, Quote } from '@/contracts/order'
 import type { WalletProvider } from '@/contracts/wallet'
 import { CLIENT_KEYS, readJson, writeJson } from '@/lib/client-storage'
@@ -26,6 +27,8 @@ export interface OrderAttempt {
 export interface CheckoutDraft {
   form: Partial<Buyer>
   walletId: string | null
+  /** Rede escolhida para o pedido; sem escolha, vale a rede da carteira selecionada. */
+  network: Network | null
   provider: WalletProvider | null
   /** Carteiras com a conexão (simulada) ativa. */
   connectedWalletIds: string[]
@@ -35,6 +38,7 @@ export interface CheckoutDraft {
 export const EMPTY_DRAFT: CheckoutDraft = {
   form: {},
   walletId: null,
+  network: null,
   provider: null,
   connectedWalletIds: [],
   attempt: null,

@@ -39,6 +39,7 @@ Formato único ([`common.ts`](../src/contracts/common.ts)):
 | 409  | `QUOTE_EXPIRED`, `QUOTE_STALE`                              | Cotação vencida ou desatualizada (`details.changes`: o que mudou)            |
 | 409  | `IDEMPOTENCY_CONFLICT`                                      | Chave de idempotência reutilizada com outro corpo                            |
 | 409  | `WALLET_REJECTED`                                           | Conexão de carteira recusada                                                 |
+| 409  | `NETWORK_MISMATCH`                                          | Carteira do pedido é de outra rede que a cotação                             |
 | 5xx  | `TRANSIENT`                                                 | Falha transitória (pode ser repetida)                                        |
 
 No cliente, toda falha vira `ApiRequestError` (`src/api/errors.ts`), incluindo `NETWORK` (sem

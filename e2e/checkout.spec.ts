@@ -99,6 +99,67 @@ test.describe('Formulário e revisão', () => {
   })
 })
 
+test.describe('Rede do pedido', () => {
+  test('a rede escolhida seleciona a carteira compatível e define a taxa', async ({ page }) => {
+    await startCheckout(page)
+    const form = page.getByRole('form', { name: 'Dados do colecionador' })
+    const network = form.getByLabel('Rede')
+    await expect(network).toHaveValue('ethereum')
+    await expect(page.getByTestId('checkout-total').filter({ visible: true })).toHaveText(
+      '1.206 ETH',
+    )
+
+    // Polygon: a carteira "Reserva" (Polygon) passa a ser a do pedido e a taxa é a da rede.
+    await network.selectOption('polygon')
+    await expect(page.getByRole('radio', { name: /^Reserva/ })).toBeChecked()
+    await expect(page.getByTestId('checkout-total').filter({ visible: true })).toHaveText(
+      '1.192 ETH',
+    )
+    const dialog = await openReview(page)
+    await expect(dialog).toContainText('Polygon')
+    await expect(dialog.getByTestId('review-total')).toHaveText('1.192 ETH')
+  })
+
+  test('rede sem carteira cadastrada: erro no campo e compra bloqueada', async ({ page }) => {
+    await startCheckout(page)
+    const network = page.getByRole('form', { name: 'Dados do colecionador' }).getByLabel('Rede')
+    await network.selectOption('solana')
+    await expect(network).toHaveAttribute('aria-invalid', 'true')
+    await expect(network).toHaveAccessibleDescription(/é da rede Ethereum.*rede Solana/)
+    await expect(confirmPurchaseButton(page)).toBeDisabled()
+  })
+
+  test('a API recusa pedido com carteira de outra rede (409 NETWORK_MISMATCH)', async ({
+    page,
+  }) => {
+    await startCheckout(page)
+    await openReview(page) // cotação na rede Ethereum
+    const result = await page.evaluate(async () => {
+      const session = JSON.parse(localStorage.getItem('kurio:app:session')!)
+      const draft = JSON.parse(localStorage.getItem(`kurio:app:checkout:${session.user.id}`)!)
+      const headers = { authorization: `Bearer ${session.token}` }
+      const wallets = (await (await fetch('/api/wallets', { headers })).json()).items as {
+        id: string
+        network: string
+      }[]
+      const polygon = wallets.find((wallet) => wallet.network === 'polygon')!
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'content-type': 'application/json',
+          'idempotency-key': 'idem-teste-rede-incompativel',
+        },
+        body: JSON.stringify({ ...draft.attempt.body, walletId: polygon.id }),
+      })
+      return { status: res.status, body: await res.json() }
+    })
+    expect(result.status).toBe(409)
+    expect(result.body.error.code).toBe('NETWORK_MISMATCH')
+    expect(await apiOrders(page)).toHaveLength(0)
+  })
+})
+
 test.describe('Cotação', () => {
   test('cotação expirada bloqueia o envio e permite recotar com nova chave', async ({ page }) => {
     await startCheckout(page, { scenario: 'cotacao-expirada' })

@@ -40,6 +40,7 @@ export const apiErrorCodeSchema = z.enum([
   'QUOTE_STALE',
   'IDEMPOTENCY_CONFLICT',
   'WALLET_REJECTED',
+  'NETWORK_MISMATCH',
   'TRANSIENT',
 ])
 export type ApiErrorCode = z.infer<typeof apiErrorCodeSchema>
