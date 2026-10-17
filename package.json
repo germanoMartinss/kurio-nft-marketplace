@@ -23,7 +23,8 @@
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:report": "playwright show-report",
-    "lighthouse": "node lighthouse/run.mjs"
+    "lighthouse": "node lighthouse/run.mjs",
+    "lighthouse:vercel": "node lighthouse/run.mjs --remote"
   },
   "msw": {
     "workerDirectory": [
