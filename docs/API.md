@@ -132,6 +132,7 @@ Selecionados por `?cenario=<id>` (em qualquer URL da aplicação) ou no painel `
 | `acesso-negado`        | Rotas privadas respondem 403.                                                                   |
 | `preco-alterado`       | 4s após abrir o carrinho com itens, o preço do primeiro item sobe 15% (`nft.updated`).          |
 | `edicao-esgotada`      | 4s após abrir o carrinho com itens, a edição do primeiro item esgota (`nft.updated`).           |
+| `favoritos-falham`     | A primeira inclusão de favorito responde 503 (a interface reverte); a segunda funciona.         |
 | `timeout-pedido`       | O pedido é criado, mas a primeira resposta passa do timeout; o reenvio recupera o mesmo pedido. |
 | `pagamento-recusado`   | Pedidos terminam recusados.                                                                     |
 | `pagamento-lento`      | Pagamento leva 12s (queda de conexão com pedido pendente).                                      |

@@ -1,6 +1,6 @@
 # Arquitetura
 
-Documento vivo: cada fase acrescenta as decisões que tomou. Contexto e requisitos em
+Decisões de arquitetura, UX e desvios do Figma, com a justificativa de cada uma. Contexto e requisitos em
 [CLAUDE.md](CLAUDE.md) e [CHALLENGE.md](CHALLENGE.md).
 
 ## Stack e versões
@@ -133,21 +133,88 @@ Regra adotada:
 | Redes sociais                                                              | Link externo em nova aba, com aviso no nome acessível.                                                                                                                                  |
 | Seção fora da entrega (Criadores, Aprenda, Central de ajuda, Atividade...) | `UnavailableAction`: botão com `aria-disabled` e "(indisponível nesta demonstração)" no nome acessível; ao ser acionado, explica o motivo num toast. Não navega e não simula resultado. |
 
-### Desvios do Figma
+Os desvios do Figma estão todos em [Desvios do Figma](#desvios-do-figma).
 
-| Tela                       | No Figma                                                                                                                                                | Na implementação                                                                     | Motivo                                                                                          |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| Carrinho (mobile)          | Ícone de lixeira sobreposto ao botão "+" do terceiro item                                                                                               | Lixeira em posição própria                                                           | Defeito do layout: a sobreposição impede o clique no "+".                                       |
-| Login e cadastro (desktop) | Rótulo "2.29 ETH" duplicado sobre um card e selo RARO de canto reto saindo do card (defeitos registrados na descrição do componente "Marketplace Page") | Sem duplicação; selo acompanha o raio do card                                        | Defeitos conhecidos do próprio arquivo.                                                         |
-| Footer (mobile e tablet)   | Não existe nos frames mobile                                                                                                                            | Oculto abaixo de 1024px                                                              | Fidelidade aos frames mobile.                                                                   |
-| Barra de abas (mobile)     | Só aparece no frame da home                                                                                                                             | Oculta em detalhe, carrinho, pagamento, entrar e cadastro                            | Esses frames têm a própria barra de ação inferior ou são telas cheias.                          |
-| Busca (desktop)            | Só o ícone de lupa no header                                                                                                                            | Ícone abre um diálogo de busca                                                       | O layout desktop não tem campo de busca; o diálogo mantém a composição do header.               |
-| Ordenação (mobile)         | Não aparece no frame                                                                                                                                    | Dentro do drawer de filtros                                                          | Ordenação é obrigatória; o frame mobile não tem espaço para a linha "Ordenar por".              |
-| Contagens dos filtros      | (33), (12), (65)… ilustrativas                                                                                                                          | Calculadas pela API a partir das 36 fixtures                                         | Os números refletem os dados reais da simulação.                                                |
-| Galeria do detalhe         | Quatro miniaturas idênticas                                                                                                                             | Quatro enquadramentos da mesma obra                                                  | Dá função real à galeria com a única arte disponível por NFT.                                   |
-| "Mais desta coleção"       | Artes variadas                                                                                                                                          | NFTs da mesma categoria                                                              | Nas fixtures cada coleção usa uma única ilustração; a categoria reproduz a variedade do layout. |
-| Detalhe: compra            | Sem texto de disponibilidade                                                                                                                            | "N disponíveis · até 10 por pedido" sob a compra (desktop) e sob as edições (mobile) | O limite de quantidade (§3) precisa ser comunicado, não só sinalizado pelo botão desabilitado.  |
-| Ações do card (desktop)    | Carrinho, favoritar e ampliar no hover                                                                                                                  | Favoritar e ver detalhes no hover/foco                                               | Adicionar ao carrinho exige escolher a edição; a compra acontece no detalhe.                    |
+## Desvios do Figma
+
+Lista **única** de tudo o que difere do Figma, com o motivo. Regra geral: estados não desenhados
+(vazio, erro, pendente, recusado, aviso, revisão) seguem o mesmo padrão visual (mesmos tokens,
+ícone + texto, não só cor). Tokens: o `design/tokens.md` só cobre o desktop; os do mobile foram
+derivados dos PNGs (mapeamento semântico dos nomes em [Tokens](#tokens)).
+
+### Telas
+
+| Tela                          | No Figma                                                                                                                                                | Na implementação                                                                                                                                                        | Motivo                                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Carrinho (mobile)             | Ícone de lixeira sobreposto ao botão "+" do terceiro item                                                                                               | Lixeira em posição própria                                                                                                                                              | Defeito do layout: a sobreposição impede o clique no "+".                                               |
+| Login e cadastro (desktop)    | Rótulo "2.29 ETH" duplicado sobre um card e selo RARO de canto reto saindo do card (defeitos registrados na descrição do componente "Marketplace Page") | Sem duplicação; selo acompanha o raio do card                                                                                                                           | Defeitos conhecidos do próprio arquivo.                                                                 |
+| Footer (mobile e tablet)      | Não existe nos frames mobile                                                                                                                            | Oculto abaixo de 1024px                                                                                                                                                 | Fidelidade aos frames mobile.                                                                           |
+| Barra de abas (mobile)        | Só aparece no frame da home                                                                                                                             | Oculta em detalhe, carrinho, pagamento, entrar e cadastro                                                                                                               | Esses frames têm a própria barra de ação inferior ou são telas cheias.                                  |
+| Busca (desktop)               | Só o ícone de lupa no header                                                                                                                            | Ícone abre um diálogo de busca                                                                                                                                          | O layout desktop não tem campo de busca; o diálogo mantém a composição do header.                       |
+| Ordenação (mobile)            | Não aparece no frame                                                                                                                                    | Dentro do drawer de filtros                                                                                                                                             | Ordenação é obrigatória; o frame mobile não tem espaço para a linha "Ordenar por".                      |
+| Contagens dos filtros         | (33), (12), (65)… ilustrativas                                                                                                                          | Calculadas pela API a partir das 36 fixtures                                                                                                                            | Os números refletem os dados reais da simulação.                                                        |
+| Galeria do detalhe            | Quatro miniaturas idênticas                                                                                                                             | Quatro enquadramentos da mesma obra                                                                                                                                     | Dá função real à galeria com a única arte disponível por NFT.                                           |
+| "Mais desta coleção"          | Artes variadas                                                                                                                                          | NFTs da mesma categoria                                                                                                                                                 | Nas fixtures cada coleção usa uma única ilustração; a categoria reproduz a variedade do layout.         |
+| Detalhe: compra               | Sem texto de disponibilidade                                                                                                                            | "N disponíveis · até 10 por pedido" sob a compra (desktop) e sob as edições (mobile)                                                                                    | O limite de quantidade (§3) precisa ser comunicado, não só sinalizado pelo botão desabilitado.          |
+| Ações do card (desktop)       | Carrinho, favoritar e ampliar no hover                                                                                                                  | Favoritar e ver detalhes no hover/foco                                                                                                                                  | Adicionar ao carrinho exige escolher a edição; a compra acontece no detalhe.                            |
+| Login e cadastro              | Placeholder como único rótulo dos campos                                                                                                                | Campos com `label` oculto (`sr-only`); erros com ícone + texto                                                                                                          | Acessibilidade (§8): rótulo associado e erro não dependente de cor.                                     |
+| Login e cadastro (desktop)    | Fundo da página sem escurecer atrás do diálogo                                                                                                          | Véu leve (25%) atrás do diálogo                                                                                                                                         | Deixa claro que o fundo está inerte (foco preso).                                                       |
+| Cadastro (mobile)             | Placeholder de "Nome de usuário" centralizado                                                                                                           | Alinhado à esquerda, como os demais campos                                                                                                                              | Inconsistência do frame.                                                                                |
+| Login e cadastro              | "Esqueceu a senha?" e "Continuar com Google/Facebook"                                                                                                   | Botões `UnavailableAction`, anunciados como indisponíveis                                                                                                               | Fora do escopo (§3): não podem aparentar sucesso.                                                       |
+| Logout (mobile)               | Sem frame de perfil mobile                                                                                                                              | "Sair da conta" no fim do perfil; menu do usuário só no desktop                                                                                                         | Mobile não tem menu no cabeçalho.                                                                       |
+| Carrinho (desktop)            | Só a coluna de quantidade                                                                                                                               | Edição numa linha própria sob o ID do token                                                                                                                             | A edição identifica o item (disponibilidade é por NFT + edição).                                        |
+| Carrinho (mobile)             | Total da linha                                                                                                                                          | Total da linha visível; preço unitário só para leitores de tela                                                                                                         | Mantém o Figma sem perder a informação.                                                                 |
+| Carrinho                      | Sem avisos, estado vazio nem erro de cupom                                                                                                              | Criados no mesmo padrão visual (ícone + texto, não só cor)                                                                                                              | Estados exigidos pelo §3/§7 e não desenhados.                                                           |
+| Pagamento (desktop)           | "Usar outra carteira?"                                                                                                                                  | Lista de carteiras cadastradas ("Carteira conectada", como no frame mobile)                                                                                             | É onde ficam seleção, conexão e desconexão simuladas.                                                   |
+| Pagamento                     | Campos de rede, endereço e ENS editáveis                                                                                                                | Somente leitura (vêm da carteira escolhida); "Tipo de carteira" é `<select>` nativo                                                                                     | A carteira cadastrada é a fonte; evita dado divergente.                                                 |
+| Pagamento (mobile)            | Só carteiras e total                                                                                                                                    | Formulário do colecionador abaixo do total, status de conexão por carteira e "Confirmar compra" fixo na base; carteira padrão é a secundária ("Reserva"), como no frame | Validar os campos também no mobile; o botão continua alcançável com o formulário longo.                 |
+| Pagamento, revisão e pedido   | Sem diálogo de revisão, estados pendente e recusado                                                                                                     | Criados no mesmo padrão visual                                                                                                                                          | Exigidos pelo §3 (revisão antes do envio, pendente/recusado).                                           |
+| Confirmação (desktop)         | Recibo sem "Continuar explorando" e sem nota                                                                                                            | Acrescentados "Continuar explorando", nota "referências simuladas" e a edição em cada linha                                                                             | Referências de transação são simuladas (§3); a edição identifica a linha.                               |
+| Confirmação (mobile)          | Sem frame                                                                                                                                               | Mesmo recibo do desktop, adaptado ao padrão mobile                                                                                                                      | Exigido pelo §3.                                                                                        |
+| Barra superior (mobile)       | Título do topo no tamanho do frame                                                                                                                      | 18px abaixo de 640px                                                                                                                                                    | Caber "Pagamento com carteira" em 390 px (e 320 px no zoom de 400%).                                    |
+| Perfil (mobile)               | Sem frame                                                                                                                                               | Título no topo, abas em pílula e "Sair da conta" no fim, no padrão das telas de compra                                                                                  | Exigido pelo §3.                                                                                        |
+| Perfil: seções fora do escopo | Atividade, ofertas, arquivos baixados e suporte                                                                                                         | `UnavailableAction`                                                                                                                                                     | Fora do escopo (§3).                                                                                    |
+| Carteiras (desktop)           | A seção começa em "Carteira principal", com um "Adicionar" no topo da principal                                                                         | Título "Carteiras" só para leitores de tela; formulário já aberto, sem "Adicionar"                                                                                      | O formulário substitui o passo de abrir o cadastro; o título dá ao leitor de tela o contexto da página. |
+| Carteiras                     | "Nome ENS" como select                                                                                                                                  | Sufixo `.eth` fixo ao lado do campo                                                                                                                                     | O sufixo é sempre `.eth`.                                                                               |
+| Carteiras                     | Rótulos de senha visíveis                                                                                                                               | Mantidos; o botão de olho ganhou nome acessível por campo                                                                                                               | Acessibilidade.                                                                                         |
+
+### Assets substituídos
+
+| Asset                | No Figma                              | Na implementação                                                                                                     | Motivo                                                  |
+| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Ícones               | SVGs do Figma (alguns não exportados) | SVGs do Figma convertidos em componentes (`pnpm icons:generate`); Phosphor só para "olho aberto" e "seta para baixo" | Não vieram na exportação (ver [Assets](#assets)).       |
+| Ilustrações dos NFTs | PNG 500×500 (~430 KB)                 | AVIF/WebP em 160, 240, 320 e 500 px (`pnpm images:optimize`)                                                         | Desempenho (Lighthouse); o PNG de origem não é servido. |
+| Arte por NFT         | Quatro ilustrações                    | As mesmas quatro, repetidas entre os 36 NFTs; galeria com quatro enquadramentos                                      | Única arte disponível por NFT.                          |
+| Fonte                | Roboto Mono                           | Roboto Mono self-hosted (400/500/700)                                                                                | Funcionar offline/local, sem depender de CDN.           |
+
+### Acessibilidade acima do layout
+
+Ajustes feitos por exigência do §8, sem mudar a composição: rótulos ocultos nos campos que só têm
+placeholder; erros com ícone + texto; conectada/desconectada e esgotado com rótulo textual; foco
+visível e foco preso nos diálogos e drawers; "Pular para o conteúdo"; avisos em regiões `aria-live`.
+O contraste das cores do Figma é validado pelo axe (`e2e/a11y.spec.ts`) em todas as telas e
+estados, e nenhuma cor do Figma precisou ser alterada.
+
+### Revisão em 768 px
+
+Não há PNG nesse tamanho, então a regra é **coerência** com o desktop (1440) e o mobile (390): abaixo
+de 1024 px vale o padrão mobile (barra de abas, topo por tela, sem footer), porque o cabeçalho de
+desktop não cabe em 768 px. Conferido com `pnpm screens` (captura de página inteira, onde elementos
+fixos como a barra de abas e a barra de compra aparecem no meio da imagem) e olho em todas as telas:
+
+| Tela               | Resultado em 768 px                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| Início             | Hero em faixa, abas, grade de 3 colunas, paginação, faixas editoriais em duas colunas. Sem overflow. |
+| Detalhe            | Imagem e cartão centralizados, barra de compra fixa, abas e "Mais desta coleção" com 3 cards.        |
+| Carrinho           | Lista e resumo centralizados (largura contida), resumo encostado na base.                            |
+| Pagamento          | Padrão mobile em largura total: carteiras, aplicativo, total, formulário.                            |
+| Confirmação        | Recibo centralizado, mesma composição do desktop sem header/footer.                                  |
+| Entrar / Cadastro  | Página cheia com formulário centralizado (no desktop é diálogo).                                     |
+| Perfil / Carteiras | Abas em pílula, formulários em coluna única.                                                         |
+| 404                | Mesma composição do mobile.                                                                          |
+
+As 11 telas em 390, 768 e 1440 passam no `pnpm screens` com `overflow-x = 0` e zero erros de console;
+zoom de 200% e 400% sem rolagem horizontal é coberto por `e2e/keyboard.spec.ts`.
 
 ## Verificação visual
 
@@ -160,7 +227,7 @@ overflow horizontal e erros de console, e gera imagens lado a lado "implementaç
 | Aspecto             | Política                                                                                                               | Por quê                                                                                                                                                             |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Chaves públicas     | `['nfts', 'list', consulta]`, `['nfts', 'detail', id]`, `['nfts', 'highlights']`                                       | A consulta inteira faz parte da chave: cada combinação de filtros tem cache próprio.                                                                                |
-| Chaves privadas     | Sempre sob `['user', userId, …]` (ex.: favoritos); carrinho sob `['user', id, 'cart']` ou `['guest', guestId, 'cart']` | Isolamento por dono: o logout/troca de usuário remove o prefixo inteiro (Fase 5).                                                                                   |
+| Chaves privadas     | Sempre sob `['user', userId, …]` (ex.: favoritos); carrinho sob `['user', id, 'cart']` ou `['guest', guestId, 'cart']` | Isolamento por dono: o logout/troca de usuário remove o prefixo inteiro.                                                                                            |
 | `staleTime`         | 30s (destaques: 5 min)                                                                                                 | Navegar e voltar não refaz a consulta à toa; o tempo real cobre mudanças relevantes.                                                                                |
 | Retry               | Até 2 vezes, **só** em falha transitória (rede, timeout, 5xx); mutations nunca                                         | 4xx é definitivo; repetir mutation poderia duplicar operação (pedidos usam idempotência).                                                                           |
 | Paginação/filtros   | `placeholderData: keepPreviousData` + indicador "atualizando"                                                          | A lista anterior fica visível enquanto a nova carrega, sem pular o layout.                                                                                          |
@@ -285,7 +352,7 @@ honesta: o MSW responde dentro do navegador e só consegue gravar cookies via `d
 por definição não são `httpOnly`. Simular um cookie que se comporta diferente do real seria pior do
 que assumir o Bearer e documentar a diferença.
 
-### Ciclo de vida da sessão (Fase 5)
+### Ciclo de vida da sessão
 
 `bindSessionLifecycle` (`src/app/session-lifecycle.ts`) fica **fora do React** e reage à store da
 sessão (`features/auth/session-store.ts`), então vale também para mudanças vindas de outra aba
@@ -306,8 +373,8 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   não derruba a sessão, 401 sim.
 - **Login**: grava a sessão, une o carrinho de visitante (`POST /cart/merge`) e só então sai da tela;
   falha na junção não bloqueia o login (aviso; os itens seguem no carrinho de visitante).
-- **Rascunhos** (checkout, Fase 7) serão guardados por `userId`: preservados na expiração do
-  mesmo usuário e descartados no logout/troca.
+- **Rascunhos** (checkout) são guardados por `userId`: preservados na expiração do mesmo usuário
+  (ele volta e retoma) e descartados no logout/troca.
 - **Socket por sessão** (`src/realtime/session-socket.ts`): conexão própria (`forceNew`) com o
   token no handshake; ao trocar de sessão o anterior perde todos os listeners e é desconectado.
 - **Armadilha**: o `engine.io-client` guarda o `WebSocket` global ao ser avaliado. Importado antes
@@ -315,18 +382,7 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   importado dinamicamente em `createRealtimeSocket`; nenhum import estático dele pode entrar no
   caminho do `main.tsx`.
 
-### Desvios do Figma nas telas de autenticação
-
-- Os campos têm só placeholder no layout; ganharam `label` oculto visualmente (`sr-only`) para
-  leitores de tela, e mensagens de erro com ícone + texto (não só cor).
-- O fundo da página atrás do diálogo tem véu leve (25%); o Figma não escurece.
-- No frame mobile de cadastro o placeholder de "Nome de usuário" está centralizado; mantivemos o
-  alinhamento à esquerda dos demais campos.
-- "Esqueceu a senha?" e "Continuar com Google/Facebook" estão fora do escopo: anunciados como
-  indisponíveis (`UnavailableAction`), sem simular sucesso.
-- Logout no mobile fica na tela de perfil (Fase 8); o menu do usuário do header é só desktop.
-
-## Carrinho e tempo real (Fase 6)
+## Carrinho e tempo real
 
 - **Quem calcula é a API.** O cliente nunca soma: toda mutation (`PATCH/DELETE /cart/items`,
   `PUT/DELETE /cart/coupon`) devolve o carrinho recalculado (subtotal, desconto, taxa, total em
@@ -357,20 +413,14 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   invalidadas e rebuscadas: eventos perdidos durante a queda são reconciliados pelo REST, a fonte
   da verdade. Testado derrubando a conexão e alterando o preço no mesmo instante.
 - **Cotação pronta para o checkout.** `useCreateQuote` (mutation) e `quoteDivergences(quote, cart)`
-  comparam a cotação com o carrinho vivo (que reflete `nft.updated`); a Fase 7 usa isso para exigir
+  comparam a cotação com o carrinho vivo (que reflete `nft.updated`); o checkout usa isso para exigir
   nova confirmação.
 - **Layout.** Desktop: tabela semântica (`<table>` com cabeçalhos) em linhas-cartão e coluna de
   resumo. Mobile/tablet: cartões e painel de resumo `sticky` na base (`mt-auto`: encosta na base
   também com poucos itens, então o skeleton e o conteúdo ocupam a mesma posição). O skeleton do
   resumo tem as mesmas dimensões do conteúdo (verificado em E2E, ±2px).
-- **Desvios do Figma.** (a) A edição aparece numa linha própria sob o ID do token na tabela
-  desktop (o Figma só mostra a coluna de quantidade, mas a edição identifica o item). (b) O botão de
-  remover no mobile fica no canto superior do cartão: no Figma ele se sobrepõe ao stepper (artefato
-  de exportação). (c) O mobile mostra o total da linha (como o Figma) e o preço unitário apenas
-  para leitores de tela. (d) Avisos de alteração, estado vazio e erro de cupom não existem no
-  Figma e seguem o padrão visual dos demais estados (ícone + texto, não só cor).
 
-## Checkout e pedidos (Fase 7)
+## Checkout e pedidos
 
 - **Fluxo.** `/pagamento` (formulário validado com React Hook Form + `buyerSchema`, carteira
   cadastrada, aplicativo de carteira) → "Confirmar compra" pede uma **cotação** (`POST /quotes`) e
@@ -412,18 +462,8 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   pagamento no instante desejado (mesmo caminho do temporizador, com `order.updated`).
   `realtime.emit(evento)` injeta eventos arbitrários (antigos, de outro usuário) pelo servidor de
   socket, sempre passando pelo socket.io-client.
-- **Desvios do Figma.** (a) "Usar outra carteira?" foi substituído pela lista de carteiras
-  cadastradas ("Carteira conectada", que o frame mobile já tem) também no desktop: é onde ficam
-  seleção, conexão e desconexão. (b) Rede, endereço e ENS/secundária são somente leitura (vêm da
-  carteira escolhida); "Tipo de carteira" é um `<select>` nativo ligado à escolha da lista de
-  aplicativos. (c) O mobile ganhou o formulário (o frame só mostra carteiras e total) abaixo do
-  total, para validar os campos também lá. (d) O recibo desktop não tem header/footer, como o
-  Figma; foi acrescentado "Continuar explorando", a nota "referências simuladas" e a edição em
-  cada linha. (e) Estados pendente e recusado, o diálogo de revisão e a tela de recibo mobile não
-  existem no Figma e seguem o mesmo padrão visual. (f) O título da barra superior mobile usa 18px
-  abaixo de 640px para caber "Pagamento com carteira" em 390px.
 
-## Perfil e carteiras (Fase 8)
+## Perfil e carteiras
 
 - **Estrutura.** `/perfil` (dados, avatar e senha) e `/perfil/carteiras` compartilham o
   `ProfileLayout`: coluna lateral no desktop (Figma) e, no mobile, o título no topo, abas em pílula
@@ -439,14 +479,6 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - **Carteiras.** Um formulário por tipo: cria (`POST`) quando não existe, edita (`PUT`) quando existe.
   "Igual à carteira principal" copia os campos que não são únicos (o endereço duplicado é recusado
   pela API no campo). Rede e tipo são `<select>` nativos (acessíveis por teclado/leitor).
-- **Desvios do Figma.** O título "Carteiras" fica só para leitores de tela no desktop (o Figma
-  começa em "Carteira principal"); o "Adicionar" do topo da principal não existe (o formulário já
-  está aberto); "Nome ENS" tem o sufixo ".eth" fixo, não um select; rótulos de senha são visíveis
-  como no Figma e o botão de olho tem nome acessível por campo.
-- **Pagamento mobile.** A carteira padrão é a secundária ("Reserva"), como no frame; o total vem
-  logo após "Carteira e rede". Diferenças mantidas: status de conexão em cada carteira, o formulário
-  do colecionador abaixo do total e o botão "Confirmar compra" fixo na base (`sticky`), para que
-  continue alcançável com o formulário longo.
 - **Relógio nos testes (`page.clock`).** `e2e/clock.spec.ts` instala o relógio antes de a página
   carregar; como o MSW roda na página, cliente e API simulada compartilham o tempo adiantado:
   cotação de 5 min, sessão de 2 h e pagamento de 12 s são vencidos com `fastForward`, sem espera.
@@ -490,6 +522,115 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - **Limitação conhecida.** O MSW (service worker) precisa estar pronto antes da primeira requisição, o
   que mantém o LCP mobile em ~2,3 s (desktop ~0,5 s). É o custo de os mocks fazerem parte do build de
   demonstração.
+
+## Contratos REST e eventos (resumo)
+
+Detalhe completo, com todos os endpoints, erros e cenários, em [docs/API.md](docs/API.md); a fonte
+da verdade são os schemas de `src/contracts/`.
+
+- **Recursos:** sessão e conta (cadastro, login, consulta, logout), NFTs (lista com
+  busca/filtros/ordenação/paginação e detalhe), favoritos, carrinho (consulta, inclusão, alteração,
+  remoção, cupom, avisos, junção do visitante), cotação, pedidos (criação idempotente, consulta e
+  recibo), perfil (dados, avatar, senha) e carteiras (consulta, cadastro, atualização e conexão
+  simulada).
+- **Erros** num formato único `{ error: { code, message, fieldErrors?, details? } }`: validação
+  (422), sessão inválida/expirada (401), sem permissão (403), inexistente (404), conflitos de
+  cadastro, disponibilidade, cotação e idempotência (409) e falha transitória (5xx). No cliente
+  chegam como `ApiRequestError`, que também cobre `NETWORK` e `TIMEOUT`.
+- **Dinheiro** em string decimal; quantidades inteiras; datas ISO 8601.
+- **Eventos** (`nft.updated`, `order.updated`) com o envelope
+  `{ eventId, type, resource, version, occurredAt, payload }`: id estável, recurso afetado e versão.
+
+## Reconciliação REST + Socket.IO
+
+O REST é a fonte da verdade; o socket só avisa que algo mudou e antecipa a atualização.
+
+1. **Cada evento** é validado, descartado se for duplicata (`eventId` já visto), antigo (versão ≤ a
+   conhecida) ou de outro usuário, e nunca regride um estado terminal ou um dado mais novo vindo do
+   REST.
+2. **Aplicação**: `nft.updated` atualiza detalhe e listas e invalida o carrinho que contém o NFT;
+   `order.updated` aplica o estado e rebusca o pedido (o evento não traz a transação).
+3. **Reconexão**: o segundo `connect` do mesmo socket invalida e rebusca todas as consultas ativas.
+   Eventos perdidos na queda, ou publicados antes de o socket conectar, são recuperados pelo REST.
+4. **Sessão**: um socket por sessão (`forceNew`, token no handshake); ao trocar de usuário o anterior
+   perde os listeners e é desconectado; `order.updated` só chega às conexões do dono do pedido.
+5. **Pedido pendente** sobrevive a refresh e queda: a tela lê o estado do REST e retoma sem criar
+   outra compra (mesma `Idempotency-Key`).
+
+Detalhes e testes em [Carrinho e tempo real](#carrinho-e-tempo-real) e
+[Checkout e pedidos](#checkout-e-pedidos).
+
+## Decisões de UX
+
+- **A URL é a fonte da verdade** das telas (filtros, busca, ordem, página, `?redirect=`): refresh,
+  histórico e links diretos funcionam; `/entrar` e `/cadastro` são rotas próprias, em diálogo no
+  desktop e página cheia no mobile.
+- **A interface nunca decide o que a API deve decidir**: totais, disponibilidade, cotação e
+  confirmação do pedido vêm da API; o recibo só aparece para pedido confirmado com transação.
+- **Carregamento sem salto**: skeletons com as dimensões do conteúdo (CLS 0) e shimmer, estáticos
+  com `prefers-reduced-motion`; listas anteriores ficam visíveis enquanto a nova carrega.
+- **Mudanças em tempo real são avisadas, não aplicadas em silêncio**: o carrinho mostra o aviso
+  (região `aria-live`) até o usuário confirmar, e o checkout exige nova confirmação com cotação
+  desatualizada.
+- **Revisão antes do envio** (diálogo com foco preso) e **pedido pendente** explícito, com
+  recuperação após refresh.
+- **Sessão expirada preserva o contexto**: vai a `/entrar?redirect=` e volta ao ponto de origem; o
+  rascunho do checkout do mesmo usuário é mantido.
+- **Ações fora do escopo dizem que não existem** (`UnavailableAction`): nome acessível "(indisponível
+  nesta demonstração)" e toast explicativo; nunca navegam nem simulam sucesso.
+- **Erros dizem a causa**: transitórios sugerem conferir a conexão e oferecem nova tentativa;
+  erros definitivos (ex.: 403) mostram a mensagem da API.
+- **Comprar** adiciona ao carrinho pela API (que revalida a disponibilidade) e leva ao carrinho; o
+  carrinho não tem atualização otimista porque os totais dependem da API (a otimista com rollback
+  está nos favoritos).
+- **Feedback acessível** por toasts (sonner, `aria-live`) e regiões vivas presentes desde o início.
+
+## Limitações
+
+- **Socket.IO só por WebSocket.** O `@mswjs/socket.io-binding` intercepta apenas WebSocket; o
+  long-polling do engine.io não é suportado nos mocks. O cliente usa `transports: ['websocket']` e
+  `path: '/realtime/'` (ver [Limitações do transporte](#limitações-do-transporte-e-como-foram-tratadas)).
+  Contra um backend real, o transporte poderia voltar a incluir long-polling.
+- **`msw` fixado em 2.15.0**, porque o binding exige `msw ^2.10.2`; atualizar para o MSW 3 exige
+  reavaliar o binding.
+- **Backend dentro do navegador.** O banco simulado persiste no `localStorage` do navegador: cada
+  navegador tem o seu estado, sem sincronização entre dispositivos; a cota do storage limita o
+  volume (avatar ≤ 1 MB). Não há latência de rede real, só a configurável dos cenários.
+- **Token Bearer em `localStorage`**, e não cookie `httpOnly` (ver [Sessão](#sessão)).
+- **Service worker antes de tudo.** O MSW precisa estar pronto antes da primeira requisição; isso
+  mantém o LCP mobile em ~2,3 s (desktop ~0,5 s). Um hard refresh sem controle do service worker
+  recarrega a página uma vez (comportamento do MSW 2.15).
+- **Lighthouse na Vercel varia** com a rede e a hora; a medição reprodutível é a do servidor local
+  (`lighthouse/serve.mjs`). Ver [lighthouse/RESULTADOS.md](lighthouse/RESULTADOS.md).
+- **Regressão visual só em Linux/Chromium**: as baselines são dessa plataforma; outras exigem
+  `pnpm test:e2e:update`.
+- **Blockchain, extensões de carteira e gateways são simulados** (fora do escopo do enunciado):
+  transações, hashes e links de exploração são referências geradas pela simulação.
+- **Uma arte por NFT** (quatro ilustrações do Figma para 36 NFTs) e tokens do mobile derivados dos
+  PNGs (o `design/tokens.md` cobre só o desktop).
+- **Retries** só em leituras transitórias; mutations nunca são repetidas automaticamente (pedidos
+  usam idempotência explícita).
+
+## Verificações finais
+
+- **Sem respostas fictícias fora do MSW (R6.3).** Regra imposta pelo ESLint (`no-restricted-imports`
+  em `eslint.config.js`): fora de `src/mocks/`, nada importa `msw`, `@mswjs/*` nem `@/mocks`
+  (exceções: o início dos mocks em `main.tsx` e o painel `/mocks`), e só `src/api/` importa o Axios.
+  Um import proibido quebra o `pnpm lint`. Varredura manual complementar em `src/` (fora de
+  `src/mocks/`): nenhum `fetch`/`XMLHttpRequest`, nenhum adaptador do Axios, nenhum `faker`/`stub`,
+  nenhum `Math.random`; os únicos `setTimeout` são o debounce da busca e o adiamento de uma tarefa
+  de sessão; `window.__kurioMock` só é definido dentro de `src/mocks/`; o `localStorage` do cliente
+  guarda apenas sessão, id do visitante e rascunho do checkout (estado do cliente, não dados de
+  negócio). O cliente nunca soma valores: `lib/money` serve a formatação, comparações e ao slider.
+- **Ações fora do escopo (R3.27/R3.28).** Varredura dinâmica (Playwright) em início, detalhe, carrinho,
+  entrar, cadastro e perfil, em 1440 e 390 px: as 84 ações `aria-disabled` acionadas não navegaram,
+  não enviaram requisição de escrita e responderam com um toast "indisponível". Links externos
+  (redes sociais, e-mail, compartilhar, explorador de blocos) abrem em nova aba com aviso no nome
+  acessível; o explorador é marcado como simulado.
+- **Estabilidade (Fase 11).** O teste de axe do pagamento falhava sob carga porque medir o contraste
+  durante o fade de um toast do sonner produzia cores intermediárias. O `audit()` agora espera a
+  condição real (sem toasts em trânsito e sem animações finitas em curso). Validado com 140
+  repetições a 16 workers e três execuções completas consecutivas do `pnpm test:e2e`.
 
 ## Rotas
 
