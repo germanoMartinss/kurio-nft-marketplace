@@ -235,7 +235,10 @@ test.describe('Sessão expirada', () => {
   })
 
   test('em página pública: continua como visitante e oferece entrar', async ({ page }) => {
-    await loginAs(page, USERS.ana, 'sessao-expirada')
+    // Relógio controlado (como em clock.spec.ts): a sessão de 2 horas só vence quando o teste
+    // adianta o relógio, nunca por lentidão da máquina.
+    await page.clock.install()
+    await loginAs(page, USERS.ana)
     // Espera as chamadas privadas do carregamento (sessão e favoritos): expirar antes delas faria
     // a expiração ser detectada por elas, e não pelo clique que o teste quer exercitar.
     const loaded = Promise.all([
@@ -244,8 +247,7 @@ test.describe('Sessão expirada', () => {
     ])
     await page.goto('/nft/emerald-ape-042')
     await loaded
-    await page.waitForFunction(() => window.__kurioMock !== undefined)
-    await page.evaluate(() => window.__kurioMock!.session.expireAll())
+    await page.clock.fastForward('02:05:00')
     // Qualquer chamada privada (favoritos) detecta a expiração.
     await favoriteButton(page).click()
     await expect(page.getByText('Sua sessão expirou').first()).toBeVisible()
