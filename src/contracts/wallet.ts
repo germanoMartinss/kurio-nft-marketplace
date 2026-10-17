@@ -56,7 +56,11 @@ export const walletSchema = z.extend(walletInputSchema, {
 })
 export type Wallet = z.infer<typeof walletSchema>
 
-export const walletListSchema = z.object({ items: z.array(walletSchema) })
+/** Carteira na listagem: inclui o estado da conexão simulada, guardado na API. */
+export const walletWithStatusSchema = z.extend(walletSchema, { connected: z.boolean() })
+export type WalletWithStatus = z.infer<typeof walletWithStatusSchema>
+
+export const walletListSchema = z.object({ items: z.array(walletWithStatusSchema) })
 
 /** POST /api/wallets */
 export const walletCreateSchema = z.extend(walletInputSchema, { kind: walletKindSchema })

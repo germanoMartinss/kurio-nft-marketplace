@@ -14,12 +14,30 @@ import { getScenario } from '../scenarios/active'
 import { apiError, parseBody, route } from './http'
 
 const walletsOf = (userId: string) => db().wallets[userId] ?? []
+const connectedOf = (userId: string) => db().walletConnections[userId] ?? []
+const ownsWallet = (userId: string, walletId: string) =>
+  walletsOf(userId).some((wallet) => wallet.id === walletId)
+
+function setConnection(userId: string, walletId: string, connected: boolean) {
+  mutate((draft) => {
+    const current = new Set(draft.walletConnections[userId] ?? [])
+    if (connected) current.add(walletId)
+    else current.delete(walletId)
+    draft.walletConnections[userId] = [...current]
+  })
+}
 
 export const walletHandlers = [
   route('get', '/wallets', ({ request }) => {
     const auth = requireUser(request)
     if ('response' in auth) return auth.response
-    return HttpResponse.json({ items: walletsOf(auth.user.id) })
+    const connected = connectedOf(auth.user.id)
+    return HttpResponse.json({
+      items: walletsOf(auth.user.id).map((wallet) => ({
+        ...wallet,
+        connected: connected.includes(wallet.id),
+      })),
+    })
   }),
 
   route('post', '/wallets', async ({ request }) => {
@@ -67,18 +85,24 @@ export const walletHandlers = [
   route<{ id: string }>('post', '/wallets/:id/connect', ({ request, params }) => {
     const auth = requireUser(request)
     if ('response' in auth) return auth.response
-    if (!walletsOf(auth.user.id).some((wallet) => wallet.id === params.id)) {
+    if (!ownsWallet(auth.user.id, params.id)) {
       return apiError(404, 'NOT_FOUND', 'Carteira não encontrada.')
     }
     if (getScenario().walletConnection === 'recusada') {
       return apiError(409, 'WALLET_REJECTED', 'A conexão foi recusada na carteira.')
     }
+    setConnection(auth.user.id, params.id, true)
     return HttpResponse.json<WalletConnection>({ walletId: params.id, status: 'conectada' })
   }),
 
   route<{ id: string }>('post', '/wallets/:id/disconnect', ({ request, params }) => {
     const auth = requireUser(request)
     if ('response' in auth) return auth.response
+    // Carteira de outro usuário responde como inexistente, sem revelar que ela existe.
+    if (!ownsWallet(auth.user.id, params.id)) {
+      return apiError(404, 'NOT_FOUND', 'Carteira não encontrada.')
+    }
+    setConnection(auth.user.id, params.id, false)
     return HttpResponse.json<WalletConnection>({ walletId: params.id, status: 'desconectada' })
   }),
 ]

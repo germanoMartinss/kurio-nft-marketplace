@@ -40,6 +40,7 @@ Formato único ([`common.ts`](../src/contracts/common.ts)):
 | 409  | `IDEMPOTENCY_CONFLICT`                                      | Chave de idempotência reutilizada com outro corpo                            |
 | 409  | `WALLET_REJECTED`                                           | Conexão de carteira recusada                                                 |
 | 409  | `NETWORK_MISMATCH`                                          | Carteira do pedido é de outra rede que a cotação                             |
+| 409  | `WALLET_DISCONNECTED`                                       | Pedido com carteira não conectada                                            |
 | 5xx  | `TRANSIENT`                                                 | Falha transitória (pode ser repetida)                                        |
 
 No cliente, toda falha vira `ApiRequestError` (`src/api/errors.ts`), incluindo `NETWORK` (sem
@@ -71,8 +72,8 @@ conexão) e `TIMEOUT` (10s).
 | Perfil         | `GET /profile` · `PATCH /profile`                                       | `ProfileUpdate` → `Profile`                                                                                                                                                                                                                                 | `profile.ts`   |
 |                | `PUT /profile/avatar` · `DELETE /profile/avatar`                        | `{ dataUrl }` (PNG/JPEG/WebP, até 1 MB) → `Profile`                                                                                                                                                                                                         | `profile.ts`   |
 |                | `POST /profile/password`                                                | `{ currentPassword, newPassword }` → 204 (encerra as outras sessões)                                                                                                                                                                                        | `profile.ts`   |
-| Carteiras      | `GET /wallets` · `POST /wallets` · `PUT /wallets/:id`                   | `WalletInput` (+ `kind` no POST) → `Wallet`                                                                                                                                                                                                                 | `wallet.ts`    |
-|                | `POST /wallets/:id/connect` · `POST /wallets/:id/disconnect`            | → `{ walletId, status }` (simulação da extensão)                                                                                                                                                                                                            | `wallet.ts`    |
+| Carteiras      | `GET /wallets` · `POST /wallets` · `PUT /wallets/:id`                   | `WalletInput` (+ `kind` no POST) → `Wallet`; a listagem inclui `connected`                                                                                                                                                                                  | `wallet.ts`    |
+|                | `POST /wallets/:id/connect` · `POST /wallets/:id/disconnect`            | → `{ walletId, status }` (simulação da extensão; estado guardado na API; 404 para carteira de outro usuário)                                                                                                                                                | `wallet.ts`    |
 
 Todas as rotas de favoritos, cotação, pedidos, perfil, carteiras e `POST /cart/merge` exigem sessão.
 O carrinho funciona com sessão (carrinho do usuário) ou com `X-Guest-Id` (carrinho do visitante).

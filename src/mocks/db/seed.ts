@@ -14,6 +14,7 @@ export function createSeedState(): DbState {
     favorites: structuredClone(FAVORITE_FIXTURES),
     carts: {},
     wallets: structuredClone(WALLET_FIXTURES),
+    walletConnections: {},
     quotes: {},
     orders: {},
     idempotency: {},

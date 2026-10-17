@@ -463,8 +463,12 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - **Rascunho por usuário** (`kurio:app:checkout:<userId>`): formulário, carteira, conexão e
   tentativa. Preservado quando a sessão **expira** (o mesmo usuário volta e retoma) e descartado
   no logout e na troca de usuário (`sessionStore.endedByExpiry()` distingue os casos).
-- **Carteira.** Conexão/desconexão simuladas por `POST /wallets/:id/(connect|disconnect)`; o envio
-  conecta a carteira se necessário e a recusa (`WALLET_REJECTED`) não cria pedido.
+- **Carteira.** Conexão/desconexão simuladas por `POST /wallets/:id/(connect|disconnect)`. O estado
+  da conexão fica no banco simulado (`walletConnections`, por usuário) e volta em `GET /wallets`
+  (`connected`): sobrevive a refresh e o cliente não guarda cópia própria. O envio conecta a
+  carteira se necessário; a recusa (`WALLET_REJECTED`) não cria pedido. A API exige a carteira
+  conectada para criar o pedido (`409 WALLET_DISCONNECTED`) e responde 404 ao conectar ou
+  desconectar carteira de outro usuário.
 - **Rede.** A rede do pedido é escolhida no formulário (padrão: a da carteira) e define a taxa
   da cotação. A API recusa pedido cuja carteira é de outra rede que a cotação
   (`409 NETWORK_MISMATCH`).

@@ -15,7 +15,11 @@ function load(): DbState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DbState
-      if (parsed.schemaVersion === 1) return parsed
+      if (parsed.schemaVersion === 1) {
+        // Bancos persistidos antes da conexão de carteiras existir no servidor.
+        parsed.walletConnections ??= {}
+        return parsed
+      }
     }
   } catch {
     // Estado corrompido ou localStorage indisponível: recomeça do seed.

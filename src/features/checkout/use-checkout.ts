@@ -7,7 +7,8 @@ import { connectWallet, disconnectWallet } from '@/api/wallets'
 import { createOrder, createQuote } from '@/api/orders'
 import type { Network } from '@/contracts/common'
 import type { Buyer, OrderCreate, Quote, QuoteChange } from '@/contracts/order'
-import type { Wallet, WalletProvider } from '@/contracts/wallet'
+import type { Wallet, WalletProvider, WalletWithStatus } from '@/contracts/wallet'
+import { walletKeys } from '@/features/wallets/queries'
 import { orderKeys } from '@/features/orders/queries'
 
 import {
@@ -33,6 +34,11 @@ function toProblem(error: unknown): CheckoutProblem {
       return { kind: 'stale', message: error.message, changes }
     }
     if (error.code === 'QUOTE_EXPIRED') return { kind: 'expired', message: error.message }
+    if (error.code === 'WALLET_DISCONNECTED')
+      return {
+        kind: 'wallet',
+        message: 'A carteira está desconectada. Conecte de novo para enviar o pedido.',
+      }
     if (error.code === 'WALLET_REJECTED')
       return {
         kind: 'wallet',
@@ -64,6 +70,16 @@ export function useCheckout(userId: string) {
   const [submitting, setSubmitting] = useState(false)
   // Guarda síncrona: dois cliques no mesmo tick passam antes de `submitting` atualizar a tela.
   const inFlight = useRef(false)
+
+  const walletsKey = walletKeys.list(userId)
+  const isConnected = (walletId: string) =>
+    queryClient
+      .getQueryData<WalletWithStatus[]>(walletsKey)
+      ?.some((wallet) => wallet.id === walletId && wallet.connected) ?? false
+  const setConnected = (walletId: string, connected: boolean) =>
+    queryClient.setQueryData<WalletWithStatus[]>(walletsKey, (wallets) =>
+      wallets?.map((wallet) => (wallet.id === walletId ? { ...wallet, connected } : wallet)),
+    )
 
   const setDraft = useCallback(
     (change: (previous: CheckoutDraft) => CheckoutDraft) => {
@@ -147,17 +163,15 @@ export function useCheckout(userId: string) {
     setSubmitting(true)
     setProblem(null)
     try {
-      if (!draftRef.current.connectedWalletIds.includes(current.body.walletId)) {
+      // A conexão é estado da API (`GET /wallets`); o envio conecta a carteira se for preciso.
+      if (!isConnected(current.body.walletId)) {
         try {
           await connectWallet(current.body.walletId)
         } catch (error) {
           setProblem(toProblem(error))
           return
         }
-        setDraft((previous) => ({
-          ...previous,
-          connectedWalletIds: [...previous.connectedWalletIds, current.body.walletId],
-        }))
+        setConnected(current.body.walletId, true)
       }
       setDraft((previous) => ({
         ...previous,
@@ -172,6 +186,9 @@ export function useCheckout(userId: string) {
       }))
       await navigate({ to: '/pedido/$orderId', params: { orderId: order.id } })
     } catch (error) {
+      // A carteira foi desconectada desde a última leitura: o próximo envio conecta de novo.
+      if (error instanceof ApiRequestError && error.code === 'WALLET_DISCONNECTED')
+        setConnected(current.body.walletId, false)
       const failure = toProblem(error)
       // A API rejeitou com uma resposta definitiva: nenhum pedido foi criado com esta chave.
       if (failure.kind !== 'retry')
@@ -192,13 +209,8 @@ export function useCheckout(userId: string) {
       else await disconnectWallet(walletId)
       return { walletId, connect }
     },
-    onSuccess: ({ walletId, connect }) =>
-      setDraft((previous) => ({
-        ...previous,
-        connectedWalletIds: connect
-          ? [...new Set([...previous.connectedWalletIds, walletId])]
-          : previous.connectedWalletIds.filter((id) => id !== walletId),
-      })),
+    onSuccess: ({ walletId, connect }) => setConnected(walletId, connect),
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: walletKeys.list(userId) }),
   })
 
   return {

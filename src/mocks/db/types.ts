@@ -18,6 +18,8 @@ export interface DbState {
   /** Chave: `user:<id>` ou `guest:<id>`. */
   carts: Record<string, CartRecord>
   wallets: Record<string, Wallet[]>
+  /** Carteiras com a conexão simulada ativa, por usuário (id do usuário → ids das carteiras). */
+  walletConnections: Record<string, string[]>
   quotes: Record<string, QuoteRecord>
   orders: Record<string, OrderRecord>
   /** Chave: `<userId>:<Idempotency-Key>`. */

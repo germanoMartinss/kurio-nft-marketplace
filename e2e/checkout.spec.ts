@@ -279,6 +279,11 @@ test.describe('Pedido idempotente', () => {
     const result = await page.evaluate(async () => {
       const session = JSON.parse(localStorage.getItem('kurio:app:session')!)
       const draft = JSON.parse(localStorage.getItem(`kurio:app:checkout:${session.user.id}`)!)
+      // Como o app faz antes de enviar: a carteira do pedido precisa estar conectada.
+      await fetch(`/api/wallets/${draft.attempt.body.walletId}/connect`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${session.token}` },
+      })
       const send = async (body: unknown) => {
         const res = await fetch('/api/orders', {
           method: 'POST',
@@ -564,15 +569,69 @@ test.describe('Carteira', () => {
     expect(await apiOrders(page)).toHaveLength(1)
   })
 
-  test('conectar e desconectar a carteira cadastrada', async ({ page }) => {
+  test('conectar e desconectar a carteira cadastrada; o estado vem da API', async ({ page }) => {
     await startCheckout(page)
-    const principal = page.getByRole('radiogroup', { name: 'Carteira conectada' })
-    await expect(principal).toContainText('Desconectada')
-    await principal.getByRole('button', { name: 'Ações da carteira Principal' }).click()
+    const radiogroup = page.getByRole('radiogroup', { name: 'Carteira conectada' })
+    await expect(radiogroup).not.toContainText('Conectada')
+    await radiogroup.getByRole('button', { name: 'Ações da carteira Principal' }).click()
     await page.getByRole('menuitem', { name: 'Conectar carteira' }).click()
-    await expect(principal).toContainText('Conectada')
-    await principal.getByRole('button', { name: 'Ações da carteira Principal' }).click()
+    await expect(radiogroup).toContainText('Conectada')
+
+    // A conexão é estado do servidor simulado: sobrevive ao reload.
+    await page.reload()
+    await expect(page.getByRole('radiogroup', { name: 'Carteira conectada' })).toContainText(
+      'Conectada',
+    )
+    await page
+      .getByRole('radiogroup', { name: 'Carteira conectada' })
+      .getByRole('button', { name: 'Ações da carteira Principal' })
+      .click()
     await page.getByRole('menuitem', { name: 'Desconectar carteira' }).click()
-    await expect(principal).toContainText('Desconectada')
+    await expect(page.getByRole('radiogroup', { name: 'Carteira conectada' })).not.toContainText(
+      'Conectada',
+    )
+  })
+
+  test('a API exige a carteira conectada (409 WALLET_DISCONNECTED) e protege a de outra conta', async ({
+    page,
+  }) => {
+    await startCheckout(page)
+    await openReview(page)
+    const result = await page.evaluate(async () => {
+      const session = JSON.parse(localStorage.getItem('kurio:app:session')!)
+      const draft = JSON.parse(localStorage.getItem(`kurio:app:checkout:${session.user.id}`)!)
+      const ana = { authorization: `Bearer ${session.token}` }
+      const order = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          ...ana,
+          'content-type': 'application/json',
+          'idempotency-key': draft.attempt.key,
+        },
+        body: JSON.stringify(draft.attempt.body),
+      })
+      // Bruno tenta desconectar a carteira da Ana.
+      const login = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'bruno@kurio.dev', password: 'Colecao#77' }),
+      })
+      const { token } = await login.json()
+      const foreign = await fetch(`/api/wallets/${draft.attempt.body.walletId}/disconnect`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}` },
+      })
+      return {
+        order: { status: order.status, code: (await order.json()).error?.code },
+        foreign: { status: foreign.status, code: (await foreign.json()).error?.code },
+      }
+    })
+    expect(result.order).toEqual({ status: 409, code: 'WALLET_DISCONNECTED' })
+    expect(result.foreign).toEqual({ status: 404, code: 'NOT_FOUND' })
+    expect(await apiOrders(page)).toHaveLength(0)
+
+    // Pela interface, o envio conecta a carteira e o pedido é criado.
+    await reviewDialog(page).getByRole('button', { name: 'Enviar pedido' }).click()
+    await expect(page).toHaveURL(/\/pedido\/ord_/)
   })
 })

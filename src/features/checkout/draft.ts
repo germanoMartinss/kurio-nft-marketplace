@@ -30,8 +30,6 @@ export interface CheckoutDraft {
   /** Rede escolhida para o pedido; sem escolha, vale a rede da carteira selecionada. */
   network: Network | null
   provider: WalletProvider | null
-  /** Carteiras com a conexão (simulada) ativa. */
-  connectedWalletIds: string[]
   attempt: OrderAttempt | null
 }
 
@@ -40,7 +38,6 @@ export const EMPTY_DRAFT: CheckoutDraft = {
   walletId: null,
   network: null,
   provider: null,
-  connectedWalletIds: [],
   attempt: null,
 }
 

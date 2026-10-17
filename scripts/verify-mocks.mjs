@@ -24,7 +24,14 @@ const assert = (cond, msg) => {
 }
 
 // Chamada pela página: passa pelo service worker do MSW, como o Axios da aplicação.
-const api = (method, path, { body, token, guest = 'guest-verify-0001', headers = {} } = {}) =>
+// Como o app, `POST /orders` conecta antes a carteira do pedido (`connect: false` desliga isso).
+const api = async (method, path, options = {}) => {
+  const { body, token, connect = true } = options
+  if (method === 'POST' && path === '/orders' && connect && token && body?.walletId)
+    await rawApi('POST', `/wallets/${body.walletId}/connect`, { token })
+  return rawApi(method, path, options)
+}
+const rawApi = (method, path, { body, token, guest = 'guest-verify-0001', headers = {} } = {}) =>
   page.evaluate(
     async ({ method, path, body, token, guest, headers }) => {
       try {
@@ -281,6 +288,40 @@ await check('idempotência: mesma chave+corpo → mesmo pedido; corpo diferente 
   )
   order = first.body
 })
+await check(
+  'carteira: pedido exige conexão (409 WALLET_DISCONNECTED), rede incompatível (409 NETWORK_MISMATCH) e disconnect alheio (404)',
+  async () => {
+    const q = await api('POST', '/quotes', { token: ana, body: { network: 'ethereum' } })
+    await api('POST', '/wallets/wal_ana_principal/disconnect', { token: ana })
+    const disconnected = await api('POST', '/orders', {
+      token: ana,
+      connect: false,
+      headers: { 'idempotency-key': 'idem-verify-desconectada' },
+      body: { quoteId: q.body.id, walletId: 'wal_ana_principal', provider: 'metamask', buyer },
+    })
+    assert(
+      disconnected.status === 409 && disconnected.body.error.code === 'WALLET_DISCONNECTED',
+      JSON.stringify(disconnected.body),
+    )
+    const wallets = await api('GET', '/wallets', { token: ana })
+    const polygon = wallets.body.items.find((wallet) => wallet.network === 'polygon')
+    assert(
+      wallets.body.items.every((wallet) => typeof wallet.connected === 'boolean'),
+      'connected',
+    )
+    const mismatch = await api('POST', '/orders', {
+      token: ana,
+      headers: { 'idempotency-key': 'idem-verify-rede' },
+      body: { quoteId: q.body.id, walletId: polygon.id, provider: 'metamask', buyer },
+    })
+    assert(
+      mismatch.status === 409 && mismatch.body.error.code === 'NETWORK_MISMATCH',
+      JSON.stringify(mismatch.body),
+    )
+    const foreign = await api('POST', '/wallets/wal_ana_principal/disconnect', { token: bruno })
+    assert(foreign.status === 404, String(foreign.status))
+  },
+)
 await check('isolamento: outro usuário não vê o pedido (404)', async () => {
   const r = await api('GET', `/orders/${order.id}`, { token: bruno })
   assert(r.status === 404, String(r.status))
@@ -600,6 +641,7 @@ await check(
     const q = (await api('POST', '/quotes', { token: a, body: { network: 'ethereum' } })).body
     const body = { quoteId: q.id, walletId: 'wal_ana_principal', provider: 'metamask', buyer }
     const headers = { 'idempotency-key': 'idem-verify-timeout' }
+    await api('POST', '/wallets/wal_ana_principal/connect', { token: a })
     // Simula o cliente desistindo da 1ª tentativa (o pedido já foi criado no servidor) e reenviando.
     const first = page.evaluate(
       ({ body, token, headers }) => {

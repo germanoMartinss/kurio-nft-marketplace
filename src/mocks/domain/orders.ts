@@ -169,6 +169,14 @@ export function createOrder(
       message: `A carteira ${wallet.nickname} não é da rede do pedido. Escolha uma carteira compatível.`,
     }
   }
+  if (!(db().walletConnections[user.id] ?? []).includes(wallet.id)) {
+    return {
+      ok: false,
+      status: 409,
+      code: 'WALLET_DISCONNECTED',
+      message: `Conecte a carteira ${wallet.nickname} para enviar o pedido.`,
+    }
+  }
 
   const scenario = getScenario()
   const now = new Date().toISOString()

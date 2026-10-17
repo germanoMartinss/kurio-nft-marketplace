@@ -223,7 +223,7 @@ function PaymentScreen({
               <WalletPicker
                 wallets={list}
                 value={wallet.id}
-                connectedIds={draft.connectedWalletIds}
+                connectedIds={list.filter((item) => item.connected).map((item) => item.id)}
                 busy={checkout.toggleConnection.isPending}
                 onChange={(walletId) => {
                   const chosen = list.find((item) => item.id === walletId)
