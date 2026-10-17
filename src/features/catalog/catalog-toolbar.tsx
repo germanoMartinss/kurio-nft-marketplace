@@ -34,7 +34,7 @@ export function CatalogTabs({
     <div
       role="group"
       aria-label="Recorte do catálogo"
-      className="flex shrink-0 gap-5 overflow-x-auto"
+      className="flex min-w-0 gap-5 overflow-x-auto"
     >
       {TABS.map((tab) => {
         const active = value === tab.id

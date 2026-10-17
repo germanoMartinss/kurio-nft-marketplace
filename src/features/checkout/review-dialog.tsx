@@ -71,7 +71,18 @@ export function ReviewDialog({
 
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : checkout.closeReview())}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[560px] gap-5 overflow-y-auto p-6 sm:max-w-[560px]">
+      <DialogContent
+        // O botão que abriu a revisão fica desabilitado enquanto a cotação é feita e perde o foco:
+        // devolve-se o foco ao "Confirmar compra" visível.
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          const buttons = document.querySelectorAll<HTMLButtonElement>(
+            'button[form="form-pagamento"]',
+          )
+          ;[...buttons].find((button) => button.offsetParent !== null)?.focus()
+        }}
+        className="max-h-[calc(100dvh-2rem)] max-w-[560px] gap-5 overflow-y-auto p-6 sm:max-w-[560px]"
+      >
         <DialogHeader>
           <DialogTitle className="text-20 font-bold">Revise seu pedido</DialogTitle>
           <DialogDescription className="text-14 leading-6 text-muted-foreground">

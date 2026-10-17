@@ -30,12 +30,12 @@ export function Totals({
           (-) {eth(discount).eq(0) ? '00.00' : formatEth(discount, { unit: false })}
         </dd>
       </div>
-      <div>
-        <div className={row}>
-          <dt>Taxa de rede</dt>
-          <dd className="text-18">{formatEth(networkFee)}</dd>
-        </div>
-        <p className="text-right text-12 text-accent-text">Taxa estimada</p>
+      <div className={row}>
+        <dt>Taxa de rede</dt>
+        <dd className="text-18">
+          {formatEth(networkFee)}
+          <span className="block text-right text-12 text-accent-text">Taxa estimada</span>
+        </dd>
       </div>
       <div className={cn(row, 'border-t border-border pt-3 font-bold')}>
         <dt>Total</dt>

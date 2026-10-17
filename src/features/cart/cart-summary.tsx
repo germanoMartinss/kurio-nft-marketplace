@@ -145,12 +145,12 @@ function SummaryRows({ cart }: { cart: Cart }) {
         <dt>Desconto do lançamento</dt>
         <dd className="text-14 text-muted-foreground">{formatDiscount(summary.discount)}</dd>
       </div>
-      <div>
-        <div className={row}>
-          <dt>Taxa de rede</dt>
-          <dd className="text-18">{formatEth(summary.networkFee)}</dd>
-        </div>
-        <p className="text-right text-12 text-accent-text">Taxa estimada</p>
+      <div className={row}>
+        <dt>Taxa de rede</dt>
+        <dd className="text-18">
+          {formatEth(summary.networkFee)}
+          <span className="block text-right text-12 text-accent-text">Taxa estimada</span>
+        </dd>
       </div>
       <div className={cn(row, 'pt-2 font-bold')}>
         <dt>Total</dt>

@@ -35,7 +35,7 @@ export function MobileTopBar({
         <span className="sr-only">Voltar</span>
       </button>
       {title ? (
-        <h1 className="flex-1 text-center text-18 font-bold whitespace-nowrap sm:text-20">
+        <h1 className="min-w-0 flex-1 text-center text-18 leading-6 font-bold sm:text-20">
           {title}
         </h1>
       ) : (

@@ -213,7 +213,10 @@ function PaymentScreen({
                 className="max-lg:order-1 lg:order-2"
               />
             ) : (
-              <Skeleton className="h-[200px] max-lg:order-1 lg:order-2" />
+              <Skeleton
+                data-testid="wallet-section"
+                className="h-[280px] max-lg:order-1 lg:order-2"
+              />
             )}
 
             <section
@@ -228,7 +231,7 @@ function PaymentScreen({
                 onSubmit={onSubmit}
                 noValidate
                 aria-label="Dados do colecionador"
-                className="grid gap-x-6 gap-y-5 lg:grid-cols-2"
+                className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-5 lg:grid-cols-2"
               >
                 <TextInput
                   label="Nome de exibição"
@@ -339,6 +342,7 @@ function PaymentScreen({
           <div className="max-lg:contents lg:flex lg:flex-col lg:gap-5">
             <section
               aria-labelledby="seus-nfts"
+              data-testid="items-section"
               className="flex flex-col gap-3 max-lg:order-3 lg:gap-3"
             >
               <h2 id="seus-nfts" className="sr-only text-16 font-bold lg:not-sr-only">
@@ -375,7 +379,7 @@ function PaymentScreen({
                   </p>
                 </>
               ) : (
-                <Skeleton className="h-[260px] lg:h-[420px]" />
+                <Skeleton className="h-[26px] lg:h-[267px]" />
               )}
             </section>
             <ProviderPicker

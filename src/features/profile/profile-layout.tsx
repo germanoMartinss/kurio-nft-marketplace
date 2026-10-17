@@ -118,7 +118,11 @@ export function ProfileLayout({
           ))}
         </nav>
 
-        <section className="min-w-0 flex-1" aria-labelledby="perfil-titulo">
+        <section
+          className="min-w-0 flex-1"
+          aria-labelledby="perfil-titulo"
+          data-testid="profile-section"
+        >
           <h1 className="sr-only max-lg:hidden">Meu perfil</h1>
           <h2
             id="perfil-titulo"

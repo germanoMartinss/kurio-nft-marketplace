@@ -36,7 +36,11 @@ export function WalletPicker({
 }) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className={cn('flex flex-col gap-3', className)}>
+    <section
+      aria-labelledby={titleId}
+      data-testid="wallet-section"
+      className={cn('flex flex-col gap-3', className)}
+    >
       <div className="flex items-baseline justify-between gap-3">
         <h2 id={titleId} className="text-16 font-bold">
           Carteira conectada

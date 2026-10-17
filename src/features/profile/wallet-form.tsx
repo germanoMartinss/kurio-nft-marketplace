@@ -82,7 +82,7 @@ export function WalletForm({
       onSubmit={submit}
       noValidate
       aria-label={`Carteira ${label}`}
-      className="grid gap-x-7 gap-y-5 lg:grid-cols-2"
+      className="grid grid-cols-[minmax(0,1fr)] gap-x-7 gap-y-5 lg:grid-cols-2"
     >
       <TextInput
         label="Nome de exibição"

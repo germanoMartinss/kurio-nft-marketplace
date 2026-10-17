@@ -66,7 +66,9 @@ export function OrderPage({ orderId }: { orderId: string }) {
 
   return (
     <div className="container-page flex min-h-dvh items-start justify-center py-6 max-lg:px-4 lg:pt-[120px] lg:pb-16">
-      <div className="w-full max-w-[578px]">{content}</div>
+      <div className="w-full max-w-[578px]" data-testid="order-view">
+        {content}
+      </div>
     </div>
   )
 }
@@ -79,7 +81,8 @@ function OrderSkeleton() {
       role="status"
       className="flex flex-col gap-4"
     >
-      <Skeleton className="h-[420px] w-full" />
+      {/* Altura do recibo de um pedido de 1 item (a tela mais comum ao reabrir um pedido). */}
+      <Skeleton className="h-[854px] w-full sm:h-[656px]" />
     </div>
   )
 }

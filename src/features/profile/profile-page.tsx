@@ -57,17 +57,31 @@ export function ProfilePage() {
   )
 }
 
+/** Mesma grade do formulário: campo de 68px (rótulo + entrada), avatar de 78px e botão de 40px. */
 function ProfileSkeleton() {
+  const field = <Skeleton className="h-[68px]" />
   return (
     <div
       aria-busy="true"
       role="status"
       aria-label="Carregando perfil"
-      className="grid gap-5 lg:grid-cols-2"
+      className="grid grid-cols-[minmax(0,1fr)] gap-x-7 gap-y-5 lg:grid-cols-2"
     >
-      {Array.from({ length: 6 }, (_, index) => (
-        <Skeleton key={index} className="h-[68px]" />
-      ))}
+      {field}
+      {field}
+      {field}
+      {field}
+      {field}
+      <Skeleton className="h-[78px] lg:col-start-2" />
+      <div className="mt-3 flex flex-col gap-5 lg:col-start-1">
+        <Skeleton className="h-6" />
+        {field}
+        {field}
+        {field}
+      </div>
+      <div className="lg:col-span-2">
+        <Skeleton className="h-10 w-[104px] max-lg:w-full" />
+      </div>
     </div>
   )
 }
@@ -147,7 +161,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
         onSubmit={submit}
         noValidate
         aria-label="Perfil do colecionador"
-        className="grid gap-x-7 gap-y-5 lg:grid-cols-2"
+        className="grid grid-cols-[minmax(0,1fr)] gap-x-7 gap-y-5 lg:grid-cols-2"
       >
         <TextInput
           label="Nome de exibição"

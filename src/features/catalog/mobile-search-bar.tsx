@@ -22,7 +22,7 @@ export const MobileSearchBar = forwardRef<
       <form
         role="search"
         onSubmit={(event) => event.preventDefault()}
-        className="flex h-11 flex-1 items-center gap-3 rounded-xl bg-card px-4"
+        className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-xl bg-card px-4"
       >
         <Search className="size-5 shrink-0 text-subtle" aria-hidden />
         <label htmlFor="busca" className="sr-only">
