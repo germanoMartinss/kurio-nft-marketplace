@@ -42,12 +42,20 @@ test.describe('Relógio controlado', () => {
     await page.clock.install()
     await startCheckout(page)
     const dialog = await openReview(page)
-    // Congela o relógio do cliente na hora da cotação e adianta só o do servidor simulado.
-    await page.evaluate(() => {
-      const now = Date.now
-      Date.now = () => now() + 6 * 60_000
-    })
+    // Relógio pausado (a contagem regressiva do diálogo para) e adiantado 6 minutos: a interface
+    // ainda oferece "Enviar pedido" quando o clique acontece. Depois do clique o relógio volta a
+    // andar (a latência do MSW também usa os timers da página) e quem detecta o vencimento é a API.
+    const now = await page.evaluate(() => Date.now())
+    await page.clock.pauseAt(now + 1_000)
+    await page.clock.setSystemTime(now + 6 * 60_000)
+    const created = page.waitForResponse(
+      (res) => res.url().endsWith('/api/orders') && res.request().method() === 'POST',
+    )
     await dialog.getByRole('button', { name: 'Enviar pedido' }).click()
+    await page.clock.resume()
+    const response = await created
+    expect(response.status()).toBe(409)
+    expect((await response.json()).error.code).toBe('QUOTE_EXPIRED')
     await expect(dialog.getByRole('alert')).toContainText('A cotação expirou')
     await expect(reviewDialog(page)).toBeVisible()
   })

@@ -182,20 +182,13 @@ test.describe('Cotação', () => {
     })
     // Sem evento, o clique chega à API, que rejeita e informa o que mudou.
     const stale = page.waitForResponse(
-      (res) => res.url().endsWith('/api/orders') && res.status() === 409,
-      { timeout: 3_000 },
+      (res) => res.url().endsWith('/api/orders') && res.request().method() === 'POST',
     )
-    await dialog
-      .getByRole('button', { name: 'Enviar pedido' })
-      .click({ timeout: 2_000 })
-      .catch(() => {})
-    await stale.catch(() => undefined)
-    await expect(dialog.getByRole('alert')).toContainText(
-      'o preço mudou de 1.19 ETH para 1.80 ETH',
-      {
-        timeout: 10_000,
-      },
-    )
+    await dialog.getByRole('button', { name: 'Enviar pedido' }).click()
+    const response = await stale
+    expect(response.status()).toBe(409)
+    expect((await response.json()).error.code).toBe('QUOTE_STALE')
+    await expect(dialog.getByRole('alert')).toContainText('o preço mudou de 1.19 ETH para 1.80 ETH')
     expect(await apiOrders(page)).toHaveLength(0)
   })
 })
