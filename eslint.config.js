@@ -5,6 +5,12 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+const AXIOS = { name: 'axios', message: 'Todo HTTP passa por src/api (cliente Axios único).' }
+const MOCKS = {
+  group: ['@/mocks', '@/mocks/*', '**/mocks', '**/mocks/*', 'msw', 'msw/*', '@mswjs/*'],
+  message: 'Dados simulados só existem na camada de rede (MSW); veja src/mocks.',
+}
+
 export default defineConfig([
   globalIgnores([
     'dist',
@@ -34,6 +40,22 @@ export default defineConfig([
         { argsIgnorePattern: '^_', ignoreRestSiblings: true },
       ],
     },
+  },
+  {
+    // R6.3: respostas simuladas só existem na camada de rede. Fora de `src/mocks`, nada importa o
+    // MSW nem os mocks (exceções: o início dos mocks em `main.tsx` e o painel `/mocks`), e só
+    // `src/api` conhece o Axios.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/mocks/**', 'src/api/**', 'src/main.tsx', 'src/routes/mocks.tsx'],
+    rules: { 'no-restricted-imports': ['error', { paths: [AXIOS], patterns: [MOCKS] }] },
+  },
+  {
+    files: ['src/api/**/*.{ts,tsx}'],
+    rules: { 'no-restricted-imports': ['error', { patterns: [MOCKS] }] },
+  },
+  {
+    files: ['src/main.tsx', 'src/routes/mocks.tsx'],
+    rules: { 'no-restricted-imports': ['error', { paths: [AXIOS] }] },
   },
   {
     // Arquivos de rota exportam `Route` junto com componentes; o plugin do router cuida do HMR.
