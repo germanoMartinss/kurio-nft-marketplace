@@ -310,10 +310,12 @@ test.describe('Alterações em tempo real (nft.updated)', () => {
         payload: { price: '9.99', previousPrice: null, available: 1, editions: [] },
       })
     })
-    await page.waitForTimeout(800)
-    await expect(cartTotal(page)).toHaveText('1.616 ETH')
+    // Sentinela: os eventos chegam em ordem pelo socket. Quando o preço novo aparece, a duplicata
+    // e o evento antigo já foram processados, e só o sentinela pode ter rebuscado o carrinho.
+    await updateNft(page, 'emerald-ape-042', { price: '1.70' })
+    await expect(cartTotal(page)).toHaveText('1.716 ETH')
     await expect(page.getByText('9.99')).toHaveCount(0)
-    expect(cartRequests).toHaveLength(0)
+    expect(cartRequests).toHaveLength(1)
   })
 
   test('reconcilia com a REST após reconexão', async ({ page }) => {

@@ -158,8 +158,8 @@ test.describe('Catálogo', () => {
     const emerald = outcomes.indexOf('emerald:resposta')
     expect(emerald).toBeGreaterThanOrEqual(0)
     expect(outcomes[ape] === 'ape:cancelada' || ape > emerald).toBe(true)
-    // Depois do tempo da resposta lenta, a tela continua mostrando a consulta atual.
-    await page.waitForTimeout(1_600)
+    // A consulta antiga já terminou (respondeu ou foi cancelada, ver o poll acima) e a tela
+    // continua mostrando a consulta atual.
     await expect(page).toHaveURL(/busca=emerald/)
     expect(await cardNames(page)).toEqual(['Emerald Ape #042'])
   })
