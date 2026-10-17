@@ -1,0 +1,4 @@
+# Relatórios e capturas gerados por ferramentas: fora das estatísticas de linguagem e recolhidos nos diffs.
+lighthouse/** linguist-generated
+e2e/**/*-snapshots/** linguist-generated
+lighthouse/*.mjs -linguist-generated
