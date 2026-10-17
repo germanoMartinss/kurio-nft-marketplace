@@ -1,12 +1,16 @@
+import { useRouterState } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
 import { MobileTabBar } from './mobile-tab-bar'
+import { showsMobileTabBar } from './navigation'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 
 const MAIN_CONTENT_ID = 'conteudo'
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const tabBar = showsMobileTabBar(pathname)
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -20,9 +24,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <SiteFooter />
-      {/* Espaço para a barra de abas fixa no mobile, para não cobrir o fim da página. */}
-      <div aria-hidden="true" className="h-24 lg:hidden" />
-      <MobileTabBar />
+      {tabBar ? (
+        <>
+          {/* Espaço para a barra de abas fixa no mobile, para não cobrir o fim da página. */}
+          <div aria-hidden="true" className="h-28 lg:hidden" />
+          <MobileTabBar />
+        </>
+      ) : null}
     </div>
   )
 }

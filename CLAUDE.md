@@ -159,9 +159,10 @@ lighthouse/     configuração e relatórios versionados
 Gerenciador: **pnpm** (Node ≥ 22.12). Disponíveis: `pnpm dev` (com mocks) · `pnpm build` ·
 `pnpm preview` · `pnpm typecheck` · `pnpm lint` · `pnpm format` / `pnpm format:check` ·
 `pnpm screens` · `pnpm requirements` · `pnpm icons:generate` · `pnpm images:optimize`.
-Previstos: `test:e2e`, `test:e2e:update` (Fase 9) e `lighthouse` (Fase 10).
+Testes: `pnpm test:e2e` (Playwright, desktop e mobile), `pnpm test:e2e:update` (baselines),
+`pnpm test:e2e:report`, `pnpm verify:mocks`. Previsto: `lighthouse` (Fase 10).
 
-Antes de cada commit: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build`.
+Antes de cada commit: `pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm test:e2e`.
 
 - Socket.IO usa `path: '/realtime/'` (não `/socket.io/`): o MSW 2.x reescreve esse prefixo. Ver ARCHITECTURE.md.
 - `/mocks` é o painel de diagnóstico da camada de mocks.

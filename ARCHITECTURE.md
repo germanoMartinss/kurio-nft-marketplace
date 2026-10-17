@@ -134,17 +134,68 @@ Regra adotada:
 
 ### Desvios do Figma
 
-| Tela                       | No Figma                                                                                                                                                | Na implementação                              | Motivo                                                    |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
-| Carrinho (mobile)          | Ícone de lixeira sobreposto ao botão "+" do terceiro item                                                                                               | Lixeira em posição própria                    | Defeito do layout: a sobreposição impede o clique no "+". |
-| Login e cadastro (desktop) | Rótulo "2.29 ETH" duplicado sobre um card e selo RARO de canto reto saindo do card (defeitos registrados na descrição do componente "Marketplace Page") | Sem duplicação; selo acompanha o raio do card | Defeitos conhecidos do próprio arquivo.                   |
-| Footer (mobile e tablet)   | Não existe nos frames mobile                                                                                                                            | Oculto abaixo de 1024px                       | Fidelidade aos frames mobile.                             |
+| Tela                       | No Figma                                                                                                                                                | Na implementação                                                                     | Motivo                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Carrinho (mobile)          | Ícone de lixeira sobreposto ao botão "+" do terceiro item                                                                                               | Lixeira em posição própria                                                           | Defeito do layout: a sobreposição impede o clique no "+".                                       |
+| Login e cadastro (desktop) | Rótulo "2.29 ETH" duplicado sobre um card e selo RARO de canto reto saindo do card (defeitos registrados na descrição do componente "Marketplace Page") | Sem duplicação; selo acompanha o raio do card                                        | Defeitos conhecidos do próprio arquivo.                                                         |
+| Footer (mobile e tablet)   | Não existe nos frames mobile                                                                                                                            | Oculto abaixo de 1024px                                                              | Fidelidade aos frames mobile.                                                                   |
+| Barra de abas (mobile)     | Só aparece no frame da home                                                                                                                             | Oculta em detalhe, carrinho, pagamento, entrar e cadastro                            | Esses frames têm a própria barra de ação inferior ou são telas cheias.                          |
+| Busca (desktop)            | Só o ícone de lupa no header                                                                                                                            | Ícone abre um diálogo de busca                                                       | O layout desktop não tem campo de busca; o diálogo mantém a composição do header.               |
+| Ordenação (mobile)         | Não aparece no frame                                                                                                                                    | Dentro do drawer de filtros                                                          | Ordenação é obrigatória; o frame mobile não tem espaço para a linha "Ordenar por".              |
+| Contagens dos filtros      | (33), (12), (65)… ilustrativas                                                                                                                          | Calculadas pela API a partir das 36 fixtures                                         | Os números refletem os dados reais da simulação.                                                |
+| Galeria do detalhe         | Quatro miniaturas idênticas                                                                                                                             | Quatro enquadramentos da mesma obra                                                  | Dá função real à galeria com a única arte disponível por NFT.                                   |
+| "Mais desta coleção"       | Artes variadas                                                                                                                                          | NFTs da mesma categoria                                                              | Nas fixtures cada coleção usa uma única ilustração; a categoria reproduz a variedade do layout. |
+| Detalhe: compra            | Sem texto de disponibilidade                                                                                                                            | "N disponíveis · até 10 por pedido" sob a compra (desktop) e sob as edições (mobile) | O limite de quantidade (§3) precisa ser comunicado, não só sinalizado pelo botão desabilitado.  |
+| Ações do card (desktop)    | Carrinho, favoritar e ampliar no hover                                                                                                                  | Favoritar e ver detalhes no hover/foco                                               | Adicionar ao carrinho exige escolher a edição; a compra acontece no detalhe.                    |
 
 ## Verificação visual
 
 `pnpm screens` (`scripts/capture-screens.mjs`) captura cada tela em 390, 768 e 1440px, aponta
 overflow horizontal e erros de console, e gera imagens lado a lado "implementação | Figma" em
 `screenshots/` (não versionado). Toda tela é conferida assim antes do commit da fase.
+
+## Estado e cache (TanStack Query)
+
+| Aspecto             | Política                                                                                                               | Por quê                                                                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Chaves públicas     | `['nfts', 'list', consulta]`, `['nfts', 'detail', id]`, `['nfts', 'highlights']`                                       | A consulta inteira faz parte da chave: cada combinação de filtros tem cache próprio.                                                                                |
+| Chaves privadas     | Sempre sob `['user', userId, …]` (ex.: favoritos); carrinho sob `['user', id, 'cart']` ou `['guest', guestId, 'cart']` | Isolamento por dono: o logout/troca de usuário remove o prefixo inteiro (Fase 5).                                                                                   |
+| `staleTime`         | 30s (destaques: 5 min)                                                                                                 | Navegar e voltar não refaz a consulta à toa; o tempo real cobre mudanças relevantes.                                                                                |
+| Retry               | Até 2 vezes, **só** em falha transitória (rede, timeout, 5xx); mutations nunca                                         | 4xx é definitivo; repetir mutation poderia duplicar operação (pedidos usam idempotência).                                                                           |
+| Paginação/filtros   | `placeholderData: keepPreviousData` + indicador "atualizando"                                                          | A lista anterior fica visível enquanto a nova carrega, sem pular o layout.                                                                                          |
+| Respostas obsoletas | `signal` repassado ao Axios                                                                                            | Quando a consulta deixa de ser a atual, a requisição é cancelada; uma resposta antiga nunca ocupa a chave da consulta nova (testado com o cenário `fora-de-ordem`). |
+| Pré-carregamento    | Loaders das rotas chamam `prefetchQuery` sem `await`; `defaultPreload: 'intent'`                                       | Hover/foco em links já busca os dados, sem bloquear a navegação (a tela mostra o skeleton).                                                                         |
+| Otimista            | Favoritos: `onMutate` grava o novo estado, `onError` restaura o anterior e avisa, `onSettled` revalida                 | Resposta imediata ao clique, com rollback em falha.                                                                                                                 |
+
+## Catálogo e detalhe
+
+- **Estado na URL**: busca, coleções, redes, faixa de preço, aba, ordem e página são search params
+  em pt-BR (`?busca=&colecoes=musica,arte-3d&redes=&precoMin=&precoMax=&aba=&ordem=&pagina=`),
+  validados por `validateSearch` (valores inválidos são descartados, não quebram a página). Cada
+  mudança é uma entrada no histórico; mudança de filtro remove `pagina`; valores padrão não vão
+  para a URL. Filtros não rolam a página (`resetScroll: false`); a paginação leva ao topo do catálogo.
+- **Busca**: digitação local com debounce de 350ms; uma entrada no histórico por busca, não por
+  tecla. Se a URL muda por fora (voltar), o campo acompanha.
+- **Estados**: skeleton com as dimensões finais (sem deslocamento), vazio com "limpar filtros",
+  erro com "tentar novamente", atualização em segundo plano com indicador e anúncio do total de
+  resultados para leitores de tela.
+- **Filtros acessíveis**: checkboxes nativos (combináveis, operáveis por teclado) estilizados como
+  a lista do Figma, com sinal de marcação além da cor; slider de preço com nome e valor textual por
+  controle ("Preço mínimo, 0,02 ETH"). No mobile, drawer com foco preso e devolvido ao botão.
+- **Detalhe**: acesso direto e refresh; 404 da API vira "NFT não encontrado"; edições como radios
+  (esgotada desabilitada e anunciada); quantidade limitada pela disponibilidade da edição e por 10
+  por pedido, com o limite anunciado; "Comprar" adiciona ao carrinho pela API (que revalida a
+  disponibilidade) e leva ao carrinho.
+- **Imagens**: `<picture>` com AVIF/WebP responsivos, dimensões intrínsecas para evitar CLS e
+  `fetchpriority="high"` só na imagem principal.
+
+## Testes E2E (Playwright)
+
+`playwright.config.ts`: build de produção servido pelo `vite preview`, Chromium em dois projetos
+(desktop 1440×900 e mobile 390×844 com toque), relatório HTML e trace/vídeo/screenshot das falhas.
+Cada teste roda num contexto novo, então começa com storage vazio, banco simulado no seed e
+sessão deslogada; o cenário é escolhido por `?cenario=` na primeira navegação (`e2e/support.ts`).
+As verificações observam a interface e as requisições reais à API (que passam pelo MSW).
 
 ## Contratos
 

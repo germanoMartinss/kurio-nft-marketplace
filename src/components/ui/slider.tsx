@@ -8,8 +8,15 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  thumbLabels,
+  getValueText,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & {
+  /** Nome acessível de cada controle, ex.: ["Preço mínimo", "Preço máximo"]. */
+  thumbLabels?: string[]
+  /** Valor anunciado pelo leitor de tela, ex.: "0,02 ETH" em vez do índice do passo. */
+  getValueText?: (value: number) => string
+}) {
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [value, defaultValue, min, max],
@@ -30,7 +37,7 @@ function Slider({
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative grow overflow-hidden rounded-full bg-border-soft data-horizontal:h-[3px] data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
+        className="relative grow overflow-hidden rounded-full bg-primary/35 data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
@@ -41,7 +48,11 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="relative block size-3.5 shrink-0 rounded-full border-2 border-background bg-primary transition-[color,box-shadow] select-none after:absolute after:-inset-2 disabled:pointer-events-none disabled:opacity-50"
+          aria-label={thumbLabels?.[index]}
+          aria-valuetext={
+            getValueText && _values[index] !== undefined ? getValueText(_values[index]) : undefined
+          }
+          className="relative block size-[15px] shrink-0 rounded-full border-2 border-background bg-primary transition-[color,box-shadow] select-none after:absolute after:-inset-2 disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
     </SliderPrimitive.Root>

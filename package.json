@@ -19,7 +19,10 @@
     "images:optimize": "node scripts/optimize-images.mjs",
     "screens": "node scripts/capture-screens.mjs",
     "requirements": "node scripts/requirements-summary.mjs && prettier --write docs/REQUIREMENTS.md",
-    "verify:mocks": "node scripts/verify-mocks.mjs"
+    "verify:mocks": "node scripts/verify-mocks.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:report": "playwright show-report"
   },
   "msw": {
     "workerDirectory": [

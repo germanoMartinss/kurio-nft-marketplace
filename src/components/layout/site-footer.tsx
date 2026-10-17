@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import type { ComponentType, ReactNode } from 'react'
 
 import { UnavailableAction } from '@/components/common/unavailable-action'
+import { CATEGORY_LABELS, type Category } from '@/contracts/nft'
 import {
   SocialFacebook,
   SocialInstagram,
@@ -39,6 +40,14 @@ const SOCIAL_LINKS: { label: string; href: string; Icon: ComponentType<{ classNa
     { label: 'LinkedIn', href: 'https://www.linkedin.com', Icon: SocialLinkedin },
     { label: 'YouTube', href: 'https://www.youtube.com', Icon: SocialYoutube },
   ]
+
+const FOOTER_CATEGORIES: Category[] = [
+  'arte-digital',
+  'fotografia',
+  'musica',
+  'arte-3d',
+  'utilidade',
+]
 
 const linkClass = 'text-14 leading-[22px] text-foreground transition-colors hover:text-accent-text'
 
@@ -105,15 +114,16 @@ export function SiteFooter() {
           </FooterColumn>
 
           <FooterColumn title="Coleções">
-            {['Arte digital', 'Fotografia', 'Música', 'Arte 3D', 'Utilidade'].map((name) => (
+            {FOOTER_CATEGORIES.map((category) => (
               <Link
-                key={name}
+                key={category}
                 to="/"
+                search={{ colecoes: category }}
                 hash="catalogo"
-                activeOptions={{ includeHash: true }}
+                activeOptions={{ includeHash: true, includeSearch: true }}
                 className={linkClass}
               >
-                {name}
+                {CATEGORY_LABELS[category]}
               </Link>
             ))}
           </FooterColumn>

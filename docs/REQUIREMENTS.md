@@ -8,76 +8,76 @@ exigido) · `pendente`.
 **Teste**: arquivo de teste Playwright que cobre o item (`e2e/…`), ou o que verificou o item enquanto
 os testes E2E não existem.
 
-Última atualização: Fase 3 (contratos e backend simulado).
+Última atualização: Fase 4 (início e detalhe do NFT).
 
 ## Resumo
 
 | Seção                                         | Itens   | feito  | parcial | pendente |
 | --------------------------------------------- | ------- | ------ | ------- | -------- |
-| §3 Telas e fluxos                             | 72      | 1      | 31      | 40       |
-| §4 Integração e estado                        | 12      | 0      | 5       | 7        |
+| §3 Telas e fluxos                             | 72      | 23     | 27      | 22       |
+| §4 Integração e estado                        | 12      | 1      | 10      | 1        |
 | §5 Contratos REST                             | 12      | 12     | 0       | 0        |
-| §6 Mocking com MSW                            | 27      | 24     | 2       | 1        |
+| §6 Mocking com MSW                            | 27      | 25     | 1       | 1        |
 | §7 Tempo real com Socket.IO                   | 11      | 1      | 5       | 5        |
-| §8 Interface, responsividade e acessibilidade | 17      | 2      | 9       | 6        |
-| §9 Testes com Playwright                      | 19      | 0      | 0       | 19       |
+| §8 Interface, responsividade e acessibilidade | 17      | 2      | 13      | 2        |
+| §9 Testes com Playwright                      | 19      | 5      | 4       | 10       |
 | §10 Performance e Lighthouse                  | 9       | 0      | 0       | 9        |
-| §11 Critérios eliminatórios                   | 6       | 0      | 4       | 2        |
+| §11 Critérios eliminatórios                   | 6       | 1      | 5       | 0        |
 | §12 Entrega                                   | 11      | 3      | 5       | 3        |
-| **Total**                                     | **196** | **43** | **61**  | **92**   |
+| **Total**                                     | **196** | **73** | **70**  | **53**   |
 
 ## §3 Telas e fluxos
 
 ### Telas (tabela do §3)
 
-| ID    | Requisito                                                                                               | Status   | Onde                                           | Teste                                                 |
-| ----- | ------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------- | ----------------------------------------------------- |
-| R3.1  | Início: destaques                                                                                       | pendente |                                                |                                                       |
-| R3.2  | Início: catálogo                                                                                        | pendente |                                                |                                                       |
-| R3.3  | Início: busca                                                                                           | pendente |                                                |                                                       |
-| R3.4  | Início: filtros                                                                                         | pendente |                                                |                                                       |
-| R3.5  | Início: ordenação                                                                                       | pendente |                                                |                                                       |
-| R3.6  | Início: navegação para o NFT                                                                            | pendente |                                                |                                                       |
-| R3.7  | Detalhe: galeria                                                                                        | pendente |                                                |                                                       |
-| R3.8  | Detalhe: informações                                                                                    | pendente |                                                |                                                       |
-| R3.9  | Detalhe: edição                                                                                         | pendente |                                                |                                                       |
-| R3.10 | Detalhe: quantidade                                                                                     | pendente |                                                |                                                       |
-| R3.11 | Detalhe: favoritos                                                                                      | pendente |                                                |                                                       |
-| R3.12 | Detalhe: compra                                                                                         | pendente |                                                |                                                       |
-| R3.13 | Carrinho: edição de quantidades                                                                         | pendente |                                                |                                                       |
-| R3.14 | Carrinho: remoção                                                                                       | pendente |                                                |                                                       |
-| R3.15 | Carrinho: cupom                                                                                         | pendente |                                                |                                                       |
-| R3.16 | Carrinho: resumo de valores                                                                             | pendente |                                                |                                                       |
-| R3.17 | Pagamento: dados do colecionador                                                                        | pendente |                                                |                                                       |
-| R3.18 | Pagamento: seleção de carteira e rede                                                                   | pendente |                                                |                                                       |
-| R3.19 | Pagamento: revisão e envio do pedido                                                                    | pendente |                                                |                                                       |
-| R3.20 | Confirmação: resultado, identificação da transação, itens, taxas e total                                | pendente |                                                |                                                       |
-| R3.21 | Login: autenticação, validação e retorno ao fluxo anterior                                              | pendente |                                                |                                                       |
-| R3.22 | Cadastro: criação de conta, validação e tratamento de conflito                                          | pendente |                                                |                                                       |
-| R3.23 | Perfil: edição dos dados, avatar e alteração de senha                                                   | pendente |                                                |                                                       |
-| R3.24 | Carteiras: cadastro e edição de carteiras principal e secundária                                        | pendente |                                                |                                                       |
-| R3.25 | Frames desktop e mobile disponíveis implementados (9 desktop, 6 mobile)                                 | parcial  | `src/components/layout/`                       | `pnpm screens` (shell: header, footer, barra de abas) |
-| R3.26 | Perfil, carteiras e confirmação funcionam em mobile mesmo sem frame                                     | pendente |                                                |                                                       |
-| R3.27 | Páginas editoriais, suporte, atividade, ofertas e downloads fora da entrega, com comportamento coerente | parcial  | `src/components/common/unavailable-action.tsx` | verificação manual                                    |
-| R3.28 | Ações fora do escopo não aparentam sucesso funcional                                                    | parcial  | `UnavailableAction`, `newsletter-form.tsx`     | verificação manual                                    |
+| ID    | Requisito                                                                                               | Status   | Onde                                                                                           | Teste                    |
+| ----- | ------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- | ------------------------ |
+| R3.1  | Início: destaques                                                                                       | feito    | hero com carrossel e "NFT em destaque" (`features/catalog/hero.tsx`, `featured-banner.tsx`)    | `pnpm screens`           |
+| R3.2  | Início: catálogo                                                                                        | feito    | `routes/index.tsx`, `features/catalog/`                                                        | `e2e/catalog.spec.ts`    |
+| R3.3  | Início: busca                                                                                           | feito    | diálogo no desktop, campo no mobile; debounce e URL                                            | `e2e/catalog.spec.ts`    |
+| R3.4  | Início: filtros                                                                                         | feito    | coleções, faixa de preço e rede (sidebar e drawer)                                             | `e2e/catalog.spec.ts`    |
+| R3.5  | Início: ordenação                                                                                       | feito    | `SortSelect` (no mobile, dentro do drawer)                                                     | `e2e/catalog.spec.ts`    |
+| R3.6  | Início: navegação para o NFT                                                                            | feito    | cards com link para `/nft/$nftId`                                                              | `e2e/nft-detail.spec.ts` |
+| R3.7  | Detalhe: galeria                                                                                        | feito    | miniaturas com enquadramentos e ampliação (`features/nft/gallery.tsx`)                         | `pnpm screens`           |
+| R3.8  | Detalhe: informações                                                                                    | feito    | `features/nft/nft-detail-page.tsx`, abas de detalhes                                           | `e2e/nft-detail.spec.ts` |
+| R3.9  | Detalhe: edição                                                                                         | feito    | `EditionPicker` (radios, esgotada desabilitada e anunciada)                                    | `e2e/nft-detail.spec.ts` |
+| R3.10 | Detalhe: quantidade                                                                                     | feito    | `QuantityStepper` limitado pela disponibilidade e por pedido                                   | `e2e/nft-detail.spec.ts` |
+| R3.11 | Detalhe: favoritos                                                                                      | parcial  | `FavoriteButton` com atualização otimista; persistência por usuário depende da sessão (Fase 5) |                          |
+| R3.12 | Detalhe: compra                                                                                         | parcial  | "Comprar" adiciona pela API e leva ao carrinho; tela do carrinho na Fase 6                     |                          |
+| R3.13 | Carrinho: edição de quantidades                                                                         | pendente |                                                                                                |                          |
+| R3.14 | Carrinho: remoção                                                                                       | pendente |                                                                                                |                          |
+| R3.15 | Carrinho: cupom                                                                                         | pendente |                                                                                                |                          |
+| R3.16 | Carrinho: resumo de valores                                                                             | pendente |                                                                                                |                          |
+| R3.17 | Pagamento: dados do colecionador                                                                        | pendente |                                                                                                |                          |
+| R3.18 | Pagamento: seleção de carteira e rede                                                                   | pendente |                                                                                                |                          |
+| R3.19 | Pagamento: revisão e envio do pedido                                                                    | pendente |                                                                                                |                          |
+| R3.20 | Confirmação: resultado, identificação da transação, itens, taxas e total                                | pendente |                                                                                                |                          |
+| R3.21 | Login: autenticação, validação e retorno ao fluxo anterior                                              | pendente |                                                                                                |                          |
+| R3.22 | Cadastro: criação de conta, validação e tratamento de conflito                                          | pendente |                                                                                                |                          |
+| R3.23 | Perfil: edição dos dados, avatar e alteração de senha                                                   | pendente |                                                                                                |                          |
+| R3.24 | Carteiras: cadastro e edição de carteiras principal e secundária                                        | pendente |                                                                                                |                          |
+| R3.25 | Frames desktop e mobile disponíveis implementados (9 desktop, 6 mobile)                                 | parcial  | shell, início e detalhe (desktop e mobile)                                                     | `pnpm screens`           |
+| R3.26 | Perfil, carteiras e confirmação funcionam em mobile mesmo sem frame                                     | pendente |                                                                                                |                          |
+| R3.27 | Páginas editoriais, suporte, atividade, ofertas e downloads fora da entrega, com comportamento coerente | parcial  | `src/components/common/unavailable-action.tsx`                                                 | verificação manual       |
+| R3.28 | Ações fora do escopo não aparentam sucesso funcional                                                    | parcial  | `UnavailableAction`, `newsletter-form.tsx`                                                     | verificação manual       |
 
 ### Catálogo e detalhe
 
-| ID    | Requisito                                                     | Status   | Onde                                                                  | Teste               |
-| ----- | ------------------------------------------------------------- | -------- | --------------------------------------------------------------------- | ------------------- |
-| R3.29 | Busca, filtros, ordenação e paginação compõem o estado da URL | pendente |                                                                       |                     |
-| R3.30 | Esse estado sobrevive a refresh e à navegação pelo histórico  | pendente |                                                                       |                     |
-| R3.31 | Filtros combináveis                                           | pendente |                                                                       |                     |
-| R3.32 | Mudança de filtro reinicia a paginação                        | pendente |                                                                       |                     |
-| R3.33 | Consultas refletem os parâmetros enviados à API               | parcial  | `GET /api/nfts` aplica todos os parâmetros; consulta pela UI pendente | `pnpm verify:mocks` |
-| R3.34 | Tratamento de resultado vazio                                 | pendente |                                                                       |                     |
-| R3.35 | Tratamento de falhas                                          | pendente |                                                                       |                     |
-| R3.36 | Tratamento de respostas fora de ordem                         | parcial  | cenário `fora-de-ordem`; descarte no cliente pendente                 | `pnpm verify:mocks` |
-| R3.37 | Detalhe: acesso direto                                        | parcial  | rota `/nft/$nftId` (provisória)                                       | smoke de rotas      |
-| R3.38 | Detalhe: NFT inexistente                                      | parcial  | `GET /api/nfts/:id` → 404 `NOT_FOUND`; tela pendente                  | `pnpm verify:mocks` |
-| R3.39 | Detalhe: edição indisponível                                  | parcial  | edições com `available: 0` (ex.: Emerald Ape 1/1); tela pendente      | `pnpm verify:mocks` |
-| R3.40 | Detalhe: limite de quantidade                                 | parcial  | `maxQuantity` e 409 `AVAILABILITY_CONFLICT` na API; tela pendente     | `pnpm verify:mocks` |
-| R3.41 | Favoritos persistem para o usuário autenticado                | parcial  | favoritos persistidos por usuário na API; tela pendente               | `pnpm verify:mocks` |
+| ID    | Requisito                                                     | Status  | Onde                                                                   | Teste                    |
+| ----- | ------------------------------------------------------------- | ------- | ---------------------------------------------------------------------- | ------------------------ |
+| R3.29 | Busca, filtros, ordenação e paginação compõem o estado da URL | feito   | search params validados em `features/catalog/search-params.ts`         | `e2e/catalog.spec.ts`    |
+| R3.30 | Esse estado sobrevive a refresh e à navegação pelo histórico  | feito   | URL como fonte da verdade; histórico e refresh                         | `e2e/catalog.spec.ts`    |
+| R3.31 | Filtros combináveis                                           | feito   | coleções + redes + preço + aba + busca                                 | `e2e/catalog.spec.ts`    |
+| R3.32 | Mudança de filtro reinicia a paginação                        | feito   | `withFilter` remove `pagina`                                           | `e2e/catalog.spec.ts`    |
+| R3.33 | Consultas refletem os parâmetros enviados à API               | feito   | a requisição carrega os parâmetros da URL                              | `e2e/catalog.spec.ts`    |
+| R3.34 | Tratamento de resultado vazio                                 | feito   | `EmptyState` com "Limpar filtros"; cenário `catalogo-vazio`            | `e2e/catalog.spec.ts`    |
+| R3.35 | Tratamento de falhas                                          | feito   | `ErrorState` com nova tentativa; retry automático em falha transitória | `e2e/loading.spec.ts`    |
+| R3.36 | Tratamento de respostas fora de ordem                         | feito   | cancelamento via `signal` + chave por consulta                         | `e2e/catalog.spec.ts`    |
+| R3.37 | Detalhe: acesso direto                                        | feito   | rota `/nft/$nftId` com acesso direto e refresh                         | `e2e/nft-detail.spec.ts` |
+| R3.38 | Detalhe: NFT inexistente                                      | feito   | 404 da API → "NFT não encontrado"                                      | `e2e/nft-detail.spec.ts` |
+| R3.39 | Detalhe: edição indisponível                                  | feito   | edição esgotada desabilitada e anunciada                               | `e2e/nft-detail.spec.ts` |
+| R3.40 | Detalhe: limite de quantidade                                 | feito   | limite anunciado; "+" desabilitado no máximo                           | `e2e/nft-detail.spec.ts` |
+| R3.41 | Favoritos persistem para o usuário autenticado                | parcial | integração pronta (chave `["user", id, "favorites"]`); login na Fase 5 |                          |
 
 ### Carrinho
 
@@ -127,20 +127,20 @@ os testes E2E não existem.
 
 ## §4 Integração e estado
 
-| ID    | Requisito                                                                       | Status   | Onde                                                                                    | Teste                           |
-| ----- | ------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- | ------------------------------- |
-| R4.1  | TanStack Router nas rotas, parâmetros de busca e proteção dos fluxos privados   | parcial  | `src/routes/` (rotas criadas; search params e proteção pendentes)                       |                                 |
-| R4.2  | TanStack Query nas consultas, mutations e sincronização do cache                | parcial  | `src/app/query-client.ts` (só a consulta de diagnóstico)                                |                                 |
-| R4.3  | Chamadas REST via Axios                                                         | parcial  | `src/api/` (todas as rotas via Axios); uso nas telas pendente                           |                                 |
-| R4.4  | Contratos tipados entre transporte, estado e interface                          | parcial  | `src/contracts/` validados em `src/api/` e nos mocks; estado e interface pendentes      | typecheck + `pnpm verify:mocks` |
-| R4.5  | Estados de carregamento, vazio, erro, sucesso e atualização em segundo plano    | pendente |                                                                                         |                                 |
-| R4.6  | Invalidação coerente após mutations e eventos                                   | pendente |                                                                                         |                                 |
-| R4.7  | Cancelamento ou descarte de respostas obsoletas                                 | pendente |                                                                                         |                                 |
-| R4.8  | Isolamento dos dados por usuário e pelos parâmetros da consulta                 | pendente |                                                                                         |                                 |
-| R4.9  | Recuperação de falhas sem duplicar operações                                    | parcial  | idempotência de pedidos e retry só para falhas transitórias (`src/app/query-client.ts`) | `pnpm verify:mocks`             |
-| R4.10 | Tratamento de rotas inexistentes e acesso direto a qualquer tela prevista       | pendente | 404 e rotas provisórias existem; telas reais pendentes                                  | smoke de rotas                  |
-| R4.11 | Atualização otimista em pelo menos uma interação, com rollback em caso de falha | pendente |                                                                                         |                                 |
-| R4.12 | Política de cache, retries e sincronização documentada                          | pendente |                                                                                         |                                 |
+| ID    | Requisito                                                                       | Status   | Onde                                                                                    | Teste                                        |
+| ----- | ------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- | -------------------------------------------- |
+| R4.1  | TanStack Router nas rotas, parâmetros de busca e proteção dos fluxos privados   | parcial  | rotas e search params tipados/validados; proteção de rotas privadas na Fase 5           | `e2e/catalog.spec.ts`                        |
+| R4.2  | TanStack Query nas consultas, mutations e sincronização do cache                | parcial  | consultas do catálogo, detalhe e destaques; mutations de favoritos e carrinho           | `e2e/catalog.spec.ts`                        |
+| R4.3  | Chamadas REST via Axios                                                         | parcial  | `src/api/` (todas as rotas via Axios); uso nas telas pendente                           |                                              |
+| R4.4  | Contratos tipados entre transporte, estado e interface                          | parcial  | `src/contracts/` validados em `src/api/` e nos mocks; estado e interface pendentes      | typecheck + `pnpm verify:mocks`              |
+| R4.5  | Estados de carregamento, vazio, erro, sucesso e atualização em segundo plano    | parcial  | catálogo e detalhe com todos os estados; demais telas pendentes                         | `e2e/catalog.spec.ts`, `e2e/loading.spec.ts` |
+| R4.6  | Invalidação coerente após mutations e eventos                                   | pendente |                                                                                         |                                              |
+| R4.7  | Cancelamento ou descarte de respostas obsoletas                                 | feito    | `signal` do Query repassado ao Axios; chave por consulta                                | `e2e/catalog.spec.ts`                        |
+| R4.8  | Isolamento dos dados por usuário e pelos parâmetros da consulta                 | parcial  | isolamento por parâmetros feito; por usuário depende da sessão (Fase 5)                 | `e2e/catalog.spec.ts`                        |
+| R4.9  | Recuperação de falhas sem duplicar operações                                    | parcial  | idempotência de pedidos e retry só para falhas transitórias (`src/app/query-client.ts`) | `pnpm verify:mocks`                          |
+| R4.10 | Tratamento de rotas inexistentes e acesso direto a qualquer tela prevista       | parcial  | 404 e acesso direto; telas de carrinho, pagamento e conta ainda provisórias             | `e2e/nft-detail.spec.ts`                     |
+| R4.11 | Atualização otimista em pelo menos uma interação, com rollback em caso de falha | parcial  | favoritos otimistas com rollback; teste de falha com sessão na Fase 5                   |                                              |
+| R4.12 | Política de cache, retries e sincronização documentada                          | parcial  | ARCHITECTURE.md › Estado e cache; sincronização em tempo real pendente                  |                                              |
 
 ## §5 Contratos REST
 
@@ -164,7 +164,7 @@ os testes E2E não existem.
 | ID    | Requisito                                                                                      | Status   | Onde                                                                                 | Teste                                                       |
 | ----- | ---------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
 | R6.1  | Mocks na camada de rede                                                                        | feito    | `src/mocks/` (REST e socket)                                                         | `pnpm verify:mocks`                                         |
-| R6.2  | Contratos e cenários reutilizados entre desenvolvimento, demonstração e testes                 | parcial  | mesmos handlers em dev e demo; uso nos testes E2E pendente                           | `pnpm verify:mocks`                                         |
+| R6.2  | Contratos e cenários reutilizados entre desenvolvimento, demonstração e testes                 | feito    | os testes E2E usam os mesmos handlers e cenários (`?cenario=`)                       | `e2e/catalog.spec.ts`, `e2e/loading.spec.ts`                |
 | R6.3  | Componentes, hooks e cliente Axios sem respostas fictícias ou caminhos alternativos de negócio | parcial  | regra seguida até aqui; verificação final pendente                                   | revisão de código                                           |
 | R6.4  | Estado consistente entre catálogo, favoritos, carrinho, perfil, carteiras e pedidos            | feito    | estado único em `src/mocks/db/`; eventos publicados a cada alteração                 | `pnpm verify:mocks`                                         |
 | R6.5  | Persistência local para sustentar refresh                                                      | feito    | `localStorage` (`kurio:mock:db`)                                                     | `pnpm verify:mocks`                                         |
@@ -209,49 +209,49 @@ os testes E2E não existem.
 
 ## §8 Interface, responsividade e acessibilidade
 
-| ID    | Requisito                                                                                        | Status   | Onde                                                             | Teste           |
-| ----- | ------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------- | --------------- |
-| R8.1  | Preservar tipografia, cores, espaçamentos, hierarquia, imagens, proporções e composição do Figma | parcial  | tokens e shell                                                   | `pnpm screens`  |
-| R8.2  | Componentes shadcn/ui adaptados à identidade visual                                              | feito    | `src/components/ui/`                                             | `pnpm screens`  |
-| R8.3  | Todas as telas em desktop, tablet e mobile; mínimo 390, 768 e 1440px                             | parcial  | shell verificado nas três larguras                               | `pnpm screens`  |
-| R8.4  | Skeletons com shimmer em catálogo, detalhe e resumo do carrinho                                  | parcial  | componente `Skeleton`; uso pendente                              |                 |
-| R8.5  | Skeletons preservam as dimensões (sem deslocamento de layout)                                    | pendente |                                                                  |                 |
-| R8.6  | Respeitar preferência por movimento reduzido                                                     | feito    | `src/styles/index.css`, `Skeleton`                               |                 |
-| R8.7  | Navegação por teclado e foco visível                                                             | parcial  | foco global, link "Pular para o conteúdo"                        | smoke (teclado) |
-| R8.8  | Controle de foco em diálogos e drawers                                                           | parcial  | Radix Dialog/Sheet; uso pendente                                 |                 |
-| R8.9  | Semântica adequada, labels e mensagens de erro associadas aos campos                             | parcial  | newsletter; demais formulários pendentes                         |                 |
-| R8.10 | Alternativas textuais para imagens relevantes                                                    | pendente |                                                                  |                 |
-| R8.11 | Contraste legível                                                                                | pendente | auditoria pendente                                               |                 |
-| R8.12 | Estados não dependentes apenas de cor                                                            | pendente |                                                                  |                 |
-| R8.13 | Feedback acessível para mutations                                                                | pendente |                                                                  |                 |
-| R8.14 | Feedback acessível para alterações em tempo real                                                 | pendente |                                                                  |                 |
-| R8.15 | Sem overflow horizontal indevido nem perda de conteúdo com zoom                                  | parcial  | sem overflow no shell                                            | `pnpm screens`  |
-| R8.16 | Usar os assets do arquivo; imagens e fontes acessíveis à execução local                          | parcial  | ícones e imagens do Figma em `public/assets/`; fonte self-hosted |                 |
-| R8.17 | Documentar substituições de assets e ajustes de acessibilidade em relação ao layout              | parcial  | ARCHITECTURE.md (ícones)                                         |                 |
+| ID    | Requisito                                                                                        | Status   | Onde                                                                                           | Teste                 |
+| ----- | ------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------- | --------------------- |
+| R8.1  | Preservar tipografia, cores, espaçamentos, hierarquia, imagens, proporções e composição do Figma | parcial  | shell, início e detalhe conferidos com o Figma                                                 | `pnpm screens`        |
+| R8.2  | Componentes shadcn/ui adaptados à identidade visual                                              | feito    | `src/components/ui/`                                                                           | `pnpm screens`        |
+| R8.3  | Todas as telas em desktop, tablet e mobile; mínimo 390, 768 e 1440px                             | parcial  | shell, início e detalhe em 390, 768 e 1440 sem overflow                                        | `pnpm screens`        |
+| R8.4  | Skeletons com shimmer em catálogo, detalhe e resumo do carrinho                                  | parcial  | catálogo e detalhe; resumo do carrinho na Fase 6                                               | `e2e/loading.spec.ts` |
+| R8.5  | Skeletons preservam as dimensões (sem deslocamento de layout)                                    | parcial  | skeletons do catálogo e do detalhe com as dimensões finais                                     | `e2e/loading.spec.ts` |
+| R8.6  | Respeitar preferência por movimento reduzido                                                     | feito    | `src/styles/index.css`, `Skeleton`                                                             |                       |
+| R8.7  | Navegação por teclado e foco visível                                                             | parcial  | foco visível, pular para o conteúdo, filtros e abas por teclado                                | `e2e/catalog.spec.ts` |
+| R8.8  | Controle de foco em diálogos e drawers                                                           | parcial  | drawer de filtros (foco preso e devolvido) e diálogos de busca/ampliação                       | `e2e/catalog.spec.ts` |
+| R8.9  | Semântica adequada, labels e mensagens de erro associadas aos campos                             | parcial  | filtros, slider, newsletter e busca com rótulos; demais formulários pendentes                  |                       |
+| R8.10 | Alternativas textuais para imagens relevantes                                                    | parcial  | artes com o nome do NFT como alternativa; decorativas com `alt=""`                             |                       |
+| R8.11 | Contraste legível                                                                                | pendente | auditoria pendente                                                                             |                       |
+| R8.12 | Estados não dependentes apenas de cor                                                            | parcial  | filtro marcado com sinal, edição esgotada riscada e anunciada, página atual com `aria-current` |                       |
+| R8.13 | Feedback acessível para mutations                                                                | parcial  | toasts (região viva do sonner) para favoritos e carrinho                                       |                       |
+| R8.14 | Feedback acessível para alterações em tempo real                                                 | pendente |                                                                                                |                       |
+| R8.15 | Sem overflow horizontal indevido nem perda de conteúdo com zoom                                  | parcial  | início e detalhe sem overflow em 390/768/1440                                                  | `pnpm screens`        |
+| R8.16 | Usar os assets do arquivo; imagens e fontes acessíveis à execução local                          | parcial  | ícones e imagens do Figma em `public/assets/`; fonte self-hosted                               |                       |
+| R8.17 | Documentar substituições de assets e ajustes de acessibilidade em relação ao layout              | parcial  | ARCHITECTURE.md (ícones)                                                                       |                       |
 
 ## §9 Testes com Playwright
 
-| ID    | Requisito                                                                                             | Status   | Onde                         | Teste |
-| ----- | ----------------------------------------------------------------------------------------------------- | -------- | ---------------------------- | ----- |
-| R9.1  | Busca, filtros combinados, ordenação, paginação e restauração pelo histórico                          | pendente |                              |       |
-| R9.2  | Acesso direto ao detalhe e tratamento de recurso inexistente                                          | pendente |                              |       |
-| R9.3  | Cadastro, login, expiração de sessão, logout e troca de usuário                                       | pendente |                              |       |
-| R9.4  | Favoritos, incluindo falha de mutation e recuperação do estado                                        | pendente |                              |       |
-| R9.5  | Carrinho, quantidades, remoção, cupom e persistência após refresh/login                               | pendente |                              |       |
-| R9.6  | Compra completa, do catálogo ao recibo confirmado                                                     | pendente |                              |       |
-| R9.7  | Falha de pagamento, clique repetido e timeout com recuperação do mesmo pedido                         | pendente |                              |       |
-| R9.8  | Edição de perfil, avatar, senha e carteiras, com erros de validação                                   | pendente |                              |       |
-| R9.9  | Alteração de preço/disponibilidade via Socket.IO durante o checkout                                   | pendente |                              |       |
-| R9.10 | Eventos duplicados ou antigos, desconexão e retomada de pedido pendente                               | pendente |                              |       |
-| R9.11 | Navegação por teclado, foco de diálogos e validação de formulários                                    | pendente |                              |       |
-| R9.12 | Skeletons durante carregamento lento, feedback de falha e recuperação após nova tentativa             | pendente |                              |       |
-| R9.13 | Fluxos principais em Chromium, nos viewports desktop e mobile                                         | pendente | `@playwright/test` instalado |       |
-| R9.14 | Regressão visual de início, detalhe, carrinho e pagamento, com baselines versionadas e dados estáveis | pendente |                              |       |
-| R9.15 | Cada teste parte de um estado isolado                                                                 | pendente |                              |       |
-| R9.16 | Controle de relógio, latência e disparo de eventos nos cenários sensíveis a tempo                     | pendente |                              |       |
-| R9.17 | Relatório HTML e traces das falhas                                                                    | pendente |                              |       |
-| R9.18 | Verificações observam a interface e os resultados das operações                                       | pendente |                              |       |
-| R9.19 | Tempo real passa pelo cliente Socket.IO; REST pelos handlers MSW                                      | pendente |                              |       |
+| ID    | Requisito                                                                                             | Status   | Onde                                                                                | Teste                    |
+| ----- | ----------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- | ------------------------ |
+| R9.1  | Busca, filtros combinados, ordenação, paginação e restauração pelo histórico                          | feito    | busca, filtros combinados, ordenação, paginação, histórico, vazio e fora de ordem   | `e2e/catalog.spec.ts`    |
+| R9.2  | Acesso direto ao detalhe e tratamento de recurso inexistente                                          | feito    | acesso direto, edição esgotada, limite e NFT inexistente                            | `e2e/nft-detail.spec.ts` |
+| R9.3  | Cadastro, login, expiração de sessão, logout e troca de usuário                                       | pendente |                                                                                     |                          |
+| R9.4  | Favoritos, incluindo falha de mutation e recuperação do estado                                        | pendente |                                                                                     |                          |
+| R9.5  | Carrinho, quantidades, remoção, cupom e persistência após refresh/login                               | pendente |                                                                                     |                          |
+| R9.6  | Compra completa, do catálogo ao recibo confirmado                                                     | pendente |                                                                                     |                          |
+| R9.7  | Falha de pagamento, clique repetido e timeout com recuperação do mesmo pedido                         | pendente |                                                                                     |                          |
+| R9.8  | Edição de perfil, avatar, senha e carteiras, com erros de validação                                   | pendente |                                                                                     |                          |
+| R9.9  | Alteração de preço/disponibilidade via Socket.IO durante o checkout                                   | pendente |                                                                                     |                          |
+| R9.10 | Eventos duplicados ou antigos, desconexão e retomada de pedido pendente                               | pendente |                                                                                     |                          |
+| R9.11 | Navegação por teclado, foco de diálogos e validação de formulários                                    | parcial  | drawer de filtros (foco preso e devolvido)                                          | `e2e/catalog.spec.ts`    |
+| R9.12 | Skeletons durante carregamento lento, feedback de falha e recuperação após nova tentativa             | feito    | skeleton (e movimento reduzido), falha com nova tentativa e retry automático        | `e2e/loading.spec.ts`    |
+| R9.13 | Fluxos principais em Chromium, nos viewports desktop e mobile                                         | parcial  | projetos Chromium desktop e mobile configurados; fluxos de compra e conta pendentes | `playwright.config.ts`   |
+| R9.14 | Regressão visual de início, detalhe, carrinho e pagamento, com baselines versionadas e dados estáveis | pendente |                                                                                     |                          |
+| R9.15 | Cada teste parte de um estado isolado                                                                 | feito    | contexto novo por teste: storage vazio, seed e deslogado                            | `e2e/support.ts`         |
+| R9.16 | Controle de relógio, latência e disparo de eventos nos cenários sensíveis a tempo                     | pendente |                                                                                     |                          |
+| R9.17 | Relatório HTML e traces das falhas                                                                    | feito    | relatório HTML e trace/vídeo/screenshot em falhas                                   | `playwright.config.ts`   |
+| R9.18 | Verificações observam a interface e os resultados das operações                                       | parcial  | os testes verificam a interface e as requisições à API                              | `e2e/catalog.spec.ts`    |
+| R9.19 | Tempo real passa pelo cliente Socket.IO; REST pelos handlers MSW                                      | parcial  | REST pelos handlers MSW; testes de Socket.IO nas Fases 6 e 7                        | `e2e/catalog.spec.ts`    |
 
 ## §10 Performance e Lighthouse
 
@@ -269,27 +269,27 @@ os testes E2E não existem.
 
 ## §11 Critérios eliminatórios
 
-| ID    | Requisito                                           | Status   | Onde                                                                      | Teste               |
-| ----- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------- | ------------------- |
-| R11.1 | Uso efetivo de toda a stack obrigatória             | parcial  | todas instaladas e configuradas; uso efetivo nos fluxos pendente          |                     |
-| R11.2 | Nenhum fluxo principal apenas visual                | pendente |                                                                           |                     |
-| R11.3 | Compra confirmada somente com resposta da simulação | parcial  | pedido só é confirmado pela simulação (`domain/orders.ts`); tela pendente | `pnpm verify:mocks` |
-| R11.4 | Nenhuma exposição de dados entre usuários           | parcial  | pedidos e eventos isolados por usuário na API; cache por usuário pendente | `pnpm verify:mocks` |
-| R11.5 | Eventos nunca simulados diretamente na UI           | parcial  | eventos só saem do servidor simulado (`src/mocks/socket`)                 | smoke de produção   |
-| R11.6 | Testes E2E executáveis                              | pendente |                                                                           |                     |
+| ID    | Requisito                                           | Status  | Onde                                                                      | Teste                 |
+| ----- | --------------------------------------------------- | ------- | ------------------------------------------------------------------------- | --------------------- |
+| R11.1 | Uso efetivo de toda a stack obrigatória             | parcial | todas instaladas e configuradas; uso efetivo nos fluxos pendente          |                       |
+| R11.2 | Nenhum fluxo principal apenas visual                | parcial | catálogo e detalhe funcionais pela API; compra e conta pendentes          | `e2e/catalog.spec.ts` |
+| R11.3 | Compra confirmada somente com resposta da simulação | parcial | pedido só é confirmado pela simulação (`domain/orders.ts`); tela pendente | `pnpm verify:mocks`   |
+| R11.4 | Nenhuma exposição de dados entre usuários           | parcial | pedidos e eventos isolados por usuário na API; cache por usuário pendente | `pnpm verify:mocks`   |
+| R11.5 | Eventos nunca simulados diretamente na UI           | parcial | eventos só saem do servidor simulado (`src/mocks/socket`)                 | smoke de produção     |
+| R11.6 | Testes E2E executáveis                              | feito   | `pnpm test:e2e` (33 testes, desktop e mobile)                             | `e2e/`                |
 
 ## §12 Entrega
 
-| ID     | Requisito                                                                                                                  | Status   | Onde                                                                                    | Teste           |
-| ------ | -------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- | --------------- |
-| R12.1  | Código-fonte, lockfile, assets, mocks, fixtures, testes e configurações de auditoria                                       | parcial  | código, lockfile, assets, mocks e fixtures versionados; testes e auditoria pendentes    |                 |
-| R12.2  | Deploy público (Vercel)                                                                                                    | feito    | https://kurio-nft-marketplace-iota.vercel.app                                           | smoke na Vercel |
-| R12.3  | Versão publicada corresponde ao código, com mocks e tempo real funcionando                                                 | parcial  | deploy por push na `main`                                                               | smoke na Vercel |
-| R12.4  | Acesso direto e refresh das rotas no ambiente publicado                                                                    | feito    | `vercel.json`                                                                           | smoke na Vercel |
-| R12.5  | README: setup, variáveis de ambiente, credenciais fictícias, seleção e reset de cenários, comandos e reprodução das falhas | pendente |                                                                                         |                 |
-| R12.6  | Documentar contratos REST e eventos                                                                                        | feito    | `docs/API.md`                                                                           |                 |
-| R12.7  | Documentar política de sessão                                                                                              | parcial  | ARCHITECTURE.md › Sessão                                                                |                 |
-| R12.8  | Documentar estado do carrinho, estratégia de cache e reconciliação REST + Socket.IO                                        | pendente |                                                                                         |                 |
-| R12.9  | ARCHITECTURE.md com limitações, decisões de UX e desvios do Figma                                                          | parcial  | ARCHITECTURE.md                                                                         |                 |
-| R12.10 | Comandos: dev com mocks, build, preview, typecheck, lint, testes Playwright e Lighthouse                                   | parcial  | dev, build, preview, typecheck, lint, `verify:mocks`; Playwright e Lighthouse pendentes |                 |
-| R12.11 | Execução a partir de um checkout limpo, sem serviços privados nem backend de produção                                      | pendente | verificado na Fase 1; reverificar no fim                                                |                 |
+| ID     | Requisito                                                                                                                  | Status   | Onde                                                                                 | Teste           |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ | --------------- |
+| R12.1  | Código-fonte, lockfile, assets, mocks, fixtures, testes e configurações de auditoria                                       | parcial  | código, lockfile, assets, mocks e fixtures versionados; testes e auditoria pendentes |                 |
+| R12.2  | Deploy público (Vercel)                                                                                                    | feito    | https://kurio-nft-marketplace-iota.vercel.app                                        | smoke na Vercel |
+| R12.3  | Versão publicada corresponde ao código, com mocks e tempo real funcionando                                                 | parcial  | deploy por push na `main`                                                            | smoke na Vercel |
+| R12.4  | Acesso direto e refresh das rotas no ambiente publicado                                                                    | feito    | `vercel.json`                                                                        | smoke na Vercel |
+| R12.5  | README: setup, variáveis de ambiente, credenciais fictícias, seleção e reset de cenários, comandos e reprodução das falhas | pendente |                                                                                      |                 |
+| R12.6  | Documentar contratos REST e eventos                                                                                        | feito    | `docs/API.md`                                                                        |                 |
+| R12.7  | Documentar política de sessão                                                                                              | parcial  | ARCHITECTURE.md › Sessão                                                             |                 |
+| R12.8  | Documentar estado do carrinho, estratégia de cache e reconciliação REST + Socket.IO                                        | pendente |                                                                                      |                 |
+| R12.9  | ARCHITECTURE.md com limitações, decisões de UX e desvios do Figma                                                          | parcial  | ARCHITECTURE.md                                                                      |                 |
+| R12.10 | Comandos: dev com mocks, build, preview, typecheck, lint, testes Playwright e Lighthouse                                   | parcial  | dev, build, preview, typecheck, lint, test:e2e e verify:mocks; Lighthouse pendente   |                 |
+| R12.11 | Execução a partir de um checkout limpo, sem serviços privados nem backend de produção                                      | pendente | verificado na Fase 1; reverificar no fim                                             |                 |

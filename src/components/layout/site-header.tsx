@@ -1,10 +1,11 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 
 import { UnavailableAction } from '@/components/common/unavailable-action'
-import { Cart, Search, SignIn } from '@/components/icons'
+import { Cart, SignIn } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 import { isMarketPath } from './navigation'
+import { SearchDialog } from './search-dialog'
 
 const navItemClass =
   'text-16 text-foreground hover:text-accent-text -mb-px inline-flex h-full items-center border-b-[3px] border-transparent pt-1 transition-colors'
@@ -58,15 +59,7 @@ export function SiteHeader({ cartCount }: { cartCount?: number }) {
         </nav>
 
         <div className="flex items-center gap-6">
-          <Link
-            to="/"
-            hash="busca"
-            activeOptions={{ includeHash: true }}
-            aria-label="Buscar NFTs"
-            className="transition-colors hover:text-accent-text"
-          >
-            <Search className="size-6" />
-          </Link>
+          <SearchDialog />
           <CartLink count={cartCount} />
           <Link
             to="/entrar"
