@@ -7,6 +7,7 @@ import {
   logout,
   openApp,
   socketTokens,
+  startCheckout,
   submitLogin,
   USERS,
 } from './support'
@@ -259,6 +260,35 @@ test.describe('Sessão expirada', () => {
 })
 
 test.describe('Logout, troca de usuário e isolamento', () => {
+  test('outro usuário que entra apaga o rascunho de checkout preservado da conta anterior', async ({
+    page,
+  }) => {
+    await startCheckout(page)
+    await page
+      .getByRole('form', { name: 'Dados do colecionador' })
+      .getByLabel('Observação do colecionador (opcional)')
+      .fill('Dado pessoal da Ana')
+    const anaDraft = () =>
+      page.evaluate(() =>
+        Object.keys(localStorage).filter((key) => key === 'kurio:app:checkout:usr_ana'),
+      )
+    await expect.poll(anaDraft).toHaveLength(1)
+
+    // A sessão da Ana expira: o rascunho fica, para ela retomar.
+    await page.evaluate(() => window.__kurioMock!.session.expireAll())
+    await page.goto('/pagamento')
+    await expect(page).toHaveURL(/\/entrar\?redirect=%2Fpagamento/)
+    expect(await anaDraft()).toHaveLength(1)
+
+    // Quem entra é o Bruno: o rascunho da Ana sai do navegador.
+    await submitLogin(page, USERS.bruno)
+    await expect(page).not.toHaveURL(/\/entrar/)
+    await expect.poll(anaDraft).toHaveLength(0)
+    expect(
+      await page.evaluate(() => JSON.stringify(localStorage).includes('Dado pessoal da Ana')),
+    ).toBe(false)
+  })
+
   test('logout encerra a sessão e as subscriptions', async ({ page }, testInfo) => {
     await loginAs(page, USERS.ana)
     await expect.poll(() => socketTokens(page)).toHaveLength(1)

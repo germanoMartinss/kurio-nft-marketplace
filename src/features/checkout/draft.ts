@@ -57,6 +57,22 @@ export function clearCheckoutDraft(userId: string) {
   writeJson(CLIENT_KEYS.checkoutDraft(userId), null)
 }
 
+/**
+ * Apaga os rascunhos de checkout de todos os usuários, exceto `userId`. Chamado quando um usuário
+ * entra: o rascunho preservado na expiração de outra conta (dados pessoais do comprador) não pode
+ * continuar no navegador de quem entrou depois.
+ */
+export function clearOtherCheckoutDrafts(userId: string) {
+  const own = CLIENT_KEYS.checkoutDraft(userId)
+  const prefix = CLIENT_KEYS.checkoutDraft('')
+  try {
+    for (const key of Object.keys(localStorage))
+      if (key.startsWith(prefix) && key !== own) localStorage.removeItem(key)
+  } catch {
+    // Sem storage não há rascunho guardado.
+  }
+}
+
 /** Encerra a tentativa (pedido em estado terminal), mantendo o que o usuário já preencheu. */
 export function clearAttempt(userId: string) {
   saveCheckoutDraft(userId, { ...loadCheckoutDraft(userId), attempt: null })

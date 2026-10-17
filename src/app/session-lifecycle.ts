@@ -6,7 +6,7 @@ import { getSession } from '@/api/auth'
 import { isAuthPath } from '@/features/auth/redirect'
 import { isPrivatePath } from '@/features/auth/private-paths'
 import { sessionStore } from '@/features/auth/session-store'
-import { clearCheckoutDraft } from '@/features/checkout/draft'
+import { clearCheckoutDraft, clearOtherCheckoutDrafts } from '@/features/checkout/draft'
 import { sessionSocket } from '@/realtime/session-socket'
 
 /**
@@ -35,6 +35,8 @@ export function bindSessionLifecycle(queryClient: QueryClient, router: AnyRouter
       // descartados no logout e na troca de usuário.
       if (!sessionStore.endedByExpiry()) clearCheckoutDraft(previousUserId)
     }
+    // Entrou um usuário: rascunhos de outras contas (preservados por expiração) saem do navegador.
+    if (userId && userId !== previousUserId) clearOtherCheckoutDrafts(userId)
     if ((session?.token ?? null) !== previousToken)
       void sessionSocket.attach(session?.token ?? null)
     previousUserId = userId
