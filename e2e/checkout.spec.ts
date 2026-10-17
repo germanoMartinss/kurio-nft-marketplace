@@ -9,6 +9,8 @@ import {
   receipt,
   reviewDialog,
   startCheckout,
+  submitLogin,
+  USERS,
 } from './support'
 
 test.describe('Compra completa', () => {
@@ -96,6 +98,35 @@ test.describe('Formulário e revisão', () => {
         .getByRole('form', { name: 'Dados do colecionador' })
         .getByLabel('Observação do colecionador (opcional)'),
     ).toHaveValue('Entregar na carteira cold')
+  })
+})
+
+test.describe('Sessão expirada no checkout', () => {
+  test('confirmar com a sessão expirada leva ao login e restaura o formulário', async ({
+    page,
+  }) => {
+    await startCheckout(page)
+    const form = () => page.getByRole('form', { name: 'Dados do colecionador' })
+    await form().getByLabel('Nome de exibição').fill('Ana Colecionadora')
+    await form().getByLabel('Código de indicação').fill('RETOMA2026')
+    await form().getByLabel('Observação do colecionador (opcional)').fill('Entregar na cold wallet')
+
+    await page.evaluate(() => window.__kurioMock!.session.expireAll())
+    await confirmPurchaseButton(page).click()
+
+    // A cotação recebe 401: aviso, login com retorno ao checkout e nenhum pedido criado.
+    await expect(page).toHaveURL(/\/entrar\?redirect=%2Fpagamento/)
+    await expect(page.getByText('Sua sessão expirou').first()).toBeVisible()
+    await submitLogin(page, USERS.ana)
+    await expect(page).toHaveURL(/\/pagamento$/)
+
+    await expect(form().getByLabel('Nome de exibição')).toHaveValue('Ana Colecionadora')
+    await expect(form().getByLabel('Código de indicação')).toHaveValue('RETOMA2026')
+    await expect(form().getByLabel('Observação do colecionador (opcional)')).toHaveValue(
+      'Entregar na cold wallet',
+    )
+    expect(await apiOrders(page)).toHaveLength(0)
+    await openReview(page)
   })
 })
 
