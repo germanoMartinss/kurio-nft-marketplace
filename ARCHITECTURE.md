@@ -284,6 +284,47 @@ honesta: o MSW responde dentro do navegador e só consegue gravar cookies via `d
 por definição não são `httpOnly`. Simular um cookie que se comporta diferente do real seria pior do
 que assumir o Bearer e documentar a diferença.
 
+### Ciclo de vida da sessão (Fase 5)
+
+`bindSessionLifecycle` (`src/app/session-lifecycle.ts`) fica **fora do React** e reage à store da
+sessão (`features/auth/session-store.ts`), então vale também para mudanças vindas de outra aba
+(evento `storage`).
+
+- **Troca de usuário, logout e expiração**: `cancelQueries` + `removeQueries(['user', idAnterior])`
+  e troca do socket. Os dados privados ficam sempre sob `['user', id]`, então, mesmo antes da
+  limpeza, o usuário B nunca lê a chave do A. Uma mutation do A ainda em voo pode recriar uma chave
+  `['user', A, …]` ao falhar; ela é inalcançável para o B e some no próximo `gcTime`.
+- **Expiração (401 `SESSION_EXPIRED`/`UNAUTHENTICATED`)** é detectada em dois pontos: no
+  interceptor do Axios (qualquer chamada privada) e no `beforeLoad` das rotas privadas
+  (`requireAuth`, que valida a sessão com a API antes de renderizar). O interceptor só encerra a
+  sessão se o token recusado ainda é o da sessão atual: resposta tardia do usuário anterior não
+  derruba quem entrou depois. Em rota privada, avisa e vai a `/entrar?redirect=<destino>` (usa
+  `router.latestLocation`, que inclui a navegação em curso); em página pública, avisa e oferece
+  "Entrar". Após novo login, volta ao destino.
+- **Refresh**: o token fica no `localStorage` e é revalidado em segundo plano no boot; falha de rede
+  não derruba a sessão, 401 sim.
+- **Login**: grava a sessão, une o carrinho de visitante (`POST /cart/merge`) e só então sai da tela;
+  falha na junção não bloqueia o login (aviso; os itens seguem no carrinho de visitante).
+- **Rascunhos** (checkout, Fase 7) serão guardados por `userId`: preservados na expiração do
+  mesmo usuário e descartados no logout/troca.
+- **Socket por sessão** (`src/realtime/session-socket.ts`): conexão própria (`forceNew`) com o
+  token no handshake; ao trocar de sessão o anterior perde todos os listeners e é desconectado.
+- **Armadilha**: o `engine.io-client` guarda o `WebSocket` global ao ser avaliado. Importado antes
+  de o MSW subir, ele fica com o WebSocket nativo e escapa dos mocks. Por isso `socket.io-client` é
+  importado dinamicamente em `createRealtimeSocket`; nenhum import estático dele pode entrar no
+  caminho do `main.tsx`.
+
+### Desvios do Figma nas telas de autenticação
+
+- Os campos têm só placeholder no layout; ganharam `label` oculto visualmente (`sr-only`) para
+  leitores de tela, e mensagens de erro com ícone + texto (não só cor).
+- O fundo da página atrás do diálogo tem véu leve (25%); o Figma não escurece.
+- No frame mobile de cadastro o placeholder de "Nome de usuário" está centralizado; mantivemos o
+  alinhamento à esquerda dos demais campos.
+- "Esqueceu a senha?" e "Continuar com Google/Facebook" estão fora do escopo: anunciados como
+  indisponíveis (`UnavailableAction`), sem simular sucesso.
+- Logout no mobile fica na tela de perfil (Fase 8); o menu do usuário do header é só desktop.
+
 ## Rotas
 
 Paths em pt-BR. A URL é a fonte da verdade: `/entrar` e `/cadastro` são rotas próprias (acesso

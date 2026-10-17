@@ -2,10 +2,12 @@ import { Link, useRouterState } from '@tanstack/react-router'
 
 import { UnavailableAction } from '@/components/common/unavailable-action'
 import { Cart, SignIn } from '@/components/icons'
+import { useSessionUser } from '@/features/auth/session-store'
 import { cn } from '@/lib/utils'
 
 import { isMarketPath } from './navigation'
 import { SearchDialog } from './search-dialog'
+import { UserMenu } from './user-menu'
 
 const navItemClass =
   'text-16 text-foreground hover:text-accent-text -mb-px inline-flex h-full items-center border-b-[3px] border-transparent pt-1 transition-colors'
@@ -14,6 +16,7 @@ const navItemActiveClass = 'border-primary text-accent-text font-bold'
 export function SiteHeader({ cartCount }: { cartCount?: number }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const isMarket = isMarketPath(pathname)
+  const user = useSessionUser()
 
   return (
     <header className="container-page hidden pt-5 lg:block">
@@ -61,13 +64,17 @@ export function SiteHeader({ cartCount }: { cartCount?: number }) {
         <div className="flex items-center gap-6">
           <SearchDialog />
           <CartLink count={cartCount} />
-          <Link
-            to="/entrar"
-            className="flex h-[34px] items-center gap-1.5 rounded-md bg-primary px-2.5 text-16 font-medium text-primary-foreground hover:brightness-110"
-          >
-            <SignIn className="size-5" />
-            Entrar
-          </Link>
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <Link
+              to="/entrar"
+              className="flex h-[34px] items-center gap-1.5 rounded-md bg-primary px-2.5 text-16 font-medium text-primary-foreground hover:brightness-110"
+            >
+              <SignIn className="size-5" />
+              Entrar
+            </Link>
+          )}
         </div>
       </div>
     </header>

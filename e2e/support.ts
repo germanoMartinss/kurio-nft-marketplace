@@ -3,6 +3,8 @@ import { expect, type Page, type TestInfo } from '@playwright/test'
 /** Subconjunto do controle de mocks (`window.__kurioMock`) usado pelos testes. */
 interface MockControl {
   scenarios: { set: (id: string) => void; active: () => string }
+  session: { expireAll: () => void }
+  realtime: { connections: () => { id: string; auth: { token?: string } | null }[] }
 }
 declare global {
   interface Window {
@@ -62,3 +64,40 @@ export async function searchFor(page: Page, testInfo: TestInfo, term: string) {
     await page.getByRole('button', { name: 'Buscar', exact: true }).click()
   }
 }
+
+export const USERS = {
+  ana: { email: 'ana@kurio.dev', password: 'Kurio@2026', name: 'Ana Lima' },
+  bruno: { email: 'bruno@kurio.dev', password: 'Colecao#77', name: 'Bruno Sato' },
+}
+
+/** Preenche e envia o formulário de login (desktop: diálogo; mobile: página). */
+export async function submitLogin(page: Page, user: { email: string; password: string }) {
+  const form = page.getByRole('form', { name: 'Entrar' })
+  await form.getByLabel('E-mail').fill(user.email)
+  await form.getByLabel('Senha', { exact: true }).fill(user.password)
+  await form.getByRole('button', { name: 'Entrar', exact: true }).click()
+}
+
+/** Entra pela interface e espera sair da tela de login. */
+export async function loginAs(
+  page: Page,
+  user: { email: string; password: string },
+  scenario = 'padrao',
+) {
+  await openApp(page, '/entrar', scenario)
+  await submitLogin(page, user)
+  await expect(page).not.toHaveURL(/\/entrar/)
+}
+
+/** Botão de favoritar visível (detalhe do NFT; layout desktop ou mobile). */
+export const favoriteButton = (page: Page) =>
+  page
+    .getByRole('button', {
+      name: /^(Favoritar|Favoritado|Adicionar .* à lista de interesse|Remover .* da lista de interesse)$/,
+    })
+    .filter({ visible: true })
+    .first()
+
+/** Tokens das conexões Socket.IO abertas no servidor simulado (vazio = visitante). */
+export const socketTokens = (page: Page) =>
+  page.evaluate(() => window.__kurioMock!.realtime.connections().map((c) => c.auth?.token ?? ''))
