@@ -147,6 +147,13 @@ export const SCENARIOS: Scenario[] = [
     cartChange: { kind: 'esgotar', afterMs: 4000 },
   }),
   define({
+    id: 'favoritos-falham',
+    label: 'Falha ao favoritar',
+    description:
+      'A primeira inclusão de favorito responde 503 (a interface reverte); a segunda funciona.',
+    failures: [{ method: 'PUT', path: '/favorites/*', status: 503, code: 'TRANSIENT', times: 1 }],
+  }),
+  define({
     id: 'timeout-pedido',
     label: 'Timeout ao criar pedido',
     description:

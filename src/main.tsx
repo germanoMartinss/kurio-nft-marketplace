@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client'
 
 import { createQueryClient } from './app/query-client'
 import { createAppRouter } from './app/router'
+import { bindSessionLifecycle } from './app/session-lifecycle'
 import { env } from './env'
 
 async function enableMocking() {
@@ -22,6 +23,7 @@ async function startApp() {
 
   const queryClient = createQueryClient()
   const router = createAppRouter(queryClient)
+  bindSessionLifecycle(queryClient, router)
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

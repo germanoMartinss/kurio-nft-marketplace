@@ -1,9 +1,10 @@
 import axios from 'axios'
 
 import { env } from '@/env'
-import { CLIENT_KEYS, getGuestId, readJson } from '@/lib/client-storage'
+import { sessionStore } from '@/features/auth/session-store'
+import { getGuestId } from '@/lib/client-storage'
 
-import { toApiRequestError } from './errors'
+import { ApiRequestError, toApiRequestError } from './errors'
 
 /**
  * Instância única do Axios. Toda chamada REST da aplicação passa por aqui: o interceptor de
@@ -17,10 +18,24 @@ export const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
-  const session = readJson<{ token: string }>(CLIENT_KEYS.session)
+  const session = sessionStore.get()
   if (session?.token) config.headers.Authorization = `Bearer ${session.token}`
   config.headers['X-Guest-Id'] = getGuestId()
   return config
 })
 
-http.interceptors.response.use(undefined, (error) => Promise.reject(toApiRequestError(error)))
+http.interceptors.response.use(undefined, (error) => {
+  const normalized = toApiRequestError(error)
+  // Sessão recusada pela API (expirada ou inválida): encerra a sessão que enviou esse token.
+  if (
+    normalized instanceof ApiRequestError &&
+    normalized.status === 401 &&
+    (normalized.code === 'SESSION_EXPIRED' || normalized.code === 'UNAUTHENTICATED')
+  ) {
+    const header = (error as { config?: { headers?: { Authorization?: unknown } } }).config?.headers
+      ?.Authorization
+    if (typeof header === 'string' && header.startsWith('Bearer '))
+      sessionStore.expire(header.slice('Bearer '.length))
+  }
+  return Promise.reject(normalized)
+})

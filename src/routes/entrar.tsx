@@ -1,9 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { PagePlaceholder } from '@/components/common/page-placeholder'
+import { AuthScreen } from '@/features/auth/auth-screen'
 import { validateRedirectSearch } from '@/features/auth/redirect'
 
 export const Route = createFileRoute('/entrar')({
   validateSearch: validateRedirectSearch,
-  component: () => <PagePlaceholder title="Entrar" />,
+  component: function Login() {
+    const { redirect } = Route.useSearch()
+    return <AuthScreen mode="entrar" redirect={redirect} />
+  },
 })

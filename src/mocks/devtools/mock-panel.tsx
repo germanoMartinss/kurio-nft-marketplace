@@ -184,31 +184,43 @@ function SocketStatus() {
   const [serverConnections, setServerConnections] = useState<RealtimeConnection[]>([])
 
   useEffect(() => {
-    const socket = createRealtimeSocket()
-    socketRef.current = socket
-
-    const onConnect = () =>
-      setState((s) => ({ ...s, status: 'conectado', transport: socket.io.engine.transport.name }))
-    const onDisconnect = (reason: string) =>
-      setState((s) => ({ ...s, status: 'desconectado', lastDisconnectReason: reason }))
-    const onReconnect = () => setState((s) => ({ ...s, reconnects: s.reconnects + 1 }))
-    const onPong = ({ sentAt }: { sentAt: number }) =>
-      setState((s) => ({ ...s, roundtripMs: Date.now() - sentAt }))
-
-    socket.on('connect', onConnect)
-    socket.on('disconnect', onDisconnect)
-    socket.on('diagnostics.pong', onPong)
-    socket.io.on('reconnect', onReconnect)
-    socket.connect()
-
-    // Listeners liberados ao fim do ciclo de vida do componente.
+    let cleanup: (() => void) | undefined
+    let cancelled = false
+    void createRealtimeSocket().then((socket) => {
+      if (cancelled) return
+      cleanup = bindSocket(socket)
+    })
     return () => {
-      socket.io.off('reconnect', onReconnect)
-      socket.off('connect', onConnect)
-      socket.off('disconnect', onDisconnect)
-      socket.off('diagnostics.pong', onPong)
-      socket.disconnect()
-      socketRef.current = null
+      cancelled = true
+      cleanup?.()
+    }
+
+    function bindSocket(socket: RealtimeSocket) {
+      socketRef.current = socket
+
+      const onConnect = () =>
+        setState((s) => ({ ...s, status: 'conectado', transport: socket.io.engine.transport.name }))
+      const onDisconnect = (reason: string) =>
+        setState((s) => ({ ...s, status: 'desconectado', lastDisconnectReason: reason }))
+      const onReconnect = () => setState((s) => ({ ...s, reconnects: s.reconnects + 1 }))
+      const onPong = ({ sentAt }: { sentAt: number }) =>
+        setState((s) => ({ ...s, roundtripMs: Date.now() - sentAt }))
+
+      socket.on('connect', onConnect)
+      socket.on('disconnect', onDisconnect)
+      socket.on('diagnostics.pong', onPong)
+      socket.io.on('reconnect', onReconnect)
+      socket.connect()
+
+      // Listeners liberados ao fim do ciclo de vida do componente.
+      return () => {
+        socket.io.off('reconnect', onReconnect)
+        socket.off('connect', onConnect)
+        socket.off('disconnect', onDisconnect)
+        socket.off('diagnostics.pong', onPong)
+        socket.disconnect()
+        socketRef.current = null
+      }
     }
   }, [])
 

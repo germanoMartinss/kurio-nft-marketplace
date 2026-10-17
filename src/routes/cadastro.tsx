@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { PagePlaceholder } from '@/components/common/page-placeholder'
+import { AuthScreen } from '@/features/auth/auth-screen'
+import { validateRedirectSearch } from '@/features/auth/redirect'
 
 export const Route = createFileRoute('/cadastro')({
-  component: () => <PagePlaceholder title="Criar conta" />,
+  validateSearch: validateRedirectSearch,
+  component: function Register() {
+    const { redirect } = Route.useSearch()
+    return <AuthScreen mode="cadastro" redirect={redirect} />
+  },
 })

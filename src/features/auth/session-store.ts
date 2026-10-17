@@ -9,6 +9,7 @@ import { CLIENT_KEYS, readJson, writeJson } from '@/lib/client-storage'
  */
 type Listener = () => void
 const listeners = new Set<Listener>()
+const expiryListeners = new Set<(previous: SessionUser) => void>()
 let current: AuthSession | null = readJson<AuthSession>(CLIENT_KEYS.session)
 
 function emit() {
@@ -22,9 +23,27 @@ export const sessionStore = {
     writeJson(CLIENT_KEYS.session, session)
     emit()
   },
+  /** Atualiza só os dados do usuário (ex.: perfil alterado), mantendo o token. */
+  setUser(user: SessionUser) {
+    if (current) this.set({ ...current, user })
+  },
+  /**
+   * A API recusou o token (401). Só vale se o token recusado ainda é o da sessão atual: a
+   * resposta tardia de uma sessão anterior não pode derrubar quem entrou depois.
+   */
+  expire(rejectedToken: string) {
+    if (!current || current.token !== rejectedToken) return
+    const previous = current.user
+    this.set(null)
+    for (const listener of expiryListeners) listener(previous)
+  },
   subscribe(listener: Listener) {
     listeners.add(listener)
     return () => listeners.delete(listener)
+  },
+  onExpired(listener: (previous: SessionUser) => void) {
+    expiryListeners.add(listener)
+    return () => expiryListeners.delete(listener)
   },
 }
 

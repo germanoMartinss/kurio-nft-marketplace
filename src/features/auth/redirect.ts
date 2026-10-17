@@ -16,3 +16,8 @@ export function safeRedirect(value: unknown): string | undefined {
 export function validateRedirectSearch(search: Record<string, unknown>): RedirectSearch {
   return { redirect: safeRedirect(search.redirect) }
 }
+
+/** Telas de autenticação nunca são destino de retorno (evita voltar para o login). */
+export function isAuthPath(href: string) {
+  return /^\/(entrar|cadastro)(\/|\?|#|$)/.test(href)
+}

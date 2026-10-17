@@ -1,4 +1,4 @@
-import { io, type Socket } from 'socket.io-client'
+import type { Socket } from 'socket.io-client'
 
 import type {
   ClientToServerEvents,
@@ -18,11 +18,17 @@ export type RealtimeSocket = Socket<ServerToClientEvents, ClientToServerEvents>
  * `transports: ['websocket']`: o mock (MSW + @mswjs/socket.io-binding) só intercepta WebSocket;
  * o long-polling do engine.io não é simulado. Ver ARCHITECTURE.md.
  */
-export function createRealtimeSocket(auth: HandshakeAuth = {}): RealtimeSocket {
+export async function createRealtimeSocket(auth: HandshakeAuth = {}): Promise<RealtimeSocket> {
+  // Import dinâmico, e não por acaso: o engine.io-client guarda o `WebSocket` global no momento em
+  // que o módulo é avaliado. Importado cedo demais (antes de o MSW substituir o WebSocket), ele
+  // ficaria com o nativo e a conexão escaparia dos mocks. Ver ARCHITECTURE.md.
+  const { io } = await import('socket.io-client')
   return io(env.socketOrigin, {
     path: SOCKET_PATH,
     transports: ['websocket'],
     autoConnect: false,
+    // Uma conexão própria por socket: sessões diferentes nunca compartilham o transporte.
+    forceNew: true,
     auth,
   })
 }
