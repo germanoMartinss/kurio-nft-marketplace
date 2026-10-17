@@ -34,7 +34,9 @@ export function QuantityStepper({
     'flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60',
     size === 'lg' && 'size-[33px] border border-background',
     size === 'sm' && 'h-7 w-[22px]',
-    size === 'cart' && 'size-6 lg:size-[18px]',
+    // Carrinho como no Figma: círculo escuro com borda no mobile, pílula laranja vertical no desktop.
+    size === 'cart' &&
+      'size-6 border border-border-soft bg-surface-raised text-foreground lg:h-7 lg:w-[18px] lg:border-0 lg:bg-primary lg:text-primary-foreground',
   )
   const iconSize = size === 'lg' ? 'size-6' : size === 'sm' ? 'size-4' : 'size-4 lg:size-3.5'
   const atMax = max > 0 && value >= max
