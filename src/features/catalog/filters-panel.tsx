@@ -48,6 +48,7 @@ export function FiltersPanel({
               label={CATEGORY_LABELS[id]}
               count={count('categories', id)}
               checked={categories.includes(id)}
+              emphasizeCount
               onToggle={() => onChange({ colecoes: toggleInList(search.colecoes, id) })}
             />
           ))}
@@ -78,11 +79,14 @@ function FilterOption({
   label,
   count,
   checked,
+  emphasizeCount = false,
   onToggle,
 }: {
   label: string
   count: number | undefined
   checked: boolean
+  /** Contagem em negrito como nas coleções do Figma (desktop): #CFB28C, ou destaque se marcada. */
+  emphasizeCount?: boolean
   onToggle: () => void
 }) {
   return (
@@ -104,7 +108,13 @@ function FilterOption({
         {count === undefined ? (
           <Skeleton className="h-4 w-8" />
         ) : (
-          <span className={cn(checked && 'font-bold')}>
+          <span
+            className={cn(
+              checked && 'font-bold',
+              emphasizeCount && 'lg:font-bold',
+              emphasizeCount && (checked ? 'lg:text-accent-text' : 'lg:text-muted-foreground'),
+            )}
+          >
             ({count})<span className="sr-only"> NFTs</span>
           </span>
         )}

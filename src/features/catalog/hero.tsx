@@ -26,22 +26,22 @@ export function Hero() {
     <section aria-roledescription="carrossel" aria-label="Destaques" className="container-page">
       {/* Desktop */}
       <div className="hidden h-[450px] items-center gap-[110px] pl-10 lg:flex">
-        <div className="flex w-[600px] shrink-0 flex-col gap-11">
+        <div className="flex w-[600px] shrink-0 flex-col">
           <div className="flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <p className="text-14 leading-4 font-medium tracking-brand">Bem-vindo à Kurio</p>
-              <h1 className="text-43 font-bold">
-                SEJA DONO DO FUTURO
-                <br />
-                DA ARTE DIGITAL
-              </h1>
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
+                <p className="text-14 leading-4 font-medium tracking-brand">Bem-vindo à Kurio</p>
+                <h1 className="text-43 font-bold">
+                  SEJA DONO DO FUTURO
+                  <br />
+                  DA ARTE DIGITAL
+                </h1>
+              </div>
+              <p className="max-w-[557px] text-14 leading-6 text-muted-foreground">
+                Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte
+                digital rara, apoie artistas e tenha uma parte da cultura da internet.
+              </p>
             </div>
-            <p className="max-w-[600px] text-14 leading-6 text-muted-foreground">
-              Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte
-              digital rara, apoie artistas e tenha uma parte da cultura da internet.
-            </p>
-          </div>
-          <div className="flex items-end justify-between">
             <Link
               to="/"
               hash="catalogo"
@@ -49,8 +49,16 @@ export function Hero() {
             >
               EXPLORAR
             </Link>
-            <SlideDots count={slides.length} index={index} onSelect={setIndex} />
           </div>
+          {/* Pontos do Figma: 44px abaixo do botão, alinhados à direita, passo de 16px. Os alvos
+              de 24px avançam 16px além da coluna e 8px acima/abaixo do ponto (margens compensam). */}
+          <SlideDots
+            count={slides.length}
+            index={index}
+            onSelect={setIndex}
+            compact
+            className="mt-9 -mr-4 -mb-2 self-end"
+          />
         </div>
         <div className="size-[450px] shrink-0 overflow-hidden rounded-3xl">
           {current ? <HeroArtwork nft={current} /> : <Skeleton className="size-full rounded-3xl" />}
@@ -134,16 +142,19 @@ function SlideDots({
   count,
   index,
   onSelect,
+  compact = false,
   className,
 }: {
   count: number
   index: number
   onSelect: (index: number) => void
+  /** Passo de 16px entre os pontos (desktop), mantendo cada alvo com 24px sem sobreposição. */
+  compact?: boolean
   className?: string
 }) {
   if (count <= 1) return null
   return (
-    <div className={cn('flex gap-1', className)}>
+    <div className={cn('flex', compact ? 'gap-0' : 'gap-1', className)}>
       {Array.from({ length: count }, (_, dot) => (
         <button
           key={dot}
@@ -151,9 +162,10 @@ function SlideDots({
           aria-label={`Mostrar destaque ${dot + 1} de ${count}`}
           aria-pressed={dot === index}
           onClick={() => onSelect(dot)}
-          className="flex size-6 items-center justify-center"
+          className={cn('flex size-6 items-center', compact ? 'justify-start' : 'justify-center')}
         >
           <span
+            style={compact ? { marginLeft: Math.min(16, 8 * (count - 1 - dot)) } : undefined}
             className={cn(
               'size-2 rounded-full bg-primary transition-opacity',
               dot !== index && 'opacity-50',
