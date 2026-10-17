@@ -4,6 +4,7 @@ import {
   favoriteButton,
   isMobile,
   loginAs,
+  logout,
   openApp,
   socketTokens,
   submitLogin,
@@ -188,10 +189,9 @@ test.describe('Login', () => {
     await expect(page).toHaveURL(/\/nft\/emerald-ape-042$/)
   })
 
-  test('alternar entre entrar e criar conta preserva o redirect', async ({ page }, testInfo) => {
-    test.skip(isMobile(testInfo), 'O link alternativo do mobile é coberto pelo teste de cadastro.')
+  test('alternar entre entrar e criar conta preserva o redirect', async ({ page }) => {
     await openApp(page, '/entrar?redirect=%2Fpagamento')
-    await page.getByRole('dialog').getByRole('link', { name: 'Criar conta' }).click()
+    await page.getByRole('link', { name: /^(Criar conta|Crie uma conta)$/ }).click()
     await expect(page).toHaveURL(/\/cadastro\?redirect=%2Fpagamento/)
   })
 
@@ -233,58 +233,62 @@ test.describe('Sessão expirada', () => {
     await expect(page).toHaveURL(/\/pagamento$/)
   })
 
-  test('em página pública: continua como visitante e oferece entrar', async ({
-    page,
-  }, testInfo) => {
-    test.skip(isMobile(testInfo), 'A requisição privada de teste parte do menu de desktop.')
+  test('em página pública: continua como visitante e oferece entrar', async ({ page }) => {
     await loginAs(page, USERS.ana, 'sessao-expirada')
+    // Espera as chamadas privadas do carregamento (sessão e favoritos): expirar antes delas faria
+    // a expiração ser detectada por elas, e não pelo clique que o teste quer exercitar.
+    const loaded = Promise.all([
+      page.waitForResponse((res) => res.url().endsWith('/api/auth/session')),
+      page.waitForResponse((res) => res.url().endsWith('/api/favorites')),
+    ])
     await page.goto('/nft/emerald-ape-042')
+    await loaded
     await page.waitForFunction(() => window.__kurioMock !== undefined)
     await page.evaluate(() => window.__kurioMock!.session.expireAll())
     // Qualquer chamada privada (favoritos) detecta a expiração.
     await favoriteButton(page).click()
     await expect(page.getByText('Sua sessão expirou').first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Entrar' }).first()).toBeVisible()
+    // Oferece entrar: ação do aviso (todos os viewports) e link do cabeçalho (desktop).
+    await expect(
+      page
+        .getByRole('button', { name: 'Entrar', exact: true })
+        .or(page.getByRole('link', { name: 'Entrar' }))
+        .first(),
+    ).toBeVisible()
   })
 })
 
 test.describe('Logout, troca de usuário e isolamento', () => {
-  test.beforeEach(({ browserName: _browser }, testInfo) => {
-    test.skip(isMobile(testInfo), 'O logout do mobile fica na tela de perfil (Fase 8).')
-  })
-
-  test('logout encerra a sessão e as subscriptions', async ({ page }) => {
+  test('logout encerra a sessão e as subscriptions', async ({ page }, testInfo) => {
     await loginAs(page, USERS.ana)
     await expect.poll(() => socketTokens(page)).toHaveLength(1)
     expect((await socketTokens(page))[0]).not.toBe('')
 
-    await openUserMenu(page, 'Ana Lima')
-    await page.getByRole('menuitem', { name: 'Sair' }).click()
-    await expect(page.getByRole('link', { name: 'Entrar' }).first()).toBeVisible()
+    await logout(page, testInfo, 'Ana Lima')
     // O socket da conta foi encerrado; resta só a conexão de visitante (sem token).
     await expect.poll(() => socketTokens(page)).toEqual([''])
     await page.goto('/perfil')
     await expect(page).toHaveURL(/\/entrar\?redirect=%2Fperfil/)
   })
 
-  test('dados do usuário A não aparecem para o B', async ({ page }) => {
+  test('dados do usuário A não aparecem para o B', async ({ page }, testInfo) => {
     // Ana favoritou o Emerald Ape; Bruno, o Neon Vessel.
     await loginAs(page, USERS.ana)
     await page.goto('/nft/emerald-ape-042')
     await expect(favoriteButton(page)).toHaveAttribute('aria-pressed', 'true')
 
     // Troca de usuário na mesma aba, sem recarregar: o estado em memória é o que está em jogo.
-    await openUserMenu(page, 'Ana Lima')
-    await page.getByRole('menuitem', { name: 'Sair' }).click()
+    await logout(page, testInfo, 'Ana Lima')
+    // Sem recarregar: no mobile o logout parte do perfil e volta ao início, então navega-se pelo app.
+    if (!/\/nft\//.test(page.url()))
+      await page
+        .getByRole('link', { name: /Emerald Ape #042/ })
+        .first()
+        .click()
     await expect(favoriteButton(page)).toHaveAttribute('aria-pressed', 'false')
-    await page.getByRole('link', { name: 'Entrar' }).first().click()
+    // Visitante favorita: vai ao login e volta ao NFT já como Bruno, sem recarregar a aplicação.
+    await favoriteButton(page).click()
     await submitLogin(page, USERS.bruno)
-    await expect(page.getByRole('button', { name: /Bruno Sato.*menu da conta/ })).toBeVisible()
-    await page.getByRole('link', { name: 'Início' }).click()
-    await page
-      .getByRole('link', { name: /Emerald Ape #042/ })
-      .first()
-      .click()
     await expect(page).toHaveURL(/\/nft\/emerald-ape-042$/)
     await expect(favoriteButton(page)).toHaveAttribute('aria-pressed', 'false')
 

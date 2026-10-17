@@ -11,6 +11,8 @@ type Listener = () => void
 const listeners = new Set<Listener>()
 const expiryListeners = new Set<(previous: SessionUser) => void>()
 let current: AuthSession | null = readJson<AuthSession>(CLIENT_KEYS.session)
+/** A última sessão encerrada expirou (em vez de logout): rascunhos do usuário são preservados. */
+let lastEndWasExpiry = false
 
 function emit() {
   for (const listener of listeners) listener()
@@ -18,6 +20,7 @@ function emit() {
 
 export const sessionStore = {
   get: () => current,
+  endedByExpiry: () => lastEndWasExpiry,
   set(session: AuthSession | null) {
     current = session
     writeJson(CLIENT_KEYS.session, session)
@@ -34,7 +37,9 @@ export const sessionStore = {
   expire(rejectedToken: string) {
     if (!current || current.token !== rejectedToken) return
     const previous = current.user
+    lastEndWasExpiry = true
     this.set(null)
+    lastEndWasExpiry = false
     for (const listener of expiryListeners) listener(previous)
   },
   subscribe(listener: Listener) {

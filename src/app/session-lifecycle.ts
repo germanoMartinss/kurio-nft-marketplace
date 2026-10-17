@@ -6,6 +6,7 @@ import { getSession } from '@/api/auth'
 import { isAuthPath } from '@/features/auth/redirect'
 import { isPrivatePath } from '@/features/auth/private-paths'
 import { sessionStore } from '@/features/auth/session-store'
+import { clearCheckoutDraft } from '@/features/checkout/draft'
 import { sessionSocket } from '@/realtime/session-socket'
 
 /**
@@ -28,6 +29,9 @@ export function bindSessionLifecycle(queryClient: QueryClient, router: AnyRouter
       const key = ['user', previousUserId] as const
       void queryClient.cancelQueries({ queryKey: key })
       queryClient.removeQueries({ queryKey: key })
+      // Rascunhos do checkout: preservados quando a sessão só expirou (o usuário volta e retoma),
+      // descartados no logout e na troca de usuário.
+      if (!sessionStore.endedByExpiry()) clearCheckoutDraft(previousUserId)
     }
     if ((session?.token ?? null) !== previousToken)
       void sessionSocket.attach(session?.token ?? null)

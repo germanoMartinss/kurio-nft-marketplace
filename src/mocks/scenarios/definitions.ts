@@ -37,6 +37,10 @@ export interface Scenario {
   /** A primeira tentativa de criar cada pedido responde depois do timeout do cliente. */
   orderResponseDelayMs?: number
   walletConnection: 'aceita' | 'recusada'
+  /** Validade das cotações; omitido = 5 minutos. */
+  quoteTtlMs?: number
+  /** Latência extra de `POST /orders` (janela para requisições repetidas com a mesma chave). */
+  orderLatencyMs?: number
 }
 
 const TWO_HOURS = 2 * 60 * 60 * 1000
@@ -172,6 +176,33 @@ export const SCENARIOS: Scenario[] = [
     description:
       'O pagamento leva 12 segundos para terminar (para testar queda de conexão com pedido pendente).',
     settleDelayMs: 12_000,
+  }),
+  define({
+    id: 'cotacao-expirada',
+    label: 'Cotação expira em 4s',
+    description:
+      'Cotações valem 4 segundos: o pedido enviado depois disso é recusado com QUOTE_EXPIRED e exige nova cotação.',
+    quoteTtlMs: 4000,
+  }),
+  define({
+    id: 'requisicao-duplicada',
+    label: 'Criação de pedido lenta (requisições repetidas)',
+    description:
+      'POST /orders leva 2 segundos, o que abre a janela para cliques e reenvios repetidos com a mesma Idempotency-Key.',
+    orderLatencyMs: 2000,
+  }),
+  define({
+    id: 'pendente-confirma',
+    label: 'Pedido pendente que confirma pelo socket',
+    description: 'O pedido fica pendente por 3 segundos e termina confirmado (order.updated).',
+    settleDelayMs: 3000,
+  }),
+  define({
+    id: 'pendente-recusa',
+    label: 'Pedido pendente que é recusado pelo socket',
+    description: 'O pedido fica pendente por 3 segundos e termina recusado (order.updated).',
+    settleDelayMs: 3000,
+    orderOutcome: 'recusado',
   }),
   define({
     id: 'carteira-recusada',

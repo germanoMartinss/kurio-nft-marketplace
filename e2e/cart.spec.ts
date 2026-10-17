@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import {
   addToCart,
@@ -8,6 +8,7 @@ import {
   emptyCart,
   catalogCards,
   loginAs,
+  logout,
   openApp,
   updateNft,
   USERS,
@@ -106,6 +107,77 @@ test.describe('Carrinho', () => {
     // O carrinho agora pertence à conta: sobrevive ao refresh.
     await page.reload()
     await expect(cartItem(page, EMERALD)).toBeVisible()
+  })
+})
+
+test.describe('Carrinho: união no login, persistência e isolamento', () => {
+  const quantityOf = (page: Page, name: string) =>
+    cartItem(page, name).getByRole('status', { name: `Quantidade de ${name}` })
+
+  test('união: soma o mesmo item respeitando o limite e acrescenta o que é novo', async ({
+    page,
+  }, testInfo) => {
+    const SAGE_10 = 'Sage Nomad #009'
+    const GOLDEN = 'Golden Beat #207'
+    // A conta já tem itens: Emerald 1/50 × 2 e Sage Nomad 1/10 × 3 (só 4 disponíveis).
+    await loginAs(page, USERS.ana)
+    await addToCart(page, 'emerald-ape-042', { quantity: 2 })
+    await addToCart(page, 'sage-nomad-009', { quantity: 3, edition: '1/10' })
+    await logout(page, testInfo, 'Ana Lima')
+
+    // Como visitante: mais 3 do mesmo Emerald, mais 3 do mesmo Sage (excede o limite) e um NFT novo.
+    await addToCart(page, 'emerald-ape-042', { quantity: 3 })
+    await addToCart(page, 'sage-nomad-009', { quantity: 3, edition: '1/10' })
+    await addToCart(page, 'golden-beat-207')
+    await expect(cartItem(page, GOLDEN)).toBeVisible()
+
+    await loginAs(page, USERS.ana)
+    await openApp(page, '/carrinho')
+    await expect(quantityOf(page, EMERALD)).toHaveText('5') // 2 + 3
+    await expect(quantityOf(page, SAGE_10)).toHaveText('4') // 3 + 3, limitado à disponibilidade
+    await expect(quantityOf(page, GOLDEN)).toHaveText('1') // só existia no visitante
+
+    // O carrinho do visitante foi consumido pela união.
+    const guestLines = await page.evaluate(async () => {
+      const guestId = JSON.parse(localStorage.getItem('kurio:app:guest-id')!)
+      const res = await fetch('/api/cart', { headers: { 'X-Guest-Id': guestId } })
+      return (await res.json()).items.length
+    })
+    expect(guestLines).toBe(0)
+  })
+
+  test('persiste após reload (visitante e conta) e não vaza entre sessões', async ({
+    page,
+  }, testInfo) => {
+    // Visitante: sobrevive ao reload.
+    await addToCart(page, 'golden-beat-207', { quantity: 2 })
+    await page.reload()
+    await expect(quantityOf(page, 'Golden Beat #207')).toHaveText('2')
+
+    // Ana: o carrinho da conta sobrevive ao reload.
+    await loginAs(page, USERS.ana)
+    await addToCart(page, 'emerald-ape-042', { quantity: 2 })
+    await page.reload()
+    await expect(quantityOf(page, EMERALD)).toHaveText('2')
+    await expect(cartItem(page, 'Golden Beat #207')).toBeVisible() // veio da união no login
+
+    // Logout de A: nem o visitante nem B veem o carrinho de A, sem recarregar a página.
+    await logout(page, testInfo, 'Ana Lima')
+    if (!page.url().endsWith('/carrinho'))
+      await page
+        .getByRole('link', { name: /^Carrinho/ })
+        .first()
+        .click()
+    await expect(emptyCart(page)).toBeVisible()
+    await expect(cartItem(page, EMERALD)).toHaveCount(0)
+    await page.reload()
+    await expect(emptyCart(page)).toBeVisible()
+
+    await loginAs(page, USERS.bruno)
+    await openApp(page, '/carrinho')
+    await expect(emptyCart(page)).toBeVisible()
+    await expect(cartItem(page, EMERALD)).toHaveCount(0)
+    await expect(cartItem(page, 'Golden Beat #207')).toHaveCount(0)
   })
 })
 

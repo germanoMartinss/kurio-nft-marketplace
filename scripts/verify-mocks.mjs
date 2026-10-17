@@ -635,6 +635,133 @@ await check(
   },
 )
 
+const loginAna = async () =>
+  (await api('POST', '/auth/login', { body: { email: 'ana@kurio.dev', password: 'Kurio@2026' } }))
+    .body.token
+const quoteSage = async (token) => {
+  await api('POST', '/cart/items', {
+    token,
+    body: { nftId: 'sage-nomad-009', editionId: '1-10', quantity: 1 },
+  })
+  return (await api('POST', '/quotes', { token, body: { network: 'ethereum' } })).body
+}
+const orderBody = (quote) => ({
+  quoteId: quote.id,
+  walletId: 'wal_ana_principal',
+  provider: 'metamask',
+  buyer,
+})
+
+await check(
+  'cenário cotação expirada: a cotação vale 4s e o pedido vencido é recusado',
+  async () => {
+    await loadScenario('cotacao-expirada')
+    const a = await loginAna()
+    const q = await quoteSage(a)
+    const ttl = Date.parse(q.expiresAt) - Date.parse(q.createdAt)
+    assert(ttl === 4000, 'ttl ' + ttl)
+    await page.waitForTimeout(4300)
+    const r = await api('POST', '/orders', {
+      token: a,
+      headers: { 'idempotency-key': 'idem-verify-exp-1' },
+      body: orderBody(q),
+    })
+    assert(r.status === 409 && r.body.error.code === 'QUOTE_EXPIRED', JSON.stringify(r.body))
+    const orders = await api('GET', '/orders', { token: a })
+    assert(orders.body.items.length === 0, 'nenhum pedido criado')
+  },
+)
+await check(
+  'cenário requisição duplicada: duas requisições simultâneas, um único pedido',
+  async () => {
+    await loadScenario('requisicao-duplicada')
+    const a = await loginAna()
+    const q = await quoteSage(a)
+    const send = () =>
+      api('POST', '/orders', {
+        token: a,
+        headers: { 'idempotency-key': 'idem-verify-dup-1' },
+        body: orderBody(q),
+      })
+    const [one, two] = await Promise.all([send(), send()])
+    assert(
+      [one.status, two.status].sort().join() === '200,201' && one.body.id === two.body.id,
+      JSON.stringify([one.status, two.status, one.body?.id, two.body?.id]),
+    )
+    const orders = await api('GET', '/orders', { token: a })
+    assert(orders.body.items.length === 1, 'pedidos ' + orders.body.items.length)
+  },
+)
+for (const [scenario, expected] of [
+  ['pendente-confirma', 'confirmado'],
+  ['pendente-recusa', 'recusado'],
+]) {
+  await check(
+    `cenário ${scenario}: pendente por 3s e termina ${expected} com order.updated`,
+    async () => {
+      await loadScenario(scenario)
+      const a = await loginAna()
+      const q = await quoteSage(a)
+      const o = (
+        await api('POST', '/orders', {
+          token: a,
+          headers: { 'idempotency-key': `idem-verify-${scenario}` },
+          body: orderBody(q),
+        })
+      ).body
+      assert(o.status === 'pendente', 'nasce pendente: ' + o.status)
+      await page.waitForTimeout(3400)
+      const done = await api('GET', `/orders/${o.id}`, { token: a })
+      assert(
+        done.body.status === expected && done.body.version === 2,
+        JSON.stringify(done.body.status),
+      )
+      const events = await control(
+        '(m) => m.realtime.history().filter((e) => e.type === "order.updated")',
+      )
+      assert(
+        events.length === 1 && events[0].payload.status === expected && events[0].version === 2,
+        JSON.stringify(events),
+      )
+    },
+  )
+}
+await check('controle de testes: settleNow termina o pedido pendente e é terminal', async () => {
+  await loadScenario('pagamento-lento')
+  const a = await loginAna()
+  const q = await quoteSage(a)
+  const o = (
+    await api('POST', '/orders', {
+      token: a,
+      headers: { 'idempotency-key': 'idem-verify-settle' },
+      body: orderBody(q),
+    })
+  ).body
+  await control('(m, id) => m.orders.settleNow(id)', o.id)
+  await control('(m, id) => m.orders.settleNow(id)', o.id)
+  const done = await api('GET', `/orders/${o.id}`, { token: a })
+  assert(
+    done.body.status === 'confirmado' && done.body.version === 2 && done.body.transaction,
+    JSON.stringify(done.body),
+  )
+  const cart = await api('GET', '/cart', { token: a })
+  assert(cart.body.itemCount === 0, 'carrinho limpo só após a confirmação')
+})
+await check(
+  'recibo é snapshot: preço novo no catálogo não altera o pedido confirmado',
+  async () => {
+    const a = await loginAna()
+    const [order] = (await api('GET', '/orders', { token: a })).body.items
+    await control('(m) => m.nft.update("sage-nomad-009", { price: "9.99" })')
+    const after = await api('GET', `/orders/${order.id}`, { token: a })
+    assert(
+      after.body.total === order.total &&
+        after.body.lines[0].unitPrice === order.lines[0].unitPrice,
+      'recibo mudou',
+    )
+  },
+)
+
 console.log(results.join('\n'))
 console.log(
   `\n${results.filter((r) => r.startsWith('OK')).length}/${results.length} verificações OK`,

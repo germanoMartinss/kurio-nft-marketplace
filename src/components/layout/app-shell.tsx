@@ -14,6 +14,8 @@ const MAIN_CONTENT_ID = 'conteudo'
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const tabBar = showsMobileTabBar(pathname)
+  // O recibo do pedido ocupa a tela sozinho (o Figma não mostra header nem footer).
+  const bare = pathname.startsWith('/pedido/')
   useRealtimeSync()
   const cartCount = useCart().data?.itemCount
   return (
@@ -24,11 +26,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         Pular para o conteúdo
       </a>
-      <SiteHeader cartCount={cartCount} />
+      {bare ? null : <SiteHeader cartCount={cartCount} />}
       <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>
-      <SiteFooter />
+      {bare ? null : <SiteFooter />}
       {tabBar ? (
         <>
           {/* Espaço para a barra de abas fixa no mobile, para não cobrir o fim da página. */}

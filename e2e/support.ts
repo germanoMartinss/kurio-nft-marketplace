@@ -12,6 +12,10 @@ interface MockControl {
     history: () => { eventId: string; version: number; resource: { id: string } }[]
   }
   nft: { update: (id: string, change: Record<string, unknown>) => unknown }
+  orders: {
+    list: () => { id: string; status: string; version: number }[]
+    settleNow: (id: string) => void
+  }
 }
 declare global {
   interface Window {
@@ -157,3 +161,61 @@ export const updateNft = (page: Page, id: string, change: Record<string, unknown
     ([nftId, patch]) => window.__kurioMock!.nft.update(nftId as string, patch as never),
     [id, change] as const,
   )
+
+/** Sai da conta pela interface: menu do usuário (desktop) ou tela de perfil (mobile). */
+export async function logout(page: Page, testInfo: TestInfo, displayName: string) {
+  if (isMobile(testInfo)) {
+    // A barra de abas (com "Perfil") só existe em algumas telas; nas demais abre-se o perfil direto.
+    const tab = page.getByRole('link', { name: 'Perfil' })
+    if (await tab.isVisible()) await tab.click()
+    else await page.goto('/perfil')
+    await page.getByRole('button', { name: 'Sair da conta' }).click()
+  } else {
+    await page.getByRole('button', { name: new RegExp(`${displayName}.*menu da conta`) }).click()
+    await page.getByRole('menuitem', { name: 'Sair' }).click()
+  }
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('kurio:app:session'))).toBeNull()
+}
+
+/** Compra de ponta a ponta até a tela de pagamento: entra como Ana, adiciona itens e abre o checkout. */
+export async function startCheckout(
+  page: Page,
+  { scenario = 'padrao', items = [['emerald-ape-042', 1]] as [string, number][] } = {},
+) {
+  await loginAs(page, USERS.ana, scenario)
+  for (const [nftId, quantity] of items) await addToCart(page, nftId, { quantity, scenario })
+  await page.getByRole('button', { name: 'Conectar e finalizar' }).filter({ visible: true }).click()
+  await expect(page).toHaveURL(/\/pagamento$/)
+  await expect(confirmPurchaseButton(page)).toBeEnabled()
+}
+
+export const confirmPurchaseButton = (page: Page) =>
+  page.getByRole('button', { name: 'Confirmar compra' }).filter({ visible: true })
+
+export const reviewDialog = (page: Page) => page.getByRole('dialog', { name: 'Revise seu pedido' })
+
+/** Abre a revisão (cotação feita pela API) e espera o diálogo. */
+export async function openReview(page: Page) {
+  await confirmPurchaseButton(page).click()
+  await expect(reviewDialog(page)).toBeVisible()
+  return reviewDialog(page)
+}
+
+/** Pedidos da conta atual, lidos pela API (resultado da operação, não da interface). */
+export const apiOrders = (page: Page) =>
+  page.evaluate(async () => {
+    const session = JSON.parse(localStorage.getItem('kurio:app:session')!)
+    const res = await fetch('/api/orders', {
+      headers: { Authorization: `Bearer ${session.token}` },
+    })
+    return ((await res.json()).items as { id: string; status: string }[]) ?? []
+  })
+
+export const apiCart = (page: Page) =>
+  page.evaluate(async () => {
+    const session = JSON.parse(localStorage.getItem('kurio:app:session')!)
+    const res = await fetch('/api/cart', { headers: { Authorization: `Bearer ${session.token}` } })
+    return (await res.json()) as { itemCount: number; items: { id: string; quantity: number }[] }
+  })
+
+export const receipt = (page: Page) => page.getByTestId('receipt')

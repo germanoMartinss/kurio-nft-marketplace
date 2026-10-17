@@ -5,6 +5,8 @@
 export const CLIENT_KEYS = {
   session: 'kurio:app:session',
   guestId: 'kurio:app:guest-id',
+  /** Rascunho do checkout de um usuário (formulário, carteira e tentativa de pedido). */
+  checkoutDraft: (userId: string) => `kurio:app:checkout:${userId}`,
 } as const
 
 export function readJson<T>(key: string): T | null {

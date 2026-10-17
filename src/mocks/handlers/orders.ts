@@ -37,6 +37,8 @@ export const orderHandlers = [
     }
     const parsed = await parseBody(request, orderCreateSchema)
     if ('response' in parsed) return parsed.response
+    const latency = getScenario().orderLatencyMs
+    if (latency) await delay(latency)
     const result = createOrder(auth.user, key, parsed.data)
     if (!result.ok) return failure(result)
 

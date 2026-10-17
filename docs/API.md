@@ -116,26 +116,30 @@ Selecionados por `?cenario=<id>` (em qualquer URL da aplicação) ou no painel `
 `?reset=1` restaura os dados iniciais. Definições em
 [`src/mocks/scenarios/definitions.ts`](../src/mocks/scenarios/definitions.ts).
 
-| Id                   | Efeito                                                                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| `padrao`             | Tudo funciona, latência de 60ms.                                                                |
-| `catalogo-vazio`     | Catálogo sem NFTs.                                                                              |
-| `lento`              | Respostas em 2,5s.                                                                              |
-| `latencia-variavel`  | 200ms a 1,8s, sequência reproduzível (PRNG com semente).                                        |
-| `fora-de-ordem`      | Consultas ímpares do catálogo levam 1,5s; pares, 150ms.                                         |
-| `offline`            | Erro de rede em todo o REST; socket recusado.                                                   |
-| `timeout`            | Primeira requisição de cada rota passa do timeout do cliente.                                   |
-| `erro-servidor`      | `GET /nfts` sempre 500.                                                                         |
-| `instavel`           | Duas primeiras leituras de `/nfts*` respondem 503.                                              |
-| `nao-encontrado`     | Detalhe de NFT sempre 404.                                                                      |
-| `sessao-expirada`    | Sessões expiram 20s após o login.                                                               |
-| `acesso-negado`      | Rotas privadas respondem 403.                                                                   |
-| `preco-alterado`     | 4s após abrir o carrinho com itens, o preço do primeiro item sobe 15% (`nft.updated`).          |
-| `edicao-esgotada`    | 4s após abrir o carrinho com itens, a edição do primeiro item esgota (`nft.updated`).           |
-| `timeout-pedido`     | O pedido é criado, mas a primeira resposta passa do timeout; o reenvio recupera o mesmo pedido. |
-| `pagamento-recusado` | Pedidos terminam recusados.                                                                     |
-| `pagamento-lento`    | Pagamento leva 12s (queda de conexão com pedido pendente).                                      |
-| `carteira-recusada`  | Conexão de carteira recusada.                                                                   |
+| Id                     | Efeito                                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `padrao`               | Tudo funciona, latência de 60ms.                                                                |
+| `catalogo-vazio`       | Catálogo sem NFTs.                                                                              |
+| `lento`                | Respostas em 2,5s.                                                                              |
+| `latencia-variavel`    | 200ms a 1,8s, sequência reproduzível (PRNG com semente).                                        |
+| `fora-de-ordem`        | Consultas ímpares do catálogo levam 1,5s; pares, 150ms.                                         |
+| `offline`              | Erro de rede em todo o REST; socket recusado.                                                   |
+| `timeout`              | Primeira requisição de cada rota passa do timeout do cliente.                                   |
+| `erro-servidor`        | `GET /nfts` sempre 500.                                                                         |
+| `instavel`             | Duas primeiras leituras de `/nfts*` respondem 503.                                              |
+| `nao-encontrado`       | Detalhe de NFT sempre 404.                                                                      |
+| `sessao-expirada`      | Sessões expiram 20s após o login.                                                               |
+| `acesso-negado`        | Rotas privadas respondem 403.                                                                   |
+| `preco-alterado`       | 4s após abrir o carrinho com itens, o preço do primeiro item sobe 15% (`nft.updated`).          |
+| `edicao-esgotada`      | 4s após abrir o carrinho com itens, a edição do primeiro item esgota (`nft.updated`).           |
+| `timeout-pedido`       | O pedido é criado, mas a primeira resposta passa do timeout; o reenvio recupera o mesmo pedido. |
+| `pagamento-recusado`   | Pedidos terminam recusados.                                                                     |
+| `pagamento-lento`      | Pagamento leva 12s (queda de conexão com pedido pendente).                                      |
+| `carteira-recusada`    | Conexão de carteira recusada.                                                                   |
+| `cotacao-expirada`     | Cotações valem 4s; o pedido vencido responde `QUOTE_EXPIRED`.                                   |
+| `requisicao-duplicada` | `POST /orders` leva 2s: janela para requisições repetidas com a mesma chave.                    |
+| `pendente-confirma`    | Pedido pendente por 3s e confirmado (`order.updated`).                                          |
+| `pendente-recusa`      | Pedido pendente por 3s e recusado (`order.updated`).                                            |
 
 ### Controle para testes (`window.__kurioMock`)
 
@@ -150,6 +154,8 @@ nunca sobre a interface:
 | `session.expireAll()`                                           | Expira as sessões: a próxima requisição privada recebe `SESSION_EXPIRED` |
 | `realtime.disconnectAll()`                                      | Derruba os sockets pelo servidor (o cliente reconecta)                   |
 | `realtime.replay(eventId?)`                                     | Reenvia um evento já publicado (duplicata/evento antigo)                 |
+| `realtime.emit(evento)`                                         | Publica um evento arbitrário (versão antiga, outro usuário)              |
+| `orders.settleNow(id)` · `orders.get(id)` · `orders.list()`     | Termina o pagamento pendente agora (com `order.updated`); inspeção       |
 | `realtime.history()` · `realtime.connections()`                 | Inspeção                                                                 |
 
 ## Dados de demonstração

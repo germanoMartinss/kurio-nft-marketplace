@@ -15,6 +15,13 @@ import { parseArgs } from 'node:util'
 import { chromium } from '@playwright/test'
 import sharp from 'sharp'
 
+/** Itens do Figma, adicionados pela API simulada antes da captura. */
+const CART_LINES = [
+  ['emerald-ape-042', '1-50', 2],
+  ['violet-nomad-314', '1-1', 1],
+  ['ivory-baron-088', '1-10', 2],
+]
+
 /** Tela → rota e PNGs do Figma correspondentes (quando existem). */
 const SCREENS = {
   inicio: { path: '/', desktop: 'desktop-inicio', mobile: 'mobile-inicio' },
@@ -26,16 +33,24 @@ const SCREENS = {
   carrinho: {
     path: '/carrinho',
     // Itens do Figma (visitante), adicionados pela API simulada antes da captura.
-    cart: [
-      ['emerald-ape-042', '1-50', 2],
-      ['violet-nomad-314', '1-1', 1],
-      ['ivory-baron-088', '1-10', 2],
-    ],
+    cart: CART_LINES,
     desktop: 'desktop-carrinho-de-nfts',
     mobile: 'mobile-carrinho-de-nfts',
   },
-  pagamento: { path: '/pagamento', desktop: 'desktop-pagamento', mobile: 'mobile-pagamento' },
-  confirmacao: { path: '/pedido/exemplo', desktop: 'desktop-confirmacao-de-pedido' },
+  pagamento: {
+    path: '/pagamento',
+    login: true,
+    cart: CART_LINES,
+    desktop: 'desktop-pagamento',
+    mobile: 'mobile-pagamento',
+  },
+  confirmacao: {
+    path: '/pedido/ord_0001',
+    login: true,
+    cart: CART_LINES,
+    order: true,
+    desktop: 'desktop-confirmacao-de-pedido',
+  },
   entrar: { path: '/entrar', desktop: 'desktop-login', mobile: 'mobile-login' },
   cadastro: { path: '/cadastro', desktop: 'desktop-cadastro', mobile: 'mobile-cadastro' },
   perfil: { path: '/perfil', desktop: 'desktop-perfil-do-colecionador' },
@@ -69,20 +84,67 @@ for (const key of selected) {
     const errors = []
     page.on('pageerror', (error) => errors.push(String(error)))
     page.on('console', (message) => message.type() === 'error' && errors.push(message.text()))
+    let target = screen.path
     if (screen.cart) {
       await page.goto(values.base + '/', { waitUntil: 'networkidle' })
-      await page.evaluate(async (lines) => {
-        localStorage.setItem('kurio:app:guest-id', JSON.stringify('capture-guest-0001'))
-        for (const [nftId, editionId, quantity] of lines) {
-          await fetch('/api/cart/items', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Guest-Id': 'capture-guest-0001' },
-            body: JSON.stringify({ nftId, editionId, quantity }),
-          })
-        }
-      }, screen.cart)
+      const orderId = await page.evaluate(
+        async ({ lines, login, order }) => {
+          const guest = 'capture-guest-0001'
+          localStorage.setItem('kurio:app:guest-id', JSON.stringify(guest))
+          const call = async (method, path, body, token) => {
+            const res = await fetch('/api' + path, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Guest-Id': guest,
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(order && path === '/orders' ? { 'Idempotency-Key': 'idem-capture-0001' } : {}),
+              },
+              body: body ? JSON.stringify(body) : undefined,
+            })
+            return res.json()
+          }
+          let token
+          if (login) {
+            const session = await call('POST', '/auth/login', {
+              email: 'ana@kurio.dev',
+              password: 'Kurio@2026',
+            })
+            token = session.token
+            localStorage.setItem('kurio:app:session', JSON.stringify(session))
+          }
+          for (const [nftId, editionId, quantity] of lines)
+            await call('POST', '/cart/items', { nftId, editionId, quantity }, token)
+          if (order) {
+            const quote = await call('POST', '/quotes', { network: 'ethereum' }, token)
+            const created = await call(
+              'POST',
+              '/orders',
+              {
+                quoteId: quote.id,
+                walletId: 'wal_ana_principal',
+                provider: 'metamask',
+                buyer: {
+                  displayName: 'Ana Lima',
+                  username: 'analima',
+                  profileName: 'analima',
+                  email: 'ana@kurio.dev',
+                  ensName: 'ana',
+                  referralCode: 'KURIO2026',
+                  note: '',
+                },
+              },
+              token,
+            )
+            await new Promise((resolve) => setTimeout(resolve, 3200)) // pagamento simulado termina
+            return created.id
+          }
+        },
+        { lines: screen.cart, login: screen.login, order: screen.order },
+      )
+      if (orderId) target = `/pedido/${orderId}`
     }
-    await page.goto(values.base + screen.path, { waitUntil: 'networkidle' })
+    await page.goto(values.base + target, { waitUntil: 'networkidle' })
     await page.evaluate(() => document.fonts.ready)
     await page.waitForTimeout(300)
     const file = join(outDir, `${key}-${viewport.name}.png`)

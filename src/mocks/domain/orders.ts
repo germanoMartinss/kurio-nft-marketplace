@@ -1,5 +1,6 @@
 import type { Network } from '@/contracts/common'
 import type { OrderCreate, QuoteChange } from '@/contracts/order'
+import { hashValue } from '@/lib/hash'
 import { eth } from '@/lib/money'
 
 import { db, mutate, nextId } from '../db/store'
@@ -10,7 +11,7 @@ import { buildCart, findCoupon, maxQuantityFor, removePurchased, type CartKey } 
 import { updateNft } from './catalog'
 import { publishOrderUpdated } from './events'
 
-const QUOTE_TTL_MS = 5 * 60 * 1000
+const DEFAULT_QUOTE_TTL_MS = 5 * 60 * 1000
 
 export type DomainResult<T> =
   | { ok: true; value: T }
@@ -39,7 +40,7 @@ export function createQuote(user: UserRecord, network: Network): DomainResult<Qu
     userId: user.id,
     couponCode: db().carts[key]?.couponCode ?? null,
     createdAt: new Date(now).toISOString(),
-    expiresAt: new Date(now + QUOTE_TTL_MS).toISOString(),
+    expiresAt: new Date(now + (getScenario().quoteTtlMs ?? DEFAULT_QUOTE_TTL_MS)).toISOString(),
     lines: cart.items.map((item) => ({
       nftId: item.nftId,
       editionId: item.editionId,
@@ -101,26 +102,8 @@ export function quoteChanges(quote: QuoteRecord): QuoteChange[] {
   return changes
 }
 
-/** Serialização com chaves ordenadas em todos os níveis: o mesmo conteúdo gera o mesmo texto. */
-function canonicalJson(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value).sort(([a], [b]) => a.localeCompare(b))
-    return `{${entries.map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`).join(',')}}`
-  }
-  return JSON.stringify(value)
-}
-
-/** Hash estável (FNV-1a) do corpo, para comparar tentativas com a mesma chave de idempotência. */
-export function hashBody(body: unknown) {
-  const text = canonicalJson(body)
-  let hash = 0x811c9dc5
-  for (let index = 0; index < text.length; index++) {
-    hash ^= text.charCodeAt(index)
-    hash = Math.imul(hash, 0x01000193)
-  }
-  return (hash >>> 0).toString(16)
-}
+/** Hash estável do corpo, para comparar tentativas com a mesma chave de idempotência. */
+export const hashBody = hashValue
 
 type CreateOrderResult = DomainResult<{ order: OrderRecord; replayed: boolean }>
 
@@ -226,6 +209,13 @@ function scheduleSettlement(orderId: string) {
     orderId,
     setTimeout(() => settle(orderId), wait),
   )
+}
+
+/** Termina o pagamento agora (controle de testes): mesmo caminho do temporizador, com `order.updated`. */
+export function settleOrderNow(orderId: string) {
+  const timer = timers.get(orderId)
+  if (timer) clearTimeout(timer)
+  settle(orderId)
 }
 
 /** Retoma a simulação dos pedidos pendentes depois de um refresh. */

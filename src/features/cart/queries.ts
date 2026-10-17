@@ -10,6 +10,7 @@ import {
   updateCartItem,
 } from '@/api/cart'
 import { ApiRequestError } from '@/api/errors'
+import type { Network } from '@/contracts/common'
 
 import { useCartKey } from './keys'
 
@@ -23,6 +24,20 @@ export const cartQueryOptions = (key: ReturnType<typeof useCartKey>) =>
     queryFn: ({ signal }) => getCart('ethereum', signal),
   })
 
+/**
+ * Carrinho calculado para uma rede (a taxa depende dela): usado pelo checkout. A chave está sob a
+ * do carrinho, então mutations e eventos que invalidam o carrinho também o atualizam.
+ */
+export const checkoutCartQueryOptions = (key: ReturnType<typeof useCartKey>, network: Network) =>
+  queryOptions({
+    queryKey: [...key, 'checkout', network] as const,
+    queryFn: ({ signal }) => getCart(network, signal),
+  })
+
+export function useCheckoutCart(network: Network) {
+  return useQuery(checkoutCartQueryOptions(useCartKey(), network))
+}
+
 export function useCart() {
   return useQuery(cartQueryOptions(useCartKey()))
 }
@@ -34,6 +49,8 @@ export function useCartActions() {
 
   const onSuccess = (cart: Awaited<ReturnType<typeof getCart>>) => {
     queryClient.setQueryData(key, cart)
+    // O carrinho por rede (checkout) deriva do mesmo estado do servidor.
+    void queryClient.invalidateQueries({ queryKey: [...key, 'checkout'] })
   }
   // Conflito de disponibilidade: o carrinho exibido estava desatualizado; recarrega da API.
   const onError = (error: unknown) => {

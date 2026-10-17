@@ -1,12 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query'
 import * as z from 'zod/mini'
 
-import type { Cart } from '@/contracts/cart'
 import { nftUpdatedEventSchema, type NftUpdatedEvent } from '@/contracts/realtime'
+
+import type { Cart } from '@/contracts/cart'
 import type { CatalogPage, Highlights, NftDetail, NftSummary } from '@/contracts/nft'
 import { catalogKeys } from '@/features/catalog/queries'
-
-import type { RealtimeSocket } from './socket'
 
 /** Quantos `eventId` já vistos ficam na memória (os mais antigos saem primeiro). */
 const SEEN_LIMIT = 500
@@ -91,44 +90,4 @@ function refreshCarts(queryClient: QueryClient, nftId: string) {
       queryKey[2] === 'cart' &&
       ((state.data as Cart | undefined)?.items.some((item) => item.nftId === nftId) ?? false),
   })
-}
-
-/**
- * Liga os eventos da sessão ao cache. Devolve a função que desfaz tudo (listeners e assinatura),
- * chamada ao fim do ciclo de vida do componente raiz.
- *
- * Reconciliação: após uma reconexão, eventos podem ter sido perdidos; todas as consultas ativas
- * são rebuscadas do REST, que é a fonte da verdade.
- */
-export function bindNftSync(
-  queryClient: QueryClient,
-  subscribe: (listener: (socket: RealtimeSocket | null) => void) => () => void,
-) {
-  const apply = createNftEventApplier(queryClient)
-  let release: (() => void) | null = null
-
-  const unsubscribe = subscribe((socket) => {
-    release?.()
-    release = null
-    if (!socket) return
-    // Se o socket já está conectado, esta é a primeira conexão; a próxima será uma reconexão.
-    let connections = socket.connected ? 1 : 0
-    const onUpdated = (event: NftUpdatedEvent) => void apply(event)
-    const onConnect = () => {
-      connections += 1
-      if (connections > 1) void queryClient.invalidateQueries()
-    }
-    socket.on('nft.updated', onUpdated)
-    socket.on('connect', onConnect)
-    release = () => {
-      socket.off('nft.updated', onUpdated)
-      socket.off('connect', onConnect)
-    }
-  })
-
-  return () => {
-    unsubscribe()
-    release?.()
-    release = null
-  }
 }

@@ -370,6 +370,59 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   para leitores de tela. (d) Avisos de alteração, estado vazio e erro de cupom não existem no
   Figma e seguem o padrão visual dos demais estados (ícone + texto, não só cor).
 
+## Checkout e pedidos (Fase 7)
+
+- **Fluxo.** `/pagamento` (formulário validado com React Hook Form + `buyerSchema`, carteira
+  cadastrada, aplicativo de carteira) → "Confirmar compra" pede uma **cotação** (`POST /quotes`) e
+  abre a **revisão** (diálogo com foco preso) → "Enviar pedido" cria o pedido → `/pedido/$orderId`,
+  que mostra pendente, recusado ou o recibo conforme o estado do pedido. A tela de confirmação só
+  renderiza o recibo para `status === 'confirmado'` **com** transação vinda da API; a UI nunca
+  decide a confirmação.
+- **Cotação.** `useCreateQuote` + `quoteDivergences`/`describeChange`. O envio é bloqueado quando a
+  cotação expira (contagem regressiva) ou diverge do carrinho vivo (preço, disponibilidade, total),
+  inclusive por `nft.updated` com o diálogo aberto; a diferença é listada numa região `role="alert"`
+  e só resta "Atualizar cotação", que gera outra cotação e exige novo "Enviar pedido". A API
+  também valida (`409 QUOTE_STALE`/`QUOTE_EXPIRED`), cobrindo o caso em que o evento ainda não
+  chegou. O carrinho do checkout é consultado por rede (`[...cartKey, 'checkout', rede]`), porque a
+  taxa depende dela; fica sob a chave do carrinho e é invalidado junto.
+- **Idempotência.** `Idempotency-Key = idem-<quoteId>-<hash do corpo>` (`features/checkout/draft.ts`).
+  A chave só muda quando a cotação ou o conteúdo mudam (recotar gera outra). Clique repetido (guarda
+  síncrona `useRef` + botão desabilitado), retry após timeout e reenvio depois de refresh reutilizam
+  a mesma chave: a API devolve o mesmo pedido (200 + `Idempotent-Replayed`). Chave igual com corpo
+  diferente → `409 IDEMPOTENCY_CONFLICT`. A tentativa fica persistida até o estado terminal.
+  Depois de um envio sem resposta (`attempt.sent`), a API decide: o pedido pode já ter consumido o
+  carrinho, então divergência e validade da cotação deixam de bloquear o reenvio (bug encontrado
+  pelo teste de timeout: o carrinho esvaziado era lido como "item indisponível").
+- **Rascunho por usuário** (`kurio:app:checkout:<userId>`): formulário, carteira, conexão e
+  tentativa. Preservado quando a sessão **expira** (o mesmo usuário volta e retoma) e descartado
+  no logout e na troca de usuário (`sessionStore.endedByExpiry()` distingue os casos).
+- **Carteira.** Conexão/desconexão simuladas por `POST /wallets/:id/(connect|disconnect)`; o envio
+  conecta a carteira se necessário e a recusa (`WALLET_REJECTED`) não cria pedido.
+- **`order.updated`** (`realtime/order-sync.ts`): valida o envelope, descarta evento de outro
+  usuário (além do filtro do servidor), duplicata (`eventId`) e evento antigo (versão ≤ a conhecida,
+  do cache ou da última aplicada), e nunca regride um estado terminal. Aplica o estado e rebusca o
+  pedido (o evento não traz a transação); a confirmação também invalida o carrinho. Na reconexão
+  todas as consultas ativas são rebuscadas (reconciliação). Listeners saem no cleanup.
+- **Recibo** = snapshot do pedido (`order.lines`, taxa e total congelados na cotação); nenhum
+  `nft.updated` toca o cache do pedido. **Carrinho** só é alterado pela confirmação no servidor,
+  que remove apenas itens e quantidades comprados.
+- **Controle de tempo nos testes.** Cenários com tempos curtos e determinísticos
+  (`cotacao-expirada` 4s, `pendente-confirma`/`pendente-recusa` 3s, `requisicao-duplicada`,
+  `timeout-pedido`, `pagamento-lento`) e `__kurioMock.orders.settleNow(id)` para terminar o
+  pagamento no instante desejado (mesmo caminho do temporizador, com `order.updated`).
+  `realtime.emit(evento)` injeta eventos arbitrários (antigos, de outro usuário) pelo servidor de
+  socket, sempre passando pelo socket.io-client.
+- **Desvios do Figma.** (a) "Usar outra carteira?" foi substituído pela lista de carteiras
+  cadastradas ("Carteira conectada", que o frame mobile já tem) também no desktop: é onde ficam
+  seleção, conexão e desconexão. (b) Rede, endereço e ENS/secundária são somente leitura (vêm da
+  carteira escolhida); "Tipo de carteira" é um `<select>` nativo ligado à escolha da lista de
+  aplicativos. (c) O mobile ganhou o formulário (o frame só mostra carteiras e total) abaixo do
+  total, para validar os campos também lá. (d) O recibo desktop não tem header/footer, como o
+  Figma; foi acrescentado "Continuar explorando", a nota "referências simuladas" e a edição em
+  cada linha. (e) Estados pendente e recusado, o diálogo de revisão e a tela de recibo mobile não
+  existem no Figma e seguem o mesmo padrão visual. (f) O título da barra superior mobile usa 18px
+  abaixo de 640px para caber "Pagamento com carteira" em 390px.
+
 ## Rotas
 
 Paths em pt-BR. A URL é a fonte da verdade: `/entrar` e `/cadastro` são rotas próprias (acesso

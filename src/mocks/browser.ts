@@ -1,12 +1,12 @@
 import { setupWorker } from 'msw/browser'
 
-import type { NftUpdatedEvent } from '@/contracts/realtime'
+import type { NftUpdatedEvent, OrderUpdatedEvent } from '@/contracts/realtime'
 import { env } from '@/env'
 
 import { db, mutate, resetDb } from './db/store'
 import { updateNft } from './domain/catalog'
 import { eventHistory, replayEvent } from './domain/events'
-import { resumePendingSettlements } from './domain/orders'
+import { resumePendingSettlements, settleOrderNow } from './domain/orders'
 import { handlers } from './handlers'
 import { getScenario, resetScenarioCounters, setScenario } from './scenarios/active'
 import { findScenario, SCENARIOS } from './scenarios/definitions'
@@ -47,6 +47,12 @@ export const mockControl = {
     /** Altera preço/disponibilidade no banco e publica `nft.updated`. */
     update: updateNft,
   },
+  orders: {
+    get: (id: string) => db().orders[id],
+    list: () => Object.values(db().orders),
+    /** Termina o pagamento simulado já (confirma ou recusa conforme o cenário) e publica `order.updated`. */
+    settleNow: settleOrderNow,
+  },
   session: {
     /** Expira todas as sessões ativas: a próxima requisição privada recebe 401 SESSION_EXPIRED. */
     expireAll: () =>
@@ -62,7 +68,10 @@ export const mockControl = {
     /** Reenvia um evento já publicado (duplicata/evento antigo); sem id, o último. */
     replay: replayEvent,
     /** Publica um evento arbitrário (ex.: versão antiga com outro `eventId`) pelo servidor de socket. */
-    emit: (event: NftUpdatedEvent) => realtimeServer.emit('nft.updated', event),
+    emit: (event: NftUpdatedEvent | OrderUpdatedEvent) =>
+      event.type === 'nft.updated'
+        ? realtimeServer.emit('nft.updated', event)
+        : realtimeServer.emit('order.updated', event),
     history: eventHistory,
   },
 }
