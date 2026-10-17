@@ -154,6 +154,7 @@ nunca sobre a interface:
 | `nft.update(id, { price?, editions? })`                         | Altera o catálogo, incrementa a versão e publica `nft.updated`           |
 | `session.expireAll()`                                           | Expira as sessões: a próxima requisição privada recebe `SESSION_EXPIRED` |
 | `realtime.disconnectAll()`                                      | Derruba os sockets pelo servidor (o cliente reconecta)                   |
+| `realtime.holdConnections(true/false)`                          | Recusa novas conexões de socket até liberar (persiste no reload da aba)  |
 | `realtime.replay(eventId?)`                                     | Reenvia um evento já publicado (duplicata/evento antigo)                 |
 | `realtime.emit(evento)`                                         | Publica um evento arbitrário (versão antiga, outro usuário)              |
 | `orders.settleNow(id)` · `orders.get(id)` · `orders.list()`     | Termina o pagamento pendente agora (com `order.updated`); inspeção       |

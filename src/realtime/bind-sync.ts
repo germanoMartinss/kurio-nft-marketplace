@@ -31,7 +31,18 @@ export function bindRealtimeSync(
     const onUpdated = (event: NftUpdatedEvent) => void apply(event)
     const onConnect = () => {
       connections += 1
-      if (connections > 1) void queryClient.invalidateQueries()
+      if (connections > 1) {
+        void queryClient.invalidateQueries()
+        return
+      }
+      // Primeira conexão: o socket só conecta depois da carga inicial, então um evento publicado
+      // entre a consulta REST e a conexão se perderia (ex.: o pagamento terminou nesse intervalo).
+      // Os recursos atualizados por eventos que já estavam em cache são rebuscados.
+      const connectedAt = Date.now()
+      void queryClient.invalidateQueries({
+        predicate: ({ queryKey, state }) =>
+          state.dataUpdatedAt > 0 && state.dataUpdatedAt < connectedAt && isEventDriven(queryKey),
+      })
     }
     const onOrderUpdated = (event: OrderUpdatedEvent) => void applyOrder(event)
     socket.on('nft.updated', onUpdated)
@@ -49,4 +60,13 @@ export function bindRealtimeSync(
     release?.()
     release = null
   }
+}
+
+/** Recursos que `nft.updated` e `order.updated` mudam: pedidos, carrinhos e detalhe de NFT. */
+function isEventDriven(queryKey: readonly unknown[]) {
+  if (queryKey[0] === 'nfts') return queryKey[1] === 'detail'
+  return (
+    (queryKey[0] === 'user' || queryKey[0] === 'guest') &&
+    (queryKey[2] === 'orders' || queryKey[2] === 'cart')
+  )
 }

@@ -342,13 +342,14 @@ src/mocks/
 O binding só codifica e decodifica **pacotes de evento**. O restante do protocolo foi completado em
 `src/mocks/socket/server.ts`:
 
-| Limitação                                                                                    | Consequência sem tratamento                                                                | Tratamento                                                                                             |
-| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Só intercepta WebSocket                                                                      | Long-polling do engine.io falharia                                                         | Cliente usa `transports: ['websocket']`.                                                               |
-| Anuncia `pingInterval: 25000` mas nunca envia ping                                           | O cliente encerra a conexão por `ping timeout` após ~30s e reconecta em loop (reproduzido) | O servidor simulado envia ping (`2`) a cada 25s.                                                       |
-| Ignora o pacote CONNECT (`40{...}`)                                                          | O `auth` do handshake (token da sessão) se perde                                           | O servidor lê o CONNECT e associa a conexão à sessão.                                                  |
-| Sem rooms, namespaces, broadcast e acks                                                      | Não há como direcionar eventos por usuário                                                 | Registro próprio de conexões com filtro por destinatário; comandos trafegam por REST, não por ack.     |
-| O MSW 2.x remove o prefixo `/socket.io/` da URL do cliente antes de comparar com o `ws.link` | Um link em `/socket.io/*` nunca casa e a conexão vai para a rede                           | Socket.IO usa `path: '/realtime/'`, que não colide com outros WebSockets da origem (ex.: HMR do Vite). |
+| Limitação                                                                                    | Consequência sem tratamento                                                                | Tratamento                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Só intercepta WebSocket                                                                      | Long-polling do engine.io falharia                                                         | Cliente usa `transports: ['websocket']`.                                                                                                                                                |
+| Anuncia `pingInterval: 25000` mas nunca envia ping                                           | O cliente encerra a conexão por `ping timeout` após ~30s e reconecta em loop (reproduzido) | O servidor simulado envia ping (`2`) a cada 25s.                                                                                                                                        |
+| Ignora o pacote CONNECT (`40{...}`)                                                          | O `auth` do handshake (token da sessão) se perde                                           | O servidor lê o CONNECT e associa a conexão à sessão.                                                                                                                                   |
+| Fechar o socket durante o handshake (`client.close`) não dispara a reconexão do cliente      | Um "servidor fora do ar" simulado assim deixaria o cliente sem socket até o reload         | Nos cenários sem servidor (`offline`, `realtime.holdConnections`) a conexão segue para a rede, onde o handshake falha com erro e o cliente tenta de novo com backoff, como em produção. |
+| Sem rooms, namespaces, broadcast e acks                                                      | Não há como direcionar eventos por usuário                                                 | Registro próprio de conexões com filtro por destinatário; comandos trafegam por REST, não por ack.                                                                                      |
+| O MSW 2.x remove o prefixo `/socket.io/` da URL do cliente antes de comparar com o `ws.link` | Um link em `/socket.io/*` nunca casa e a conexão vai para a rede                           | Socket.IO usa `path: '/realtime/'`, que não colide com outros WebSockets da origem (ex.: HMR do Vite).                                                                                  |
 
 ## Sessão
 
@@ -420,6 +421,11 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - **Reconexão.** Ao reconectar (segundo `connect` do mesmo socket), todas as consultas ativas são
   invalidadas e rebuscadas: eventos perdidos durante a queda são reconciliados pelo REST, a fonte
   da verdade. Testado derrubando a conexão e alterando o preço no mesmo instante.
+- **Primeira conexão.** O socket só conecta depois da carga inicial (navegador ocioso). Na primeira
+  conexão, pedidos, carrinhos e detalhes de NFT que já estavam em cache são rebuscados: um evento
+  publicado entre a consulta REST e a conexão não se perde. As listas do catálogo ficam de fora (o
+  preço exibido nelas é atualizado pelo próximo `nft.updated` ou pelo `staleTime`). Testado com o
+  servidor de socket fora do ar (`realtime.holdConnections`) enquanto o pagamento termina.
 - **Cotação e carrinho vivo.** `quoteDivergences(quote, cart)` (`features/cart/quote.ts`) compara a
   cotação em mãos com o carrinho vivo (que reflete `nft.updated`); o checkout usa isso para exigir
   nova confirmação.
@@ -561,8 +567,9 @@ O REST é a fonte da verdade; o socket só avisa que algo mudou e antecipa a atu
    REST.
 2. **Aplicação**: `nft.updated` atualiza detalhe e listas e invalida o carrinho que contém o NFT;
    `order.updated` aplica o estado e rebusca o pedido (o evento não traz a transação).
-3. **Reconexão**: o segundo `connect` do mesmo socket invalida e rebusca todas as consultas ativas.
-   Eventos perdidos na queda, ou publicados antes de o socket conectar, são recuperados pelo REST.
+3. **Reconexão**: o segundo `connect` do mesmo socket invalida e rebusca todas as consultas ativas,
+   recuperando os eventos perdidos na queda. Na primeira conexão, pedidos, carrinhos e detalhes de
+   NFT já em cache são rebuscados, cobrindo eventos publicados antes de o socket conectar.
 4. **Sessão**: um socket por sessão (`forceNew`, token no handshake); ao trocar de usuário o anterior
    perde os listeners e é desconectado; `order.updated` só chega às conexões do dono do pedido.
 5. **Pedido pendente** sobrevive a refresh e queda: a tela lê o estado do REST e retoma sem criar

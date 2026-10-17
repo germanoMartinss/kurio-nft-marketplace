@@ -333,6 +333,32 @@ test.describe('Estados do pedido', () => {
     await expect(receipt(page)).toBeVisible()
   })
 
+  test('pagamento termina antes de o socket conectar: a primeira conexão reconcilia pelo REST', async ({
+    page,
+  }) => {
+    await startCheckout(page, { scenario: 'pagamento-lento' })
+    await (await openReview(page)).getByRole('button', { name: 'Enviar pedido' }).click()
+    await expect(page).toHaveURL(/\/pedido\/ord_/)
+    const [order] = await apiOrders(page)
+
+    // Recarrega com o servidor de socket recusando conexões: o pedido pendente vem do REST e o
+    // pagamento termina antes da primeira conexão, sem ninguém para receber o order.updated.
+    await page.evaluate(() => window.__kurioMock!.realtime.holdConnections(true))
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Pagamento em processamento' })).toBeVisible()
+    const settledBeforeConnect = await page.evaluate((id) => {
+      if (window.__kurioMock!.realtime.connections().length > 0) return false
+      window.__kurioMock!.orders.settleNow(id)
+      return true
+    }, order!.id)
+    expect(settledBeforeConnect).toBe(true)
+
+    // O servidor volta; na primeira conexão o cliente reconcilia o pedido pelo REST.
+    await page.evaluate(() => window.__kurioMock!.realtime.holdConnections(false))
+    await expect(receipt(page)).toBeVisible({ timeout: 15_000 })
+    expect(await apiOrders(page)).toHaveLength(1)
+  })
+
   test('conexão cai com o pedido pendente: reconecta e reconcilia pelo REST', async ({ page }) => {
     await startCheckout(page, { scenario: 'pagamento-lento' })
     await (await openReview(page)).getByRole('button', { name: 'Enviar pedido' }).click()

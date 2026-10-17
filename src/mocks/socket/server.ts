@@ -53,6 +53,19 @@ interface ConnectionEntry extends RealtimeConnection {
 const connections = new Map<string, ConnectionEntry>()
 let nextConnectionId = 1
 
+/**
+ * Conexões retidas (controle de testes): o servidor recusa novos sockets até ser liberado, como um
+ * servidor fora do ar. Persiste na aba (sessionStorage) para valer também logo após um reload.
+ */
+const HOLD_KEY = 'kurio:mock:realtime-hold'
+const isHeld = () => {
+  try {
+    return sessionStorage.getItem(HOLD_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 function toWebSocketUrl(origin: string) {
   const url = new URL(SOCKET_PATH, origin)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -62,9 +75,12 @@ function toWebSocketUrl(origin: string) {
 const realtimeLink = ws.link(`${toWebSocketUrl(env.socketOrigin)}*`)
 
 export const realtimeHandler = realtimeLink.addEventListener('connection', (connection) => {
-  // Cenário "sem conexão": o servidor recusa o socket, e o cliente segue tentando reconectar.
-  if (getScenario().offline) {
-    connection.client.close(1011, 'offline')
+  if (getScenario().offline || isHeld()) {
+    // Servidor fora do ar: a conexão segue para a rede, onde não há servidor de socket, e o
+    // handshake falha com erro de transporte, como em produção. O socket.io-client então tenta de
+    // novo com backoff. Fechar a conexão aqui (`client.close`) não serve: um fechamento limpo
+    // durante o handshake não dispara a reconexão do cliente.
+    connection.server.connect()
     return
   }
   const io = toSocketIo(connection)
@@ -126,5 +142,15 @@ export const realtimeServer = {
   /** Encerra as conexões pelo lado do servidor; o cliente reconecta sozinho. */
   disconnectAll() {
     for (const entry of connections.values()) entry.close()
+  },
+
+  /** Recusa (`true`) ou volta a aceitar (`false`) novas conexões. */
+  holdConnections(hold: boolean) {
+    try {
+      if (hold) sessionStorage.setItem(HOLD_KEY, '1')
+      else sessionStorage.removeItem(HOLD_KEY)
+    } catch {
+      // Sem storage, o controle não se aplica.
+    }
   },
 }

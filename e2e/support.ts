@@ -7,6 +7,7 @@ interface MockControl {
   realtime: {
     connections: () => { id: string; auth: { token?: string } | null }[]
     disconnectAll: () => void
+    holdConnections: (hold: boolean) => void
     replay: (eventId?: string) => unknown
     emit: (event: unknown) => void
     history: () => { eventId: string; version: number; resource: { id: string } }[]

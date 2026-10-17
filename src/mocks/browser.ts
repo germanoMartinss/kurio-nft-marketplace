@@ -65,6 +65,8 @@ export const mockControl = {
     connections: realtimeServer.connections,
     /** Derruba as conexões pelo lado do servidor; o cliente reconecta sozinho. */
     disconnectAll: realtimeServer.disconnectAll,
+    /** Recusa novas conexões até ser liberado (vale após reload): simula servidor de socket fora do ar. */
+    holdConnections: realtimeServer.holdConnections,
     /** Reenvia um evento já publicado (duplicata/evento antigo); sem id, o último. */
     replay: replayEvent,
     /** Publica um evento arbitrário (ex.: versão antiga com outro `eventId`) pelo servidor de socket. */
