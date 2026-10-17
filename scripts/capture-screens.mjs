@@ -25,6 +25,12 @@ const SCREENS = {
   },
   carrinho: {
     path: '/carrinho',
+    // Itens do Figma (visitante), adicionados pela API simulada antes da captura.
+    cart: [
+      ['emerald-ape-042', '1-50', 2],
+      ['violet-nomad-314', '1-1', 1],
+      ['ivory-baron-088', '1-10', 2],
+    ],
     desktop: 'desktop-carrinho-de-nfts',
     mobile: 'mobile-carrinho-de-nfts',
   },
@@ -63,6 +69,19 @@ for (const key of selected) {
     const errors = []
     page.on('pageerror', (error) => errors.push(String(error)))
     page.on('console', (message) => message.type() === 'error' && errors.push(message.text()))
+    if (screen.cart) {
+      await page.goto(values.base + '/', { waitUntil: 'networkidle' })
+      await page.evaluate(async (lines) => {
+        localStorage.setItem('kurio:app:guest-id', JSON.stringify('capture-guest-0001'))
+        for (const [nftId, editionId, quantity] of lines) {
+          await fetch('/api/cart/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Guest-Id': 'capture-guest-0001' },
+            body: JSON.stringify({ nftId, editionId, quantity }),
+          })
+        }
+      }, screen.cart)
+    }
     await page.goto(values.base + screen.path, { waitUntil: 'networkidle' })
     await page.evaluate(() => document.fonts.ready)
     await page.waitForTimeout(300)

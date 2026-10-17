@@ -1,5 +1,6 @@
 import { setupWorker } from 'msw/browser'
 
+import type { NftUpdatedEvent } from '@/contracts/realtime'
 import { env } from '@/env'
 
 import { db, mutate, resetDb } from './db/store'
@@ -60,6 +61,8 @@ export const mockControl = {
     disconnectAll: realtimeServer.disconnectAll,
     /** Reenvia um evento já publicado (duplicata/evento antigo); sem id, o último. */
     replay: replayEvent,
+    /** Publica um evento arbitrário (ex.: versão antiga com outro `eventId`) pelo servidor de socket. */
+    emit: (event: NftUpdatedEvent) => realtimeServer.emit('nft.updated', event),
     history: eventHistory,
   },
 }

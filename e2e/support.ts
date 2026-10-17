@@ -4,7 +4,14 @@ import { expect, type Page, type TestInfo } from '@playwright/test'
 interface MockControl {
   scenarios: { set: (id: string) => void; active: () => string }
   session: { expireAll: () => void }
-  realtime: { connections: () => { id: string; auth: { token?: string } | null }[] }
+  realtime: {
+    connections: () => { id: string; auth: { token?: string } | null }[]
+    disconnectAll: () => void
+    replay: (eventId?: string) => unknown
+    emit: (event: unknown) => void
+    history: () => { eventId: string; version: number; resource: { id: string } }[]
+  }
+  nft: { update: (id: string, change: Record<string, unknown>) => unknown }
 }
 declare global {
   interface Window {
@@ -101,3 +108,52 @@ export const favoriteButton = (page: Page) =>
 /** Tokens das conexões Socket.IO abertas no servidor simulado (vazio = visitante). */
 export const socketTokens = (page: Page) =>
   page.evaluate(() => window.__kurioMock!.realtime.connections().map((c) => c.auth?.token ?? ''))
+
+/**
+ * Adiciona um NFT ao carrinho pela interface do detalhe (edição padrão) e espera a resposta da API.
+ * Termina no carrinho (o botão de compra leva até lá).
+ */
+export async function addToCart(
+  page: Page,
+  nftId: string,
+  {
+    quantity = 1,
+    scenario = 'padrao',
+    edition,
+  }: { quantity?: number; scenario?: string; edition?: string } = {},
+) {
+  await openApp(page, `/nft/${nftId}`, scenario)
+  const increase = page.getByRole('button', { name: 'Aumentar quantidade' })
+  await expect(increase).toBeVisible()
+  if (edition)
+    await page.getByRole('radio', { name: new RegExp(`^${edition}\\b`) }).check({ force: true })
+  for (let click = 1; click < quantity; click++) await increase.click()
+  const added = page.waitForResponse(
+    (res) => res.url().endsWith('/api/cart/items') && res.request().method() === 'POST',
+  )
+  await page.getByRole('button', { name: /^(COMPRAR|Comprar NFT)$/ }).click()
+  expect((await added).ok()).toBe(true)
+  await expect(page).toHaveURL(/\/carrinho$/)
+}
+
+/** Linha (desktop) ou cartão (mobile) de um item do carrinho. */
+export const cartItem = (page: Page, name: string) =>
+  page
+    .getByRole('row')
+    .or(page.getByRole('list', { name: 'Itens do carrinho' }).getByRole('listitem'))
+    .filter({ hasText: name })
+
+export const cartTotal = (page: Page) => page.getByTestId('cart-total').filter({ visible: true })
+
+/** Região viva com os avisos de alteração do carrinho (um único elemento, vazio quando não há aviso). */
+export const cartNotices = (page: Page) => page.getByTestId('cart-notices')
+
+export const emptyCart = (page: Page) =>
+  page.getByRole('status').filter({ hasText: 'Seu carrinho está vazio' })
+
+/** Altera um NFT no backend simulado; o evento chega à página pelo Socket.IO. */
+export const updateNft = (page: Page, id: string, change: Record<string, unknown>) =>
+  page.evaluate(
+    ([nftId, patch]) => window.__kurioMock!.nft.update(nftId as string, patch as never),
+    [id, change] as const,
+  )

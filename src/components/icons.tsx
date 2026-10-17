@@ -6,7 +6,7 @@
  * o uso, não o desenho. Phosphor só onde o Figma não exportou o ícone (marcado abaixo e
  * registrado em ARCHITECTURE.md).
  */
-import { CaretDownIcon, EyeIcon, PlusIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, EyeIcon, WarningCircleIcon } from '@phosphor-icons/react'
 
 import {
   ActivityIcon,
@@ -39,6 +39,7 @@ import {
   MobileUserIcon,
   MobileVerticalDotsIcon,
   MobileWalletIcon,
+  PlusIcon,
   SearchIcon,
   Shopping1Icon,
   StarIcon,
@@ -64,6 +65,7 @@ export {
   LocationIcon as Wallet,
   LogoutIcon as SignIn,
   LogoutIcon as SignOut,
+  PlusIcon as Plus,
   SearchIcon as Search,
   SearchIcon as ZoomIn,
   Shopping1Icon as Activity,
@@ -100,9 +102,4 @@ export {
 }
 
 // --- Phosphor: ícones que o Figma não exportou -------------------------------------------------
-export {
-  CaretDownIcon as ChevronDown,
-  EyeIcon as Eye,
-  PlusIcon as Plus,
-  WarningCircleIcon as WarningCircle,
-}
+export { CaretDownIcon as ChevronDown, EyeIcon as Eye, WarningCircleIcon as WarningCircle }

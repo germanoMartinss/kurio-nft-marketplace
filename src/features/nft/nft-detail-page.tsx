@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
 import { ApiRequestError } from '@/api/errors'
+import { Breadcrumb } from '@/components/common/breadcrumb'
 import { ErrorState } from '@/components/common/query-states'
 import { CartFilled } from '@/components/icons'
 import { MobileTopBar } from '@/components/layout/mobile-top-bar'
@@ -139,26 +140,6 @@ function NftDetailContent({ nft }: { nft: NftDetail }) {
       <NftDetailsTabs nft={nft} />
       <RelatedNfts nft={nft} />
     </div>
-  )
-}
-
-function Breadcrumb() {
-  return (
-    <nav aria-label="Trilha de navegação">
-      <ol className="flex gap-2 text-15 leading-4 font-bold">
-        <li>
-          <Link to="/" className="hover:text-accent-text">
-            Início
-          </Link>
-        </li>
-        <li aria-hidden="true">/</li>
-        <li>
-          <Link to="/" hash="catalogo" className="hover:text-accent-text">
-            Mercado
-          </Link>
-        </li>
-      </ol>
-    </nav>
   )
 }
 

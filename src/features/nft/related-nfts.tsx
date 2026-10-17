@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 
 import { NftImage } from '@/components/nft/nft-image'
 import { Price } from '@/components/nft/price'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { NftDetail } from '@/contracts/nft'
+import type { NftDetail, NftSummary } from '@/contracts/nft'
 import { catalogQueryOptions } from '@/features/catalog/queries'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +18,20 @@ export function RelatedNfts({ nft }: { nft: NftDetail }) {
     catalogQueryOptions({ categories: [nft.category], pageSize: 12, sort: 'recentes' }),
   )
   const items = (data?.items ?? []).filter((item) => item.id !== nft.id)
+  return <NftCarousel title="Mais desta coleção" items={items} isPending={isPending} />
+}
+
+/** Lista horizontal de NFTs com snap e indicadores de página (detalhe e carrinho). */
+export function NftCarousel({
+  title,
+  items,
+  isPending,
+}: {
+  title: string
+  items: NftSummary[]
+  isPending: boolean
+}) {
+  const titleId = useId()
   const listRef = useRef<HTMLUListElement>(null)
   const [page, setPage] = useState(0)
   const pages = Math.max(1, Math.ceil(items.length / 5))
@@ -29,12 +43,9 @@ export function RelatedNfts({ nft }: { nft: NftDetail }) {
   }
 
   return (
-    <section aria-labelledby="relacionados-titulo" className="container-page flex flex-col gap-8">
-      <h2
-        id="relacionados-titulo"
-        className="border-b border-border pb-2 text-17 font-bold text-accent-text"
-      >
-        Mais desta coleção
+    <section aria-labelledby={titleId} className="container-page flex flex-col gap-8">
+      <h2 id={titleId} className="border-b border-border pb-2 text-17 font-bold text-accent-text">
+        {title}
       </h2>
       <ul
         ref={listRef}

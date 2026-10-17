@@ -105,13 +105,14 @@ originais. Nomes de arquivo normalizados para kebab-case sem acentos; os ícones
 têm o sufixo `-compartilhar`, porque `Linkedin.svg` (compartilhar) e `linkedin.svg` (rede social)
 colidiriam em sistemas de arquivos que não diferenciam maiúsculas.
 
+O "+" do stepper no desktop é `plus.svg` (exportado depois). No mobile o Figma usa o caractere "+" como texto dentro do círculo, e o `QuantityStepper` reproduz assim (ícone no desktop, texto abaixo de `lg`).
+
 Ícones usados no Figma que **não vieram na exportação** usam o equivalente do Phosphor:
 
-| Uso             | Onde aparece no Figma                                                 | Substituto (Phosphor) |
-| --------------- | --------------------------------------------------------------------- | --------------------- |
-| Mais            | steppers de quantidade (desktop e mobile); só o "menos" foi exportado | `Plus`                |
-| Olho aberto     | alternância de senha; só o "olho fechado" foi exportado               | `Eye`                 |
-| Seta para baixo | selects (rede, tipo de carteira, `.eth`)                              | `CaretDown`           |
+| Uso             | Onde aparece no Figma                                   | Substituto (Phosphor) |
+| --------------- | ------------------------------------------------------- | --------------------- |
+| Olho aberto     | alternância de senha; só o "olho fechado" foi exportado | `Eye`                 |
+| Seta para baixo | selects (rede, tipo de carteira, `.eth`)                | `CaretDown`           |
 
 **Imagens dos NFTs.** O Figma usa quatro ilustrações (`ape-oculos`, `gorila-chapeu`,
 `ape-gola-alta`, `macaco-fone`), exportadas em PNG de 500×500 (~430 KB cada). `pnpm images:optimize`
@@ -324,6 +325,50 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
 - "Esqueceu a senha?" e "Continuar com Google/Facebook" estão fora do escopo: anunciados como
   indisponíveis (`UnavailableAction`), sem simular sucesso.
 - Logout no mobile fica na tela de perfil (Fase 8); o menu do usuário do header é só desktop.
+
+## Carrinho e tempo real (Fase 6)
+
+- **Quem calcula é a API.** O cliente nunca soma: toda mutation (`PATCH/DELETE /cart/items`,
+  `PUT/DELETE /cart/coupon`) devolve o carrinho recalculado (subtotal, desconto, taxa, total em
+  string decimal) e a resposta é gravada na chave do dono. Alternativa descartada: calcular no
+  cliente com big.js para resposta instantânea; teríamos duas regras de preço que podem divergir
+  (cupom, taxa por rede, disponibilidade). O big.js fica na formatação e na API simulada.
+- **Sem update otimista no carrinho.** Os totais dependem da API, então exibir um valor otimista
+  seria exibir um número que ninguém calculou. As ações ficam desabilitadas enquanto uma mutation
+  está em voo (uma por vez, `cancelQueries` antes), o que também evita respostas fora de ordem. O
+  update otimista com rollback exigido está nos favoritos.
+- **Visitante e conta.** Chaves `['guest', guestId, 'cart']` e `['user', id, 'cart']`. O carrinho de
+  visitante vive na API (header `X-Guest-Id`) e é unido ao da conta no login (`POST /cart/merge`),
+  coberto por E2E. O contador do header/tab bar usa a mesma consulta (`useCart`), compartilhada
+  com a tela do carrinho.
+- **Avisos acessíveis.** A API mantém avisos por item (`preco-alterado`, `quantidade-ajustada`,
+  `indisponivel`) até o usuário confirmar ("Entendi", `POST /cart/notices/ack`). Eles aparecem numa
+  região `role="status"` (`aria-live="polite"`) que existe sempre, mesmo vazia: leitores de tela só
+  anunciam mudanças em regiões vivas já presentes no DOM. O item esgotado fica fora do total e
+  bloqueia "Conectar e finalizar" até ser removido.
+- **`nft.updated` (src/realtime/nft-sync.ts).** `useRealtimeSync` (no shell) assina o socket da
+  sessão e remove os listeners no cleanup. Por evento: (1) `eventId` já visto → ignora
+  (duplicata); (2) versão ≤ última versão aplicada do NFT → ignora (evento antigo); (3) aplica no
+  detalhe e nas listas/destaques só se a versão do cache for menor (um dado mais novo vindo do REST
+  nunca regride); (4) invalida as listas ativas (preço novo muda filtro/ordem/facetas) e o carrinho
+  que contenha o NFT, que é rebuscado da API (preço, avisos e total coerentes entre si).
+  Duplicata e evento antigo não disparam nenhuma requisição (testado contando requisições).
+- **Reconexão.** Ao reconectar (segundo `connect` do mesmo socket), todas as consultas ativas são
+  invalidadas e rebuscadas: eventos perdidos durante a queda são reconciliados pelo REST, a fonte
+  da verdade. Testado derrubando a conexão e alterando o preço no mesmo instante.
+- **Cotação pronta para o checkout.** `useCreateQuote` (mutation) e `quoteDivergences(quote, cart)`
+  comparam a cotação com o carrinho vivo (que reflete `nft.updated`); a Fase 7 usa isso para exigir
+  nova confirmação.
+- **Layout.** Desktop: tabela semântica (`<table>` com cabeçalhos) em linhas-cartão e coluna de
+  resumo. Mobile/tablet: cartões e painel de resumo `sticky` na base (`mt-auto`: encosta na base
+  também com poucos itens, então o skeleton e o conteúdo ocupam a mesma posição). O skeleton do
+  resumo tem as mesmas dimensões do conteúdo (verificado em E2E, ±2px).
+- **Desvios do Figma.** (a) A edição aparece numa linha própria sob o ID do token na tabela
+  desktop (o Figma só mostra a coluna de quantidade, mas a edição identifica o item). (b) O botão de
+  remover no mobile fica no canto superior do cartão: no Figma ele se sobrepõe ao stepper (artefato
+  de exportação). (c) O mobile mostra o total da linha (como o Figma) e o preço unitário apenas
+  para leitores de tela. (d) Avisos de alteração, estado vazio e erro de cupom não existem no
+  Figma e seguem o padrão visual dos demais estados (ícone + texto, não só cor).
 
 ## Rotas
 

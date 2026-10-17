@@ -1,6 +1,9 @@
 import { useRouterState } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
+import { useCart } from '@/features/cart/queries'
+import { useRealtimeSync } from '@/realtime/use-realtime-sync'
+
 import { MobileTabBar } from './mobile-tab-bar'
 import { showsMobileTabBar } from './navigation'
 import { SiteFooter } from './site-footer'
@@ -11,6 +14,8 @@ const MAIN_CONTENT_ID = 'conteudo'
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const tabBar = showsMobileTabBar(pathname)
+  useRealtimeSync()
+  const cartCount = useCart().data?.itemCount
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -19,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         Pular para o conteúdo
       </a>
-      <SiteHeader />
+      <SiteHeader cartCount={cartCount} />
       <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>
@@ -28,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <>
           {/* Espaço para a barra de abas fixa no mobile, para não cobrir o fim da página. */}
           <div aria-hidden="true" className="h-28 lg:hidden" />
-          <MobileTabBar />
+          <MobileTabBar cartCount={cartCount} />
         </>
       ) : null}
     </div>
