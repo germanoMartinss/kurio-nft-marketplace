@@ -48,7 +48,7 @@ export function NftDetailPage({ nftId }: { nftId: string }) {
 function NftDetailContent({ nft }: { nft: NftDetail }) {
   const purchase = usePurchase(nft)
   return (
-    <div className="flex flex-col gap-12 pb-40 lg:gap-24 lg:pb-10">
+    <div data-testid="detail-view" className="flex flex-col gap-12 pb-40 lg:gap-24 lg:pb-10">
       {/* Desktop */}
       <div className="container-page hidden flex-col gap-3 pt-8 lg:flex">
         <Breadcrumb />
@@ -233,30 +233,55 @@ function NftNotFound() {
 }
 
 /** Mesma composição do detalhe, para o carregamento não deslocar o layout. */
+/**
+ * Mesma estrutura e alturas do conteúdo final (bloco principal, abas e "Mais desta coleção"):
+ * sem isso o rodapé, que fica logo abaixo, seria empurrado quando os dados chegam. As alturas são
+ * as de um NFT típico e estão conferidas em `e2e/skeletons.spec.ts`.
+ */
 function NftDetailSkeleton() {
   return (
-    <div aria-busy="true" className="container-page flex flex-col gap-6 pt-8 pb-16">
+    <div
+      aria-busy="true"
+      data-testid="detail-view"
+      className="flex flex-col gap-12 pb-40 lg:gap-24 lg:pb-10"
+    >
       <p className="sr-only" role="status">
         Carregando NFT
       </p>
-      <Skeleton className="hidden h-4 w-40 lg:block" />
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="flex gap-7 lg:w-[573px]">
-          <div className="hidden flex-col gap-4 lg:flex">
-            {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="size-[100px] rounded-lg" />
-            ))}
+      {/* Desktop */}
+      <div className="container-page hidden h-[567px] flex-col gap-3 pt-8 lg:flex">
+        <Skeleton className="h-4 w-40" />
+        <div className="flex gap-8">
+          <div className="flex w-[573px] shrink-0 gap-7">
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="size-[100px] rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="size-[444px] rounded-md" />
           </div>
-          <Skeleton className="aspect-square w-full rounded-3xl lg:size-[444px] lg:rounded-md" />
+          <div className="flex flex-1 flex-col gap-5">
+            <Skeleton className="h-9 w-2/3" />
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-7 w-1/2" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-16 w-2/3" />
+          </div>
         </div>
-        <div className="flex flex-1 flex-col gap-5">
-          <Skeleton className="h-9 w-2/3" />
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-7 w-1/2" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-16 w-2/3" />
-        </div>
+      </div>
+      {/* Mobile */}
+      <div className="mx-auto flex h-[763px] w-full max-w-[600px] flex-col gap-4 px-7 pt-4 lg:hidden">
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="aspect-square w-full rounded-3xl" />
+        <Skeleton className="h-8 w-2/3" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <div className="container-page">
+        <Skeleton className="h-[670px] w-full lg:h-[360px]" />
+      </div>
+      <div className="container-page">
+        <Skeleton className="h-[311px] w-full lg:h-[380px]" />
       </div>
     </div>
   )

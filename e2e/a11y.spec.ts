@@ -19,7 +19,7 @@ import {
 async function audit(page: Page, label: string) {
   await page.evaluate(() => document.fonts.ready)
   const { violations } = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
     .analyze()
   const summary = violations.map(
     (violation) =>

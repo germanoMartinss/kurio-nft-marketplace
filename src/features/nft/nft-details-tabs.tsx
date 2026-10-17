@@ -54,7 +54,7 @@ export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
 function DetailItem({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <h3 className="text-14 font-bold text-foreground">{title}</h3>
+      <p className="text-14 font-bold text-foreground">{title}</p>
       <p>{children}</p>
     </div>
   )

@@ -1,6 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query'
 
 import { EmptyState, ErrorState } from '@/components/common/query-states'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import type { CatalogPage } from '@/contracts/nft'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,7 @@ export function CatalogResults({
 
   if (isPending) {
     return (
-      <div aria-busy="true">
+      <div aria-busy="true" className="flex flex-col gap-12 lg:gap-[88px]">
         <p className="sr-only" role="status">
           Carregando NFTs
         </p>
@@ -36,6 +37,8 @@ export function CatalogResults({
             <NftCardSkeleton key={index} />
           ))}
         </div>
+        {/* Reserva o espaço da paginação, para o que vem abaixo não se deslocar. */}
+        <Skeleton className="h-[53px] lg:h-[17px]" />
       </div>
     )
   }

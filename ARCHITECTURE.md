@@ -451,6 +451,46 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   carregar; como o MSW roda na página, cliente e API simulada compartilham o tempo adiantado:
   cotação de 5 min, sessão de 2 h e pagamento de 12 s são vencidos com `fastForward`, sem espera.
 
+## Acessibilidade, testes visuais e desempenho (Fases 9 e 10)
+
+- **Auditoria axe** (`e2e/a11y.spec.ts`): WCAG 2.0/2.1 A e AA mais boas práticas, incluindo contraste,
+  em todas as telas e estados principais (início, detalhe e inexistente, carrinho vazio/com itens/com
+  aviso, login, cadastro, 404, pagamento, revisão, pedido pendente, recibo, recusado, perfil e
+  carteiras), em desktop e mobile. Corrigidos: `dl` com estrutura inválida nos totais (a nota "Taxa
+  estimada" passou para dentro do `dd`), `aria-label` em `<p>` na avaliação (texto `sr-only`), ordem
+  de títulos no detalhe mobile e devolução do foco ao "Confirmar compra" depois da revisão.
+- **Teclado** (`e2e/keyboard.spec.ts`): "Pular para o conteúdo", foco visível, foco preso e devolvido
+  na revisão do pedido e na busca, menu do usuário, erro de formulário que foca o primeiro campo
+  inválido (descrição acessível ligada ao campo) e carrinho operado só por teclado. Testes só de
+  desktop ou só de mobile declaram o motivo no `test.skip`.
+- **Zoom/reflow**: 200% (640px) e 400% (320px) sem rolagem horizontal em início, detalhe, carrinho,
+  perfil, carteiras e pagamento (corrigidos: abas e busca do catálogo, grades de formulário e título
+  da barra superior mobile em 320px).
+- **Estados sem depender só de cor**: erros com ícone + texto, esgotado com rótulo, conectada/desconectada
+  com símbolo e texto, avisos do carrinho com título, item esgotado riscado e anunciado.
+- **Regressão visual** (`e2e/visual.spec.ts`): início, detalhe, carrinho e pagamento, desktop e mobile.
+  Dados estáveis: cenário `padrao` (seed determinístico), relógio fixo (`page.clock.setFixedTime`),
+  `animations: 'disabled'`, espera por fontes e imagens visíveis e `maxDiffPixelRatio` de 0,5%. As
+  baselines ficam em `e2e/visual.spec.ts-snapshots/` (Linux/Chromium; `pnpm test:e2e:update` regenera).
+- **Skeletons** (`e2e/skeletons.spec.ts`): perfil, pagamento (carteiras e itens), recibo, detalhe e
+  catálogo têm as dimensões do conteúdo final (±2px) para o caso típico da demonstração; o
+  detalhe reserva também as abas e "Mais desta coleção", e o catálogo, a paginação. Com número de
+  itens/carteiras diferente do típico há pequena diferença (não é possível saber antes da resposta).
+- **Lighthouse** (`pnpm lighthouse`, `lighthouse/`): início e detalhe, mobile e desktop, 3 execuções
+  com mediana, relatórios HTML/JSON versionados, resumo e ambiente em `lighthouse/RESULTADOS.md`.
+  O build é servido por `lighthouse/serve.mjs` (HTTP/2, Brotli, cache imutável e fallback de SPA como
+  a Vercel); com `vite preview` (HTTP/1.1 sem compressão) o mobile fica em ~85–89, o que mede o
+  servidor de preview e não o deploy.
+- **Otimizações de carga** (todas valem para o app, não só para a auditoria): chunk dos mocks de 473
+  para ~181 KB (o armazenamento de cookies do MSW é trocado por um stub no build: a aplicação não usa
+  cookies); núcleo comum em poucos chunks estáveis; `modulepreload` dos chunks do MSW e da tela
+  inicial; código da tela de entrada baixado em paralelo com o início do MSW; `socket.io-client` só
+  com o navegador ocioso (um evento publicado antes da conexão é reconciliado pelo REST); casca de
+  carregamento no `index.html`.
+- **Limitação conhecida.** O MSW (service worker) precisa estar pronto antes da primeira requisição, o
+  que mantém o LCP mobile em ~2,3 s (desktop ~0,5 s). É o custo de os mocks fazerem parte do build de
+  demonstração.
+
 ## Rotas
 
 Paths em pt-BR. A URL é a fonte da verdade: `/entrar` e `/cadastro` são rotas próprias (acesso

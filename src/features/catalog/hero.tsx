@@ -58,7 +58,7 @@ export function Hero() {
       </div>
 
       {/* Mobile */}
-      <div className="relative overflow-hidden rounded-[20px] bg-card bg-[linear-gradient(145deg,rgb(210_138_76/0.3)_-46%,rgb(210_138_76/0)_103%)] px-4 pt-3 pb-2 lg:hidden">
+      <div className="relative min-h-[194px] overflow-hidden rounded-[20px] bg-card bg-[linear-gradient(145deg,rgb(210_138_76/0.3)_-46%,rgb(210_138_76/0)_103%)] px-4 pt-3 pb-2 lg:hidden">
         <div className="flex gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <p className="text-12 leading-4 font-bold">Bem-vindo à Kurio</p>

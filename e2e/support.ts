@@ -156,11 +156,17 @@ export const emptyCart = (page: Page) =>
   page.getByRole('status').filter({ hasText: 'Seu carrinho está vazio' })
 
 /** Altera um NFT no backend simulado; o evento chega à página pelo Socket.IO. */
-export const updateNft = (page: Page, id: string, change: Record<string, unknown>) =>
-  page.evaluate(
+export async function updateNft(page: Page, id: string, change: Record<string, unknown>) {
+  // O socket conecta quando o navegador fica ocioso (fora do caminho crítico de carga): um evento
+  // publicado antes disso não teria destinatário.
+  await expect
+    .poll(() => page.evaluate(() => window.__kurioMock!.realtime.connections().length))
+    .toBeGreaterThan(0)
+  await page.evaluate(
     ([nftId, patch]) => window.__kurioMock!.nft.update(nftId as string, patch as never),
     [id, change] as const,
   )
+}
 
 /** Sai da conta pela interface: menu do usuário (desktop) ou tela de perfil (mobile). */
 export async function logout(page: Page, testInfo: TestInfo, displayName: string) {
