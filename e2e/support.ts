@@ -186,6 +186,14 @@ export async function startCheckout(
   for (const [nftId, quantity] of items) await addToCart(page, nftId, { quantity, scenario })
   await page.getByRole('button', { name: 'Conectar e finalizar' }).filter({ visible: true }).click()
   await expect(page).toHaveURL(/\/pagamento$/)
+  await selectWallet(page, 'Principal')
+}
+
+/** A carteira padrão é a "Reserva" (Polygon); os testes de valores usam a principal (Ethereum). */
+export async function selectWallet(page: Page, nickname: string) {
+  const radio = page.getByRole('radio', { name: new RegExp(`^${nickname}`) })
+  await radio.click()
+  await expect(radio).toBeChecked()
   await expect(confirmPurchaseButton(page)).toBeEnabled()
 }
 

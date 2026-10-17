@@ -17,7 +17,7 @@ import { NETWORK_LABELS } from '@/contracts/common'
 import { formatEth } from '@/lib/money'
 import { cn } from '@/lib/utils'
 
-import { Field, NoteField, TextInput } from './buyer-form'
+import { Field, NoteField, TextInput } from '@/components/common/form-fields'
 import { OrderLines } from './order-lines'
 import { ProviderPicker } from './provider-picker'
 import { ReviewDialog } from './review-dialog'
@@ -68,11 +68,11 @@ function PaymentScreen({
   const checkout = useCheckout(userId)
   const { draft, setDraft } = checkout
 
-  const list = wallets.data ?? []
-  const wallet =
-    list.find((item) => item.id === draft.walletId) ??
-    list.find((item) => item.kind === 'principal') ??
-    list[0]
+  // A secundária vem primeiro, como no frame mobile ("Reserva" selecionada por padrão).
+  const list = [...(wallets.data ?? [])].sort((a, b) =>
+    a.kind === b.kind ? 0 : a.kind === 'secundaria' ? -1 : 1,
+  )
+  const wallet = list.find((item) => item.id === draft.walletId) ?? list[0]
   const provider: WalletProvider | null = draft.provider ?? wallet?.provider ?? null
   const network = wallet?.network ?? 'ethereum'
   const cartQuery = useCheckoutCart(network)

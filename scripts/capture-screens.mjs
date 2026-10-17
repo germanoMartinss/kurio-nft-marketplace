@@ -53,8 +53,8 @@ const SCREENS = {
   },
   entrar: { path: '/entrar', desktop: 'desktop-login', mobile: 'mobile-login' },
   cadastro: { path: '/cadastro', desktop: 'desktop-cadastro', mobile: 'mobile-cadastro' },
-  perfil: { path: '/perfil', desktop: 'desktop-perfil-do-colecionador' },
-  carteiras: { path: '/perfil/carteiras', desktop: 'desktop-carteiras' },
+  perfil: { path: '/perfil', login: true, cart: [], desktop: 'desktop-perfil-do-colecionador' },
+  carteiras: { path: '/perfil/carteiras', login: true, cart: [], desktop: 'desktop-carteiras' },
   404: { path: '/rota-inexistente' },
 }
 const VIEWPORTS = [

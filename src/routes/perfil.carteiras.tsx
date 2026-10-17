@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { PagePlaceholder } from '@/components/common/page-placeholder'
 import { requireAuth } from '@/features/auth/guard'
+import { WalletsPage } from '@/features/profile/wallets-page'
 
 export const Route = createFileRoute('/perfil/carteiras')({
   beforeLoad: requireAuth,
-  component: () => <PagePlaceholder title="Carteiras" />,
+  component: WalletsPage,
 })

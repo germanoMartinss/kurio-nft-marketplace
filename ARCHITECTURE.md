@@ -423,6 +423,34 @@ sessão (`features/auth/session-store.ts`), então vale também para mudanças v
   existem no Figma e seguem o mesmo padrão visual. (f) O título da barra superior mobile usa 18px
   abaixo de 640px para caber "Pagamento com carteira" em 390px.
 
+## Perfil e carteiras (Fase 8)
+
+- **Estrutura.** `/perfil` (dados, avatar e senha) e `/perfil/carteiras` compartilham o
+  `ProfileLayout`: coluna lateral no desktop (Figma) e, no mobile, o título no topo, abas em pílula
+  e o botão "Sair da conta" no fim (o Figma não tem frame mobile; segue o padrão das telas de
+  compra). Atividade, ofertas, arquivos baixados e suporte usam `UnavailableAction`.
+- **Perfil.** React Hook Form + `profileUpdateSchema`. "Salvar" grava os dados (`PATCH /profile`)
+  e, se algum campo de senha foi preenchido, valida no cliente (regras da API + confirmação) e troca a
+  senha (`POST /profile/password`) em seguida; falha na senha não desfaz os dados e avisa. Erros da
+  API (`fieldErrors`: usuário/e-mail em uso, senha atual incorreta) vão para o campo. O resultado
+  alimenta o cache e a sessão (nome e avatar do header). Trocar a senha encerra as outras sessões.
+- **Avatar.** Arquivo → data URL (PNG/JPEG/WebP, ≤ 1 MB, validado no cliente e na API) →
+  `PUT /profile/avatar`; "Remover" → `DELETE`. Persiste porque o banco simulado persiste.
+- **Carteiras.** Um formulário por tipo: cria (`POST`) quando não existe, edita (`PUT`) quando existe.
+  "Igual à carteira principal" copia os campos que não são únicos (o endereço duplicado é recusado
+  pela API no campo). Rede e tipo são `<select>` nativos (acessíveis por teclado/leitor).
+- **Desvios do Figma.** O título "Carteiras" fica só para leitores de tela no desktop (o Figma
+  começa em "Carteira principal"); o "Adicionar" do topo da principal não existe (o formulário já
+  está aberto); "Nome ENS" tem o sufixo ".eth" fixo, não um select; rótulos de senha são visíveis
+  como no Figma e o botão de olho tem nome acessível por campo.
+- **Pagamento mobile.** A carteira padrão é a secundária ("Reserva"), como no frame; o total vem
+  logo após "Carteira e rede". Diferenças mantidas: status de conexão em cada carteira, o formulário
+  do colecionador abaixo do total e o botão "Confirmar compra" fixo na base (`sticky`), para que
+  continue alcançável com o formulário longo.
+- **Relógio nos testes (`page.clock`).** `e2e/clock.spec.ts` instala o relógio antes de a página
+  carregar; como o MSW roda na página, cliente e API simulada compartilham o tempo adiantado:
+  cotação de 5 min, sessão de 2 h e pagamento de 12 s são vencidos com `fastForward`, sem espera.
+
 ## Rotas
 
 Paths em pt-BR. A URL é a fonte da verdade: `/entrar` e `/cadastro` são rotas próprias (acesso

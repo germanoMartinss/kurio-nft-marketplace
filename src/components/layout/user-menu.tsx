@@ -24,9 +24,13 @@ export function UserMenu({ user }: { user: SessionUser }) {
         >
           <span
             aria-hidden="true"
-            className="flex size-6 items-center justify-center rounded-full bg-primary text-12 font-bold text-primary-foreground"
+            className="flex size-6 items-center justify-center overflow-hidden rounded-full bg-primary text-12 font-bold text-primary-foreground"
           >
-            {user.displayName.charAt(0).toUpperCase()}
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt="" className="size-full object-cover" />
+            ) : (
+              user.displayName.charAt(0).toUpperCase()
+            )}
           </span>
           <span className="max-w-32 truncate">{user.displayName}</span>
           <span className="sr-only">, menu da conta</span>
