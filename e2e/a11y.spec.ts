@@ -18,6 +18,18 @@ import {
  */
 async function audit(page: Page, label: string) {
   await page.evaluate(() => document.fonts.ready)
+  // Toasts do sonner entram e saem com fade de opacidade; o axe mede o contraste de cores
+  // intermediárias e acusa falsos positivos sob carga. Espera os toasts terminarem o ciclo de vida
+  // (a UI auditada é a estável) e as animações finitas acabarem; shimmer e spinner são infinitos
+  // e não entram na espera.
+  await page.waitForFunction(
+    () =>
+      document.querySelectorAll('[data-sonner-toast]').length === 0 &&
+      document.getAnimations().every((animation) => {
+        const { iterations, endTime } = animation.effect?.getComputedTiming() ?? {}
+        return iterations === Infinity || endTime === Infinity || animation.playState !== 'running'
+      }),
+  )
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
     .analyze()
