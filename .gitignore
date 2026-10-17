@@ -20,7 +20,7 @@ NOTES.local.md
 # Vercel
 .vercel/
 
-# Playwright (baselines em e2e/**/__screenshots__ são versionadas)
+# Playwright (as baselines visuais em e2e/visual.spec.ts-snapshots/ são versionadas)
 test-results/
 playwright-report/
 blob-report/
